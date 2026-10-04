@@ -37,7 +37,8 @@ export class PlayBar {
   private compare = el('div', 'pb-compare');
   private compareBtns = new Map<string, HTMLButtonElement>();
   onCompare: (view: 'normal' | 'this') => void = () => {};
-  private guidedBtn = el('button', 'pb-text', 'Guided');
+  private guidedBox = el('input');
+  private guidedLabel = el('label', 'pb-guided');
   private caption = el('p', 'pb-caption');
   private captionLabel = el('strong', 'pb-caption-label');
   private captionText = el('span');
@@ -85,15 +86,13 @@ export class PlayBar {
       this.compareBtns.set(id, b);
     }
     this.compare.hidden = true;
-    this.guidedBtn.setAttribute('aria-pressed', String(scene.playback.guided));
-    this.guidedBtn.title = 'Pause on each step long enough to read it, and skip quickly across quiet stretches';
-    this.guidedBtn.addEventListener('click', () => {
-      const on = this.guidedBtn.getAttribute('aria-pressed') !== 'true';
-      this.guidedBtn.setAttribute('aria-pressed', String(on));
-      scene.setGuided(on);
-    });
-    const opts = el('div', 'pb-compare');
-    opts.append(this.guidedBtn, this.compare);
+    // Guided playback switch: lives above the transport buttons, in plain words.
+    this.guidedBox.type = 'checkbox';
+    this.guidedBox.checked = scene.playback.guided;
+    this.guidedBox.addEventListener('change', () => scene.setGuided(this.guidedBox.checked));
+    this.guidedLabel.title = 'On: stops on each step long enough to read it and skips quickly across quiet stretches. Off: plays straight through.';
+    this.guidedLabel.append(this.guidedBox, el('span', undefined, 'Pause at each step'));
+    const opts = this.compare;
     this.head.append(this.title, opts);
 
     // ---- beat face
@@ -143,7 +142,8 @@ export class PlayBar {
     // Left: transport. Middle: scrubber (same time axis as the ECG above it). Right: readout and options.
     const controls = el('div', 'pb-controls');
     const transport = el('div', 'pb-transport');
-    transport.append(prev, this.playBtn, next);
+    transport.append(this.guidedLabel, el('div', 'pb-transport-btns'));
+    transport.lastElementChild!.append(prev, this.playBtn, next);
     const right = el('div', 'pb-right');
     right.append(this.time, speed, this.loopBtn, style, close);
     controls.append(transport, scrub, right);
@@ -288,7 +288,7 @@ export class PlayBar {
     this.time.textContent = `${Math.round(t)} ms`;
     const e = this.currentEvent(t);
     this.captionLabel.textContent = e ? `${e.label}. ` : '';
-    this.captionText.textContent = e ? e.caption : 'Press play to see one normal beat.';
+    this.captionText.textContent = e ? e.caption : 'Press play to start. The animation pauses at each step so you can read it.';
     this.ecgNote.textContent = e?.ecg ? `On the ECG: ${e.ecg}` : '';
     this.ticks.querySelectorAll('.pb-tick').forEach((n, i) => n.classList.toggle('on', this.events[i] === e));
     this.ecgCursor.style.left = `${(t / this.duration) * 100}%`;

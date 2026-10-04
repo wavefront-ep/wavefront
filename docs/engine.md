@@ -85,7 +85,7 @@ sequence event on the strip. Scenarios choose a template
 
 ## Guided playback
 
-Playback has a Guided switch (on by default). The sequence events of a scenario are the stops. The playhead
+Playback has a "Pause at each step" switch (on by default; the guided mode), above the transport buttons. The sequence events of a scenario are the stops. The playhead
 holds on each stop for 3 to 6.5 s (1.5 s plus 90 ms per word of the caption and ECG line), so steps a few
 milliseconds apart each get their own pause. Between stops the speed is at least the distance to the next stop
 divided by 2.5 s, so a long quiet stretch (a sinus pause, a block) is crossed in about 2.5 s while short

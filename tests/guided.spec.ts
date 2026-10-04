@@ -54,13 +54,14 @@ test('a long quiet stretch is crossed quickly, not at the slow base speed', asyn
   expect(Date.now() - t0).toBeLessThan(5500);
 });
 
-test('the Guided switch turns the holds off', async ({ page }) => {
+test("the 'Pause at each step' switch turns the holds off", async ({ page }) => {
   await openHeart(page, 1400, 800);
   await waitForSim(page);
   await page.evaluate(() => (window as any).epOpen('sinus_rhythm', 'this', true));
-  await expect(page.getByRole('button', { name: 'Guided', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByRole('button', { name: 'Guided', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Guided', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  const sw = page.getByLabel('Pause at each step');
+  await expect(sw).toBeChecked();
+  await sw.uncheck();
+  await expect(sw).not.toBeChecked();
   expect((await state(page)).time).toBe(0);
   await page.evaluate(() => ((window as any).epHeart.playback.speed = 1));
   await settle(page, 1000);
