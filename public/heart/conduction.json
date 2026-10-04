@@ -1,0 +1,450 @@
+{
+ "arrays": {
+  "pos": {
+   "offset": 0,
+   "dtype": "float32",
+   "shape": [
+    31910,
+    3
+   ]
+  },
+  "cls": {
+   "offset": 382920,
+   "dtype": "uint8",
+   "shape": [
+    31910
+   ]
+  },
+  "region": {
+   "offset": 414832,
+   "dtype": "uint8",
+   "shape": [
+    31910
+   ]
+  },
+  "edges": {
+   "offset": 446744,
+   "dtype": "uint32",
+   "shape": [
+    177864,
+    2
+   ]
+  },
+  "elen": {
+   "offset": 1869656,
+   "dtype": "float32",
+   "shape": [
+    177864
+   ]
+  },
+  "ekind": {
+   "offset": 2581112,
+   "dtype": "uint8",
+   "shape": [
+    177864
+   ]
+  },
+  "edelay": {
+   "offset": 2758976,
+   "dtype": "float32",
+   "shape": [
+    177864
+   ]
+  },
+  "map_epi_RA_idx": {
+   "offset": 3470432,
+   "dtype": "uint32",
+   "shape": [
+    4763,
+    3
+   ]
+  },
+  "map_epi_RA_w": {
+   "offset": 3527588,
+   "dtype": "float32",
+   "shape": [
+    4763,
+    3
+   ]
+  },
+  "map_endo_RA_idx": {
+   "offset": 3584744,
+   "dtype": "uint32",
+   "shape": [
+    5040,
+    3
+   ]
+  },
+  "map_endo_RA_w": {
+   "offset": 3645224,
+   "dtype": "float32",
+   "shape": [
+    5040,
+    3
+   ]
+  },
+  "map_epi_LA_idx": {
+   "offset": 3705704,
+   "dtype": "uint32",
+   "shape": [
+    6225,
+    3
+   ]
+  },
+  "map_epi_LA_w": {
+   "offset": 3780404,
+   "dtype": "float32",
+   "shape": [
+    6225,
+    3
+   ]
+  },
+  "map_endo_LA_idx": {
+   "offset": 3855104,
+   "dtype": "uint32",
+   "shape": [
+    4735,
+    3
+   ]
+  },
+  "map_endo_LA_w": {
+   "offset": 3911924,
+   "dtype": "float32",
+   "shape": [
+    4735,
+    3
+   ]
+  },
+  "map_epi_LV_idx": {
+   "offset": 3968744,
+   "dtype": "uint32",
+   "shape": [
+    5645,
+    3
+   ]
+  },
+  "map_epi_LV_w": {
+   "offset": 4036484,
+   "dtype": "float32",
+   "shape": [
+    5645,
+    3
+   ]
+  },
+  "map_endo_LV_idx": {
+   "offset": 4104224,
+   "dtype": "uint32",
+   "shape": [
+    7141,
+    3
+   ]
+  },
+  "map_endo_LV_w": {
+   "offset": 4189916,
+   "dtype": "float32",
+   "shape": [
+    7141,
+    3
+   ]
+  },
+  "map_epi_RV_idx": {
+   "offset": 4275608,
+   "dtype": "uint32",
+   "shape": [
+    5617,
+    3
+   ]
+  },
+  "map_epi_RV_w": {
+   "offset": 4343012,
+   "dtype": "float32",
+   "shape": [
+    5617,
+    3
+   ]
+  },
+  "map_endo_RV_idx": {
+   "offset": 4410416,
+   "dtype": "uint32",
+   "shape": [
+    8728,
+    3
+   ]
+  },
+  "map_endo_RV_w": {
+   "offset": 4515152,
+   "dtype": "float32",
+   "shape": [
+    8728,
+    3
+   ]
+  },
+  "map_cs_SAN_idx": {
+   "offset": 4619888,
+   "dtype": "uint32",
+   "shape": [
+    150
+   ]
+  },
+  "map_cs_AVN_idx": {
+   "offset": 4620488,
+   "dtype": "uint32",
+   "shape": [
+    110
+   ]
+  },
+  "map_cs_His_idx": {
+   "offset": 4620928,
+   "dtype": "uint32",
+   "shape": [
+    136
+   ]
+  },
+  "map_cs_Bachmann_idx": {
+   "offset": 4621472,
+   "dtype": "uint32",
+   "shape": [
+    712
+   ]
+  },
+  "map_cs_LBB_idx": {
+   "offset": 4624320,
+   "dtype": "uint32",
+   "shape": [
+    120
+   ]
+  },
+  "map_cs_LSF_idx": {
+   "offset": 4624800,
+   "dtype": "uint32",
+   "shape": [
+    432
+   ]
+  },
+  "map_cs_LAF_idx": {
+   "offset": 4626528,
+   "dtype": "uint32",
+   "shape": [
+    520
+   ]
+  },
+  "map_cs_LPF_idx": {
+   "offset": 4628608,
+   "dtype": "uint32",
+   "shape": [
+    448
+   ]
+  },
+  "map_cs_RBB_idx": {
+   "offset": 4630400,
+   "dtype": "uint32",
+   "shape": [
+    688
+   ]
+  },
+  "map_cs_RBB_entry_idx": {
+   "offset": 4633152,
+   "dtype": "uint32",
+   "shape": [
+    152
+   ]
+  },
+  "map_cs_Purkinje_LV_idx": {
+   "offset": 4633760,
+   "dtype": "uint32",
+   "shape": [
+    10410
+   ]
+  },
+  "map_cs_Purkinje_RV_idx": {
+   "offset": 4675400,
+   "dtype": "uint32",
+   "shape": [
+    10160
+   ]
+  }
+ },
+ "units": "mm, scene axes (+x patient left, +y superior, +z anterior)",
+ "nodes": 31910,
+ "tissueNodes": 29422,
+ "edges": 177864,
+ "kinds": [
+  "atrial",
+  "ventricular",
+  "san",
+  "bachmann",
+  "avn",
+  "his",
+  "bundle",
+  "purkinje",
+  "avn_in",
+  "pmj"
+ ],
+ "constants": {
+  "v_atrial": 1.0,
+  "v_ventricular": 0.5,
+  "v_san": 0.3,
+  "v_bachmann": 1.5,
+  "v_avn": 0.08,
+  "v_his": 2.0,
+  "v_bundle": 3.0,
+  "v_purkinje": 3.0,
+  "v_avn_in": 1.0,
+  "v_pmj": 0.5,
+  "pmj_delay_ms": 3.0,
+  "apd_atrial": 190.0,
+  "apd_ventricular": 280.0,
+  "apd_conduction": 110.0
+ },
+ "named": {
+  "SAN": 29429,
+  "AVN_entry": 29437,
+  "AVN_exit": 29447,
+  "His_proximal": 29448,
+  "His_distal": 29464,
+  "RBB_start": 29763,
+  "LBB_start": 29554,
+  "LSF_end": 29622,
+  "LAF_end": 29687,
+  "LPF_end": 29743
+ },
+ "stimulus": {
+  "site": "SAN",
+  "node": 29429,
+  "time_ms": 0.0
+ },
+ "paths": {
+  "SAN": {
+   "kind": "san",
+   "schematic": false,
+   "length_mm": 13.3
+  },
+  "AVN": {
+   "kind": "avn",
+   "schematic": false,
+   "length_mm": 5.4
+  },
+  "His": {
+   "kind": "his",
+   "schematic": false,
+   "length_mm": 12.2
+  },
+  "Bachmann": {
+   "kind": "bachmann",
+   "schematic": false,
+   "length_mm": 87.7
+  },
+  "internodal_anterior": {
+   "kind": "internodal",
+   "schematic": true,
+   "length_mm": 62.0
+  },
+  "internodal_middle": {
+   "kind": "internodal",
+   "schematic": true,
+   "length_mm": 54.5
+  },
+  "internodal_posterior": {
+   "kind": "internodal",
+   "schematic": true,
+   "length_mm": 57.4
+  },
+  "LBB": {
+   "kind": "bb",
+   "schematic": false,
+   "length_mm": 13.2
+  },
+  "LSF": {
+   "kind": "bb",
+   "schematic": false,
+   "length_mm": 52.3
+  },
+  "LAF": {
+   "kind": "bb",
+   "schematic": false,
+   "length_mm": 62.5
+  },
+  "LPF": {
+   "kind": "bb",
+   "schematic": false,
+   "length_mm": 54.3
+  },
+  "RBB_entry": {
+   "kind": "his",
+   "schematic": false,
+   "length_mm": 14.0
+  },
+  "RBB": {
+   "kind": "bb",
+   "schematic": false,
+   "length_mm": 84.0
+  }
+ },
+ "landmarks": {
+  "apex": [
+   52.72,
+   -42.53,
+   26.8
+  ],
+  "base": [
+   -14.47,
+   4.76,
+   -7.36
+  ],
+  "cfb": [
+   -15.3,
+   19.35,
+   -3.49
+  ],
+  "svc_centre": [
+   -43.87,
+   43.04,
+   -7.71
+  ],
+  "ivc_centre": [
+   -51.66,
+   -7.89,
+   -25.35
+  ],
+  "laa_ostium": [
+   8.04,
+   45.64,
+   -20.25
+  ]
+ },
+ "reference": {
+  "atrial_ms": [
+   3.4562260921573147,
+   103.57353615473743
+  ],
+  "ventricular_ms": [
+   162.39504187358588,
+   257.02125599078005
+  ]
+ },
+ "meshes": [
+  "cs_AVN",
+  "cs_Bachmann",
+  "cs_His",
+  "cs_LAF",
+  "cs_LBB",
+  "cs_LPF",
+  "cs_LSF",
+  "cs_Purkinje_LV",
+  "cs_Purkinje_RV",
+  "cs_RBB",
+  "cs_RBB_entry",
+  "cs_SAN",
+  "cs_internodal_anterior",
+  "cs_internodal_middle",
+  "cs_internodal_posterior",
+  "endo_LA",
+  "endo_LV",
+  "endo_RA",
+  "endo_RV",
+  "epi_LA",
+  "epi_LV",
+  "epi_RA",
+  "epi_RV"
+ ]
+}
