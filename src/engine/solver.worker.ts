@@ -1,6 +1,6 @@
 // Runs the activation solver off the main thread. The graph is sent once; each solve request
 // carries only velocities and stimuli.
-import { Adjacency, SolverGraph, Stimulus, buildAdjacency, edgeTimes, solveWaves } from './solver';
+import { Adjacency, Decrement, SolverGraph, Stimulus, buildAdjacency, edgeTimes, solveWaves } from './solver';
 
 export interface InitMessage {
   type: 'init';
@@ -11,9 +11,11 @@ export interface SolveMessage {
   id: number;
   velocity: number[];
   waves: Stimulus[][];
-  /** Refractory period in ms for each node class (0 atrial, 1 ventricular, 2 conduction). */
-  refractoryByClass: number[];
+  /** Refractory period in ms of every node. */
+  refractory: Float32Array;
   edgeScale?: Float32Array;
+  kindDir: number[];
+  decrement: Decrement[];
 }
 
 let graph: SolverGraph | null = null;
@@ -30,8 +32,6 @@ self.onmessage = (e: MessageEvent<InitMessage | SolveMessage>) => {
   if (!graph || !adj) return;
   const t0 = performance.now();
   const et = edgeTimes(graph, m.velocity, m.edgeScale);
-  const refr = new Float32Array(graph.nodes);
-  for (let i = 0; i < graph.nodes; i++) refr[i] = m.refractoryByClass[graph.cls[i]];
-  const times = solveWaves(adj, et, graph.nodes, m.waves, refr);
+  const times = solveWaves(adj, et, graph.nodes, m.waves, m.refractory, { ekind: graph.ekind, kindDir: m.kindDir, decrement: m.decrement });
   (self as any).postMessage({ type: 'solved', id: m.id, times, ms: performance.now() - t0 }, times.map((t) => t.buffer));
 };

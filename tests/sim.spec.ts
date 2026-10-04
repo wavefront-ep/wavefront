@@ -127,7 +127,7 @@ test('activation map: legend in ms, palettes and scopes', async ({ page }) => {
   await page.getByRole('button', { name: 'Map', exact: true }).click();
   expect((await state(page)).style).toBe('map');
   await expect(page.locator('.pb-legend')).toBeVisible();
-  await expect(page.locator('.pb-legend')).toContainText('ms after the sinus node fires');
+  await expect(page.locator('.pb-legend')).toContainText('ms on the timeline');
   await page.getByRole('button', { name: 'Layers and views' }).click();
   await page.getByRole('button', { name: 'CARTO-style (red early, purple late)' }).click();
   await page.getByRole('button', { name: 'Ventricles only' }).click();

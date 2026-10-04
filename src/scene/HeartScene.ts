@@ -110,6 +110,7 @@ export class HeartScene {
   private ghosts = new Map<string, Mesh>();
   private pathMid = new Map<string, Vector3>();
   private lastFrame = 0;
+  private substrates = new Set<string>();
   private paletteTex = shared.uMapTex.value;
 
   private meshes = new Map<string, Mesh>();
@@ -285,7 +286,7 @@ export class HeartScene {
 
   private setupConductionLabels() {
     for (const st of STRUCTURES) {
-      if (st.group !== 'conduction' || !st.label || !st.pathKey) continue;
+      if ((st.group !== 'conduction' && st.group !== 'substrate') || !st.label || !st.pathKey) continue;
       const p = this.pathMid.get(st.pathKey);
       if (p) this.labelItems.push({ text: st.label, point: p, meshes: [st.mesh], mode: 'always', samples: [] });
     }
@@ -324,8 +325,8 @@ export class HeartScene {
 
   private initTimeAttributes(g: BufferGeometry) {
     const n = g.getAttribute('position').count;
-    g.setAttribute('aT0', new BufferAttribute(new Float32Array(n * 4).fill(UNREACHED), 4));
-    g.setAttribute('aT1', new BufferAttribute(new Float32Array(n * 4).fill(UNREACHED), 4));
+    for (let k = 0; k < NWAVE / 4; k++) g.setAttribute(`aT${k}`, new BufferAttribute(new Float32Array(n * 4).fill(UNREACHED), 4));
+    g.setAttribute('aHL', new BufferAttribute(new Float32Array(n), 1));
   }
 
   /** Conduction system tubes (cs_* meshes), each with a faint see-through twin so the structures
@@ -336,6 +337,7 @@ export class HeartScene {
     const meta = engine.graph.meta;
     for (const [k, p] of Object.entries(meta.paths)) this.pathMid.set(k, new Vector3(...p.mid).multiplyScalar(0.01));
     for (const [k, p] of Object.entries(meta.purkinje)) this.pathMid.set(k, new Vector3(...p.centre).multiplyScalar(0.01));
+    this.pathMid.set('scar', new Vector3(...(meta as any).scar.centre).multiplyScalar(0.01));
     const parent = new Object3D();
     gltf.scene.traverse((o: Object3D) => {
       const mesh = o as Mesh;
@@ -347,6 +349,26 @@ export class HeartScene {
       const base = new Color(info.color);
       this.baseColor.set(mesh.name, base);
       const fine = mesh.name.startsWith('cs_Purkinje');
+      if (mesh.name === 'sub_scar') {
+        // Scar: desaturated slate with a subtle hatch, drawn on the endocardium and, faintly, through the wall.
+        const m = new MeshPhysicalMaterial({ color: base.clone(), roughness: 0.9, metalness: 0, side: DoubleSide });
+        m.onBeforeCompile = (sh) => {
+          sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vObj;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvObj = position;');
+          sh.fragmentShader = sh.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying vec3 vObj;')
+            .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= mix(1.0, 0.86, step(0.5, fract((vObj.x + vObj.y + vObj.z) * 70.0)));');
+        };
+        m.customProgramCacheKey = () => 'scar-hatch';
+        mesh.material = m;
+        mesh.renderOrder = 3;
+        const sg = new Mesh(mesh.geometry, new MeshBasicMaterial({ color: base.clone(), transparent: true, opacity: 0.4, depthTest: false, depthWrite: false, side: DoubleSide }));
+        sg.raycast = () => {};
+        sg.renderOrder = 6;
+        this.meshes.set(mesh.name, mesh);
+        this.ghosts.set(mesh.name, sg);
+        parent.add(sg);
+        return;
+      }
       const mk = (ghost: boolean) => {
         // The see-through twin is unlit so the yellow reads as a clean overlay on the pink wall.
         const m = ghost
@@ -371,35 +393,59 @@ export class HeartScene {
   }
 
   /** Push solver output to the GPU: per-vertex activation times for every mapped mesh. */
-  setActivation(result: ActivationResult) {
+  setActivation(result: ActivationResult, constants?: Record<string, number>) {
     const engine = this.engine;
     if (!engine) return;
-    const c = engine.constants;
+    const c = constants ?? engine.constants;
     for (const [name, mesh] of this.meshes) {
       const times = engine.vertexTimes(name, result);
+      const info = BY_MESH[name];
+      const own = (mesh.material as MeshPhysicalMaterial).userData.activation;
+      if (own) {
+        own.uAPD.value = info.group === 'conduction' || info.group === 'substrate' ? c.apd_conduction : info.chamber === 'RA' || info.chamber === 'LA' ? c.apd_atrial : c.apd_ventricular;
+      }
       if (!times) continue;
       const n = times.length / NWAVE;
-      const a0 = mesh.geometry.getAttribute('aT0') as BufferAttribute;
-      const a1 = mesh.geometry.getAttribute('aT1') as BufferAttribute;
-      for (let i = 0; i < n; i++) {
-        for (let k = 0; k < 4; k++) {
-          (a0.array as Float32Array)[i * 4 + k] = times[i * NWAVE + k];
-          (a1.array as Float32Array)[i * 4 + k] = times[i * NWAVE + 4 + k];
-        }
-      }
-      a0.needsUpdate = true;
-      a1.needsUpdate = true;
-      const own = (mesh.material as MeshPhysicalMaterial).userData.activation;
-      const info = BY_MESH[name];
-      if (own) {
-        own.uAPD.value = info.group === 'conduction' ? c.apd_conduction : info.chamber === 'RA' || info.chamber === 'LA' ? c.apd_atrial : c.apd_ventricular;
+      for (let k = 0; k < NWAVE / 4; k++) {
+        const a = mesh.geometry.getAttribute(`aT${k}`) as BufferAttribute;
+        const arr = a.array as Float32Array;
+        for (let i = 0; i < n; i++) for (let j = 0; j < 4; j++) arr[i * 4 + j] = times[i * NWAVE + 4 * k + j];
+        a.needsUpdate = true;
       }
     }
-    for (const [name, ghost] of this.ghosts) {
+    for (const ghost of this.ghosts.values()) {
       const own = (ghost.material as Material).userData.activation;
       if (own) own.uAPD.value = c.apd_conduction;
-      void name;
     }
+    this.invalidate();
+  }
+
+  /** Which substrate meshes (sub_*) a scenario shows. */
+  setSubstrates(names: string[]) {
+    this.substrates = new Set(names);
+    this.applyLayers();
+  }
+
+  /** Tint the surface where the named regions (masks in the activation graph) lie. */
+  setHighlight(masks: string[]) {
+    const engine = this.engine;
+    if (!engine) return;
+    const g = engine.graph;
+    const member = new Set<number>();
+    for (const m of masks) for (const id of g.masks[m] ?? []) member.add(id);
+    for (const [name, mesh] of this.meshes) {
+      const map = g.maps[name];
+      const attr = mesh.geometry.getAttribute('aHL') as BufferAttribute | undefined;
+      if (!map || !attr || map.k !== 3 || !map.w) continue;
+      const n = map.idx.length / 3;
+      for (let i = 0; i < n; i++) {
+        let v = 0;
+        for (let j = 0; j < 3; j++) if (member.has(map.idx[3 * i + j])) v += map.w[3 * i + j];
+        attr.setX(i, masks.length ? v : 0);
+      }
+      attr.needsUpdate = true;
+    }
+    shared.uHLAmt.value = masks.length ? 0.55 : 0;
     this.invalidate();
   }
 
@@ -489,6 +535,7 @@ export class HeartScene {
       else if (s.group === 'vessel') vis = L.vessels;
       else if (s.group === 'valve') vis = L.valves;
       else if (s.group === 'conduction') vis = L.conduction;
+      else if (s.group === 'substrate') vis = this.substrates.has(name);
       mesh.visible = vis;
       const gh = this.ghosts.get(name);
       if (gh) gh.visible = vis;
@@ -764,7 +811,8 @@ export class HeartScene {
       if (it.mode === 'always') {
         // Conduction structures sit inside the wall, so occlusion by the surface is ignored; hide
         // those on the far side of the heart instead.
-        if (!this.layers.conduction) continue;
+        const grp = BY_MESH[it.meshes[0]]?.group;
+        if (grp === 'substrate' ? !this.substrates.has(it.meshes[0]) : !this.layers.conduction) continue;
         const depth = it.point.clone().sub(cam).dot(this.camera.getWorldDirection(new Vector3()));
         // With a cutaway the inside is open, so only the clipped-away ones are dropped.
         if (this.clipped(it.point) || (this.cut.mode === 'off' && depth > centreDepth + 0.1)) continue;

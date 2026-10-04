@@ -1,0 +1,172 @@
+{
+  "id": "vt_scar_monomorphic",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Scar-related monomorphic ventricular tachycardia",
+  "summary": "A circuit round old infarct scar sends an impulse into the ventricle with every lap.",
+  "source": "Slides 77-79 (monomorphic VT; ischaemic heart disease, prior myocardial infarction)",
+  "period_ms": 2700,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "vt",
+      "stimuli": [
+        {
+          "site": "VT_start",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1600
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "vt",
+      "first_ms": 340,
+      "every_ms": 340,
+      "laps": 6,
+      "exit_sites": [
+        {
+          "site": "VT_start",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "edgeset": "vt_channel",
+      "velocity_scale": 0.35
+    },
+    {
+      "region": "scar_core",
+      "block": true
+    },
+    {
+      "kind": "avn",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "constants": {
+    "v_ventricular": 0.6
+  },
+  "show": [
+    "sub_scar",
+    "sub_vt_circuit",
+    "sub_vt_channel"
+  ],
+  "highlight": [
+    "scar_core"
+  ],
+  "camera": {
+    "dir": [
+      -0.7,
+      0.57,
+      -0.48
+    ],
+    "distance": 1.4,
+    "focus": "scar"
+  },
+  "epi_opacity": 0.7,
+  "critical_site": "vt_channel",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "vt": "wide"
+    }
+  },
+  "events": [
+    {
+      "id": "scar",
+      "label": "Scar",
+      "at": {
+        "node": "VT_start",
+        "wave": 1
+      },
+      "caption": "Old infarct scar does not conduct, but strands of surviving muscle form a slow channel through it. The circuit around the scar is drawn schematically.",
+      "ecg": "The sinus P waves carry on at their own rate."
+    },
+    {
+      "id": "channel",
+      "label": "Slow channel",
+      "at": {
+        "node": "VT_exit",
+        "wave": 1
+      },
+      "caption": "The impulse crawls through the protected channel and exits into normal muscle at the edge of the scar.",
+      "ecg": "The trace is flat while the impulse is inside the scar."
+    },
+    {
+      "id": "qrs1",
+      "label": "Ventricular activation",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 1
+      },
+      "caption": "From the exit site the impulse spreads through ordinary ventricular muscle, slowly and without the Purkinje system, so activation is long.",
+      "ecg": "A wide QRS: the ventricle is activated cell to cell."
+    },
+    {
+      "id": "lap",
+      "label": "Next lap",
+      "at": {
+        "node": "VT_exit",
+        "wave": 2
+      },
+      "caption": "The circuit has gone round again and sends another impulse into the ventricle. Every lap looks the same, so the QRS complexes are identical: monomorphic VT.",
+      "ecg": "A regular wide-complex tachycardia with identical complexes, about 175 per minute."
+    },
+    {
+      "id": "dissoc",
+      "label": "Atria dissociated",
+      "at": {
+        "node": "SAN",
+        "wave": 4
+      },
+      "caption": "The atria continue in sinus rhythm and are not related to the ventricles (AV dissociation).",
+      "ecg": "P waves appear at a different rate from the QRS complexes, sometimes inside them."
+    }
+  ],
+  "teaching_points": [
+    "Most monomorphic VT in ischaemic heart disease is scar-related reentry around an old infarct (slide 78).",
+    "A wide-complex tachycardia is VT until proven otherwise; AV dissociation supports the diagnosis (slides 94-97).",
+    "The slow channel through the scar is the target of catheter ablation."
+  ],
+  "cut": {
+    "mode": "shortAxis",
+    "offset": 0.0
+  }
+}

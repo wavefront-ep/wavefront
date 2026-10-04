@@ -11,12 +11,27 @@ export interface SolverGraph {
   ekind: Uint8Array;
   edelay: Float32Array;
   cls: Uint8Array;
+  /** 0 both ways, 1 first to second node only, 2 second to first only. */
+  edir: Uint8Array;
 }
 
 export interface Adjacency {
   start: Uint32Array;
   nbr: Uint32Array;
   edge: Uint32Array;
+  /** 1 when the entry traverses its edge first-to-second, 2 when second-to-first. */
+  bit: Uint8Array;
+}
+
+/** Per edge kind: which directions may conduct (bit 1: first to second, bit 2: second to first). */
+export type KindDirection = ArrayLike<number>;
+
+/** Rate-dependent (decremental) slowing: the sooner a node is excited after it recovers, the longer the
+ *  delay added on entry. extra = max * exp(-recoveryInterval / tau). */
+export interface Decrement {
+  kind: number;
+  max: number;
+  tau: number;
 }
 
 export interface Stimulus {
@@ -28,23 +43,33 @@ export function buildAdjacency(g: SolverGraph): Adjacency {
   const m = g.edges.length / 2;
   const deg = new Uint32Array(g.nodes + 1);
   for (let i = 0; i < m; i++) {
-    deg[g.edges[2 * i] + 1]++;
-    deg[g.edges[2 * i + 1] + 1]++;
+    const d = g.edir[i];
+    if (d !== 2) deg[g.edges[2 * i] + 1]++;
+    if (d !== 1) deg[g.edges[2 * i + 1] + 1]++;
   }
   for (let i = 0; i < g.nodes; i++) deg[i + 1] += deg[i];
   const start = deg;
   const fill = start.slice(0, g.nodes);
-  const nbr = new Uint32Array(2 * m);
-  const edge = new Uint32Array(2 * m);
+  const total = start[g.nodes];
+  const nbr = new Uint32Array(total);
+  const edge = new Uint32Array(total);
+  const bit = new Uint8Array(total);
   for (let i = 0; i < m; i++) {
     const a = g.edges[2 * i];
     const b = g.edges[2 * i + 1];
-    nbr[fill[a]] = b;
-    edge[fill[a]++] = i;
-    nbr[fill[b]] = a;
-    edge[fill[b]++] = i;
+    const d = g.edir[i];
+    if (d !== 2) {
+      nbr[fill[a]] = b;
+      bit[fill[a]] = 1;
+      edge[fill[a]++] = i;
+    }
+    if (d !== 1) {
+      nbr[fill[b]] = a;
+      bit[fill[b]] = 2;
+      edge[fill[b]++] = i;
+    }
   }
-  return { start, nbr, edge };
+  return { start, nbr, edge, bit };
 }
 
 /** Edge traversal time in ms for the given per-kind velocities (m/s = mm/ms). */
@@ -107,7 +132,22 @@ class MinHeap {
 }
 
 /** One wave from `stimuli`. `recover[i]` is the earliest time node i can be excited again. */
-export function solveWave(adj: Adjacency, etime: Float32Array, nodes: number, stimuli: Stimulus[], recover?: Float32Array): Float32Array {
+export interface WaveOptions {
+  ekind: Uint8Array;
+  kindDir?: KindDirection;
+  decrement?: Decrement[];
+}
+
+export function solveWave(
+  adj: Adjacency,
+  etime: Float32Array,
+  nodes: number,
+  stimuli: Stimulus[],
+  recover?: Float32Array,
+  opts?: WaveOptions,
+): Float32Array {
+  const decr = new Map<number, Decrement>();
+  for (const d of opts?.decrement ?? []) decr.set(d.kind, d);
   // Float64 while solving: the heap keys are doubles, and rounding the stored time to float32
   // would make a node look stale when it is popped and skip expanding it.
   const T = new Float64Array(nodes).fill(Infinity);
@@ -124,9 +164,15 @@ export function solveWave(adj: Adjacency, etime: Float32Array, nodes: number, st
     if (t > T[u]) continue;
     for (let k = adj.start[u]; k < adj.start[u + 1]; k++) {
       const v = adj.nbr[k];
-      const nt = t + etime[adj.edge[k]];
+      const e = adj.edge[k];
+      if (opts?.kindDir && !(opts.kindDir[opts.ekind[e]] & adj.bit[k])) continue; // one-way block
+      let nt = t + etime[e];
+      if (recover && nt < recover[v]) continue; // still refractory: blocked
+      if (decr.size) {
+        const d = decr.get(opts!.ekind[e]);
+        if (d && recover) nt += d.max * Math.exp(-(nt - recover[v]) / d.tau); // decremental conduction
+      }
       if (nt < T[v]) {
-        if (recover && nt < recover[v]) continue; // still refractory: blocked
         T[v] = nt;
         heap.push(nt, v);
       }
@@ -142,11 +188,12 @@ export function solveWaves(
   nodes: number,
   waves: Stimulus[][],
   refractory: Float32Array,
+  opts?: WaveOptions,
 ): Float32Array[] {
   const recover = new Float32Array(nodes).fill(-Infinity);
   const out: Float32Array[] = [];
   for (const stim of waves) {
-    const T = solveWave(adj, etime, nodes, stim, recover);
+    const T = solveWave(adj, etime, nodes, stim, recover, opts);
     out.push(T);
     for (let i = 0; i < nodes; i++) if (T[i] < Infinity) recover[i] = Math.max(recover[i], T[i] + refractory[i]);
   }

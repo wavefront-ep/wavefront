@@ -29,3 +29,11 @@ Legend: [x] present and correctly related, [~] present with a caveat, [ ] absent
 - [x] Layers: epicardial surface with opacity, four chambers individually, great vessels, valves, labels. Conduction system and coronaries: not yet.
 - [x] Cutaway: four-chamber and short-axis presets with a position slider. A slider, not a draggable on-canvas plane.
 - [~] Cut faces are not capped: wall thickness shows as the back face of the epicardium.
+
+## Arrhythmia substrates (Phase 3)
+- [~] Slow and fast AV nodal pathways: slow pathway drawn schematically, fast = the AV node route (REVIEW 32).
+- [~] Accessory pathway sites (left free wall, posteroseptal, right free wall, anteroseptal): present in the graph, left free wall shown in scenarios; schematic (REVIEW 34).
+- [~] Cavotricuspid isthmus and the flutter circuit: schematic, the mesh has no isthmus (REVIEW 37).
+- [~] Crista terminalis: schematic course, not in the mesh (REVIEW 41).
+- [~] LV scar and its circuit: schematic position (REVIEW 38).
+- [ ] Pulmonary vein ostia as substrate, RVOT: not built (no scenario needs them yet).

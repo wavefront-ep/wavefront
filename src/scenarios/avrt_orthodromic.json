@@ -1,0 +1,177 @@
+{
+  "id": "avrt_orthodromic",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Orthodromic AV reentrant tachycardia (AVRT)",
+  "summary": "The impulse goes down the AV node, up an accessory pathway to the atrium and round again.",
+  "source": "Slides 62, 64, 65 (AVRT, initiation, orthodromic AVRT)",
+  "period_ms": 2700,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "pac",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 270
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "lap",
+      "first_after": {
+        "wave": 1,
+        "node": "AP_left_free_wall_ventricular",
+        "plus_ms": 3
+      },
+      "every_ms": 305,
+      "laps": 6,
+      "exit_sites": [
+        {
+          "site": "AP_left_free_wall_atrial_tissue",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "enable": "ap_left_free_wall"
+    },
+    {
+      "kind": "accessory",
+      "direction": "retrograde"
+    },
+    {
+      "kind": "avn",
+      "direction": "antegrade"
+    },
+    {
+      "kind": "slow_pathway",
+      "direction": "antegrade"
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 260
+    }
+  ],
+  "decrement": [
+    {
+      "kind": "avn",
+      "max_ms": 12,
+      "tau_ms": 60
+    }
+  ],
+  "constants": {
+    "apd_atrial": 150
+  },
+  "show": [
+    "sub_ap_left_free_wall"
+  ],
+  "camera": {
+    "dir": [
+      0.95,
+      0.1,
+      -0.35
+    ],
+    "distance": 2.2,
+    "focus": "ap_left_free_wall"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "ap_left_free_wall",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "lap": "retro"
+    }
+  },
+  "events": [
+    {
+      "id": "sinus",
+      "label": "Sinus beat",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "A normal sinus beat. This accessory pathway only conducts backwards (a concealed pathway), so the beat looks normal and there is no delta wave.",
+      "ecg": "A normal P wave, PR interval and narrow QRS."
+    },
+    {
+      "id": "pac",
+      "label": "Premature atrial beat",
+      "at": {
+        "node": "PAC_RA",
+        "wave": 1
+      },
+      "caption": "A premature atrial beat starts early, before the circuit has recovered. This is how the tachycardia begins.",
+      "ecg": "An early P wave."
+    },
+    {
+      "id": "avn",
+      "label": "Slowed in the AV node",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 1
+      },
+      "caption": "The accessory pathway cannot conduct forwards, so the early impulse can only go down the AV node. Arriving soon after its last use, the node conducts it slowly.",
+      "ecg": "The PR interval is longer than normal."
+    },
+    {
+      "id": "v",
+      "label": "Ventricles",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 1
+      },
+      "caption": "The ventricles activate through the normal conduction system.",
+      "ecg": "A narrow QRS."
+    },
+    {
+      "id": "ap",
+      "label": "Back up the pathway",
+      "at": {
+        "node": "AP_left_free_wall_ventricular",
+        "wave": 1
+      },
+      "caption": "The impulse now finds the accessory pathway and conducts backwards to the atrium. The atria and ventricles have been activated in series, which can start a circuit.",
+      "ecg": "A retrograde P wave follows just after the QRS."
+    },
+    {
+      "id": "re",
+      "label": "Circuit established",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 2
+      },
+      "caption": "The atria are activated from the pathway end, the left lateral wall first, and the impulse re-enters the AV node. It goes round: down the AV node, up the accessory pathway, across the atria.",
+      "ecg": "Each lap gives a QRS and a retrograde P wave soon after it."
+    },
+    {
+      "id": "tachy",
+      "label": "Tachycardia",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 3
+      },
+      "caption": "A regular narrow-complex tachycardia at about 200 per minute. Because the ventricles are activated through the normal system, the QRS stays narrow.",
+      "ecg": "A regular, narrow-complex tachycardia."
+    }
+  ],
+  "teaching_points": [
+    "Orthodromic AVRT: antegrade conduction down the AV node, retrograde up an accessory pathway; the QRS is narrow (slide 65).",
+    "Initiation: a premature atrial (or ventricular) beat meets unidirectional block and finds the circuit ready (slides 50, 64).",
+    "The accessory pathway is the usual ablation target; the AV node can also be slowed with drugs or a vagal manoeuvre."
+  ]
+}

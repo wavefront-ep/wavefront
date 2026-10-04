@@ -1,13 +1,15 @@
 import { Graph, loadGraph } from './graph';
-import type { Stimulus } from './solver';
+import { SolveRequest, deferredLoopStart, prepareScenario } from './scenario';
+import type { Scenario } from '../scenarios/types';
 import type { SolveMessage } from './solver.worker';
 
-/** Number of activation waves carried per vertex (two vec4 attributes). */
-export const NWAVE = 8;
+/** Number of activation waves carried per vertex (four vec4 attributes). */
+export const NWAVE = 16;
 export const UNREACHED = 1e9;
 
 export interface ActivationResult {
   times: Float32Array[];
+  tags: string[];
   solveMs: number;
 }
 
@@ -18,8 +20,8 @@ export type EventSpec =
   | { firstRange: string[] }
   | { firstRegion: number };
 
-/** Fraction of the action potential duration during which a node cannot be re-excited. */
-const ERP_FRACTION = 0.9;
+/** Every spec can name the wave it refers to (default 0). */
+export type EventAt = EventSpec & { wave?: number };
 
 export class ActivationEngine {
   private worker: Worker;
@@ -31,7 +33,7 @@ export class ActivationEngine {
     worker.onmessage = (e: MessageEvent) => {
       const m = e.data;
       if (m.type !== 'solved') return;
-      this.pending.get(m.id)?.({ times: m.times, solveMs: m.ms });
+      this.pending.get(m.id)?.({ times: m.times, tags: [], solveMs: m.ms });
       this.pending.delete(m.id);
     };
   }
@@ -56,6 +58,7 @@ export class ActivationEngine {
         ekind: graph.ekind.slice(),
         edelay: graph.edelay.slice(),
         cls: graph.cls.slice(),
+        edir: graph.edir.slice(),
       },
     });
     await ready;
@@ -71,21 +74,79 @@ export class ActivationEngine {
     return this.graph.meta.kinds.map((k) => c[`v_${k}`]);
   }
 
-  solve(waves: Stimulus[][], overrides: Partial<Record<string, number>> = {}): Promise<ActivationResult> {
-    const c = { ...this.constants, ...overrides } as Record<string, number>;
-    const velocity = this.graph.meta.kinds.map((k) => c[`v_${k}`]);
+  solve(req: SolveRequest): Promise<ActivationResult> {
     const id = this.nextId++;
     const msg: SolveMessage = {
       type: 'solve',
       id,
-      velocity,
-      waves,
-      refractoryByClass: [c.apd_atrial * ERP_FRACTION, c.apd_ventricular * ERP_FRACTION, c.apd_conduction * ERP_FRACTION],
+      velocity: req.velocity,
+      waves: req.waves.map((w) => w.stimuli),
+      refractory: req.refractory,
+      edgeScale: req.edgeScale,
+      kindDir: req.kindDir,
+      decrement: req.decrement,
     };
+    const tags = req.waves.map((w) => w.tag);
     return new Promise((res) => {
-      this.pending.set(id, res);
+      this.pending.set(id, (r) => res({ ...r, tags }));
       this.worker.postMessage(msg);
     });
+  }
+
+  /** Solve a scenario. Loops anchored to an emergent time (`first_after`) take a second pass. */
+  async run(sc: Scenario): Promise<ActivationResult> {
+    const starts = new Map<number, number>();
+    (sc.loops ?? []).forEach((l, i) => {
+      if (!l.first_after && l.first_ms !== undefined) starts.set(i, l.first_ms);
+    });
+    let result = await this.solve(prepareScenario(this.graph, sc, starts));
+    if ((sc.loops ?? []).some((l) => l.first_after)) {
+      (sc.loops ?? []).forEach((l, i) => {
+        const t = deferredLoopStart(this.graph, result.times, l);
+        if (t !== null) starts.set(i, t);
+      });
+      result = await this.solve(prepareScenario(this.graph, sc, starts));
+    }
+    return result;
+  }
+
+  /** First and last atrial and ventricular activation of every wave (null where a wave never reaches them). */
+  waveWindows(result: ActivationResult): { tag: string; a: [number, number] | null; v: [number, number] | null }[] {
+    const g = this.graph;
+    return result.times.map((T, w) => {
+      const win = [
+        [Infinity, -Infinity],
+        [Infinity, -Infinity],
+      ];
+      for (let i = 0; i < g.meta.tissueNodes; i++) {
+        const t = T[i];
+        if (!Number.isFinite(t)) continue;
+        const r = win[g.cls[i]];
+        if (t < r[0]) r[0] = t;
+        if (t > r[1]) r[1] = t;
+      }
+      const f = (r: number[]): [number, number] | null => (r[0] === Infinity ? null : [r[0], r[1]]);
+      return { tag: result.tags[w] ?? '', a: f(win[0]), v: f(win[1]) };
+    });
+  }
+
+  /** Earliest activation of every tissue node across all waves (what the activation map colours). */
+  firstActivation(result: ActivationResult): { atrial: [number, number] | null; ventricular: [number, number] | null } {
+    const g = this.graph;
+    const r = [
+      [Infinity, -Infinity],
+      [Infinity, -Infinity],
+    ];
+    for (let i = 0; i < g.meta.tissueNodes; i++) {
+      let t = Infinity;
+      for (const T of result.times) if (T[i] < t) t = T[i];
+      if (!Number.isFinite(t)) continue;
+      const q = r[g.cls[i]];
+      if (t < q[0]) q[0] = t;
+      if (t > q[1]) q[1] = t;
+    }
+    const f = (q: number[]): [number, number] | null => (q[0] === Infinity ? null : [q[0], q[1]]);
+    return { atrial: f(r[0]), ventricular: f(r[1]) };
   }
 
   /** Per-vertex activation times (NWAVE per vertex) for a mesh with a stored vertex mapping. */
@@ -114,8 +175,9 @@ export class ActivationEngine {
   }
 
   /** Time (ms) of a named event in wave 0, or null when it is never reached. */
-  eventTime(spec: EventSpec, result: ActivationResult, wave = 0): number | null {
-    const T = result.times[wave];
+  eventTime(spec: EventAt, result: ActivationResult): number | null {
+    const T = result.times[spec.wave ?? 0];
+    if (!T) return null;
     const g = this.graph;
     let t = Infinity;
     if ('node' in spec) t = T[g.meta.named[spec.node]];

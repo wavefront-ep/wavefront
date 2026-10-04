@@ -1,12 +1,14 @@
 {
   "id": "sinus_rhythm",
   "mechanism": "normal",
+  "group": "normal",
   "title": "Normal sinus beat",
+  "summary": "The sinus node starts the beat and the impulse follows the conduction system to the ventricles.",
   "source": "Slides 5-6 (conduction system), 9 (normal sinus rhythm)",
   "period_ms": 1000,
-  "stimuli": [{ "site": "SAN", "time_ms": 0 }],
+  "waves": [{ "tag": "sinus", "stimuli": [{ "site": "SAN", "time_ms": 0 }] }],
   "modifiers": [],
-  "ecg": { "template": "normal_sinus", "lead": "II" },
+  "ecg": { "lead": "II" },
   "events": [
     { "id": "san", "label": "Sinus node", "at": { "node": "SAN" },
       "caption": "The sinus node, high in the right atrium, fires and starts the beat.",

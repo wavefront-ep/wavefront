@@ -4,55 +4,216 @@
    "offset": 0,
    "dtype": "float32",
    "shape": [
-    31889,
+    32084,
     3
    ]
   },
   "cls": {
-   "offset": 382668,
+   "offset": 385008,
    "dtype": "uint8",
    "shape": [
-    31889
+    32084
    ]
   },
   "region": {
-   "offset": 414560,
+   "offset": 417092,
    "dtype": "uint8",
    "shape": [
-    31889
+    32084
    ]
   },
   "edges": {
-   "offset": 446452,
+   "offset": 449176,
    "dtype": "uint16",
    "shape": [
-    337635,
+    337997,
     2
    ]
   },
   "ekind": {
-   "offset": 1796992,
+   "offset": 1801164,
    "dtype": "uint8",
    "shape": [
-    337635
+    337997
    ]
   },
   "delay_idx": {
-   "offset": 2134628,
+   "offset": 2139164,
    "dtype": "uint32",
    "shape": [
-    540
+    544
    ]
   },
   "delay_val": {
-   "offset": 2136788,
+   "offset": 2141340,
    "dtype": "float32",
    "shape": [
-    540
+    544
+   ]
+  },
+  "dir_idx": {
+   "offset": 2143516,
+   "dtype": "uint32",
+   "shape": [
+    308
+   ]
+  },
+  "dir_val": {
+   "offset": 2144748,
+   "dtype": "uint8",
+   "shape": [
+    308
+   ]
+  },
+  "opt_idx": {
+   "offset": 2145056,
+   "dtype": "uint32",
+   "shape": [
+    39
+   ]
+  },
+  "mask_avn_node": {
+   "offset": 2145212,
+   "dtype": "uint16",
+   "shape": [
+    11
+   ]
+  },
+  "mask_slow_pathway": {
+   "offset": 2145236,
+   "dtype": "uint16",
+   "shape": [
+    15
+   ]
+  },
+  "mask_ap_left_free_wall": {
+   "offset": 2145268,
+   "dtype": "uint16",
+   "shape": [
+    5
+   ]
+  },
+  "mask_ap_right_free_wall": {
+   "offset": 2145280,
+   "dtype": "uint16",
+   "shape": [
+    4
+   ]
+  },
+  "mask_ap_posteroseptal": {
+   "offset": 2145288,
+   "dtype": "uint16",
+   "shape": [
+    6
+   ]
+  },
+  "mask_ap_anteroseptal": {
+   "offset": 2145300,
+   "dtype": "uint16",
+   "shape": [
+    4
+   ]
+  },
+  "mask_flutter_ring": {
+   "offset": 2145308,
+   "dtype": "uint16",
+   "shape": [
+    70
+   ]
+  },
+  "mask_cti": {
+   "offset": 2145448,
+   "dtype": "uint16",
+   "shape": [
+    177
+   ]
+  },
+  "mask_crista_terminalis": {
+   "offset": 2145804,
+   "dtype": "uint16",
+   "shape": [
+    278
+   ]
+  },
+  "mask_triangle_koch": {
+   "offset": 2146360,
+   "dtype": "uint16",
+   "shape": [
+    365
+   ]
+  },
+  "mask_vt_ring": {
+   "offset": 2147092,
+   "dtype": "uint16",
+   "shape": [
+    91
+   ]
+  },
+  "mask_scar_core": {
+   "offset": 2147276,
+   "dtype": "uint16",
+   "shape": [
+    145
+   ]
+  },
+  "es_ap_left_free_wall": {
+   "offset": 2147568,
+   "dtype": "uint32",
+   "shape": [
+    10
+   ]
+  },
+  "es_ap_right_free_wall": {
+   "offset": 2147608,
+   "dtype": "uint32",
+   "shape": [
+    9
+   ]
+  },
+  "es_ap_posteroseptal": {
+   "offset": 2147644,
+   "dtype": "uint32",
+   "shape": [
+    11
+   ]
+  },
+  "es_ap_anteroseptal": {
+   "offset": 2147688,
+   "dtype": "uint32",
+   "shape": [
+    9
+   ]
+  },
+  "es_flutter_ring": {
+   "offset": 2147724,
+   "dtype": "uint32",
+   "shape": [
+    70
+   ]
+  },
+  "es_cti": {
+   "offset": 2148004,
+   "dtype": "uint32",
+   "shape": [
+    24
+   ]
+  },
+  "es_vt_ring": {
+   "offset": 2148100,
+   "dtype": "uint32",
+   "shape": [
+    91
+   ]
+  },
+  "es_vt_channel": {
+   "offset": 2148464,
+   "dtype": "uint32",
+   "shape": [
+    32
    ]
   },
   "map_epi_RA_idx": {
-   "offset": 2138948,
+   "offset": 2148592,
    "dtype": "uint32",
    "shape": [
     4763,
@@ -60,7 +221,7 @@
    ]
   },
   "map_epi_RA_w": {
-   "offset": 2196104,
+   "offset": 2205748,
    "dtype": "float32",
    "shape": [
     4763,
@@ -68,7 +229,7 @@
    ]
   },
   "map_endo_RA_idx": {
-   "offset": 2253260,
+   "offset": 2262904,
    "dtype": "uint32",
    "shape": [
     5040,
@@ -76,7 +237,7 @@
    ]
   },
   "map_endo_RA_w": {
-   "offset": 2313740,
+   "offset": 2323384,
    "dtype": "float32",
    "shape": [
     5040,
@@ -84,7 +245,7 @@
    ]
   },
   "map_epi_LA_idx": {
-   "offset": 2374220,
+   "offset": 2383864,
    "dtype": "uint32",
    "shape": [
     6225,
@@ -92,7 +253,7 @@
    ]
   },
   "map_epi_LA_w": {
-   "offset": 2448920,
+   "offset": 2458564,
    "dtype": "float32",
    "shape": [
     6225,
@@ -100,7 +261,7 @@
    ]
   },
   "map_endo_LA_idx": {
-   "offset": 2523620,
+   "offset": 2533264,
    "dtype": "uint32",
    "shape": [
     4735,
@@ -108,7 +269,7 @@
    ]
   },
   "map_endo_LA_w": {
-   "offset": 2580440,
+   "offset": 2590084,
    "dtype": "float32",
    "shape": [
     4735,
@@ -116,7 +277,7 @@
    ]
   },
   "map_epi_LV_idx": {
-   "offset": 2637260,
+   "offset": 2646904,
    "dtype": "uint32",
    "shape": [
     5645,
@@ -124,7 +285,7 @@
    ]
   },
   "map_epi_LV_w": {
-   "offset": 2705000,
+   "offset": 2714644,
    "dtype": "float32",
    "shape": [
     5645,
@@ -132,7 +293,7 @@
    ]
   },
   "map_endo_LV_idx": {
-   "offset": 2772740,
+   "offset": 2782384,
    "dtype": "uint32",
    "shape": [
     7141,
@@ -140,7 +301,7 @@
    ]
   },
   "map_endo_LV_w": {
-   "offset": 2858432,
+   "offset": 2868076,
    "dtype": "float32",
    "shape": [
     7141,
@@ -148,7 +309,7 @@
    ]
   },
   "map_epi_RV_idx": {
-   "offset": 2944124,
+   "offset": 2953768,
    "dtype": "uint32",
    "shape": [
     5617,
@@ -156,7 +317,7 @@
    ]
   },
   "map_epi_RV_w": {
-   "offset": 3011528,
+   "offset": 3021172,
    "dtype": "float32",
    "shape": [
     5617,
@@ -164,7 +325,7 @@
    ]
   },
   "map_endo_RV_idx": {
-   "offset": 3078932,
+   "offset": 3088576,
    "dtype": "uint32",
    "shape": [
     8728,
@@ -172,7 +333,7 @@
    ]
   },
   "map_endo_RV_w": {
-   "offset": 3183668,
+   "offset": 3193312,
    "dtype": "float32",
    "shape": [
     8728,
@@ -180,84 +341,147 @@
    ]
   },
   "map_cs_SAN_idx": {
-   "offset": 3288404,
+   "offset": 3298048,
    "dtype": "uint32",
    "shape": [
     150
    ]
   },
   "map_cs_AVN_idx": {
-   "offset": 3289004,
+   "offset": 3298648,
    "dtype": "uint32",
    "shape": [
     110
    ]
   },
   "map_cs_His_idx": {
-   "offset": 3289444,
+   "offset": 3299088,
    "dtype": "uint32",
    "shape": [
     136
    ]
   },
   "map_cs_Bachmann_idx": {
-   "offset": 3289988,
+   "offset": 3299632,
    "dtype": "uint32",
    "shape": [
     544
    ]
   },
   "map_cs_LBB_idx": {
-   "offset": 3292164,
+   "offset": 3301808,
    "dtype": "uint32",
    "shape": [
     120
    ]
   },
   "map_cs_LSF_idx": {
-   "offset": 3292644,
+   "offset": 3302288,
    "dtype": "uint32",
    "shape": [
     432
    ]
   },
   "map_cs_LAF_idx": {
-   "offset": 3294372,
+   "offset": 3304016,
    "dtype": "uint32",
    "shape": [
     520
    ]
   },
   "map_cs_LPF_idx": {
-   "offset": 3296452,
+   "offset": 3306096,
    "dtype": "uint32",
    "shape": [
     448
    ]
   },
   "map_cs_RBB_idx": {
-   "offset": 3298244,
+   "offset": 3307888,
    "dtype": "uint32",
    "shape": [
     688
    ]
   },
+  "map_sub_ap_left_free_wall_idx": {
+   "offset": 3310640,
+   "dtype": "uint32",
+   "shape": [
+    40
+   ]
+  },
+  "map_sub_ap_right_free_wall_idx": {
+   "offset": 3310800,
+   "dtype": "uint32",
+   "shape": [
+    32
+   ]
+  },
+  "map_sub_ap_posteroseptal_idx": {
+   "offset": 3310928,
+   "dtype": "uint32",
+   "shape": [
+    48
+   ]
+  },
+  "map_sub_ap_anteroseptal_idx": {
+   "offset": 3311120,
+   "dtype": "uint32",
+   "shape": [
+    32
+   ]
+  },
+  "map_sub_flutter_ring_idx": {
+   "offset": 3311248,
+   "dtype": "uint32",
+   "shape": [
+    568
+   ]
+  },
+  "map_sub_cti_idx": {
+   "offset": 3313520,
+   "dtype": "uint32",
+   "shape": [
+    200
+   ]
+  },
+  "map_sub_slow_pathway_idx": {
+   "offset": 3314320,
+   "dtype": "uint32",
+   "shape": [
+    120
+   ]
+  },
+  "map_sub_vt_circuit_idx": {
+   "offset": 3314800,
+   "dtype": "uint32",
+   "shape": [
+    736
+   ]
+  },
+  "map_sub_vt_channel_idx": {
+   "offset": 3317744,
+   "dtype": "uint32",
+   "shape": [
+    264
+   ]
+  },
   "map_cs_RBB_entry_idx": {
-   "offset": 3300996,
+   "offset": 3318800,
    "dtype": "uint32",
    "shape": [
     152
    ]
   },
   "map_cs_Purkinje_LV_idx": {
-   "offset": 3301604,
+   "offset": 3319408,
    "dtype": "uint32",
    "shape": [
     10410
    ]
   },
   "map_cs_Purkinje_RV_idx": {
-   "offset": 3343244,
+   "offset": 3361048,
    "dtype": "uint32",
    "shape": [
     10160
@@ -265,9 +489,9 @@
   }
  },
  "units": "mm, scene axes (+x patient left, +y superior, +z anterior)",
- "nodes": 31889,
+ "nodes": 32084,
  "tissueNodes": 29422,
- "edges": 337635,
+ "edges": 337997,
  "kinds": [
   "atrial",
   "ventricular",
@@ -279,7 +503,13 @@
   "purkinje",
   "avn_in",
   "pmj",
-  "interatrial"
+  "interatrial",
+  "slow_pathway",
+  "accessory",
+  "flutter_ring",
+  "flutter_exit",
+  "vt_ring",
+  "vt_exit"
  ],
  "constants": {
   "v_atrial": 1.0,
@@ -294,12 +524,23 @@
   "v_pmj": 0.5,
   "v_interatrial": 0.03,
   "pmj_delay_ms": 3.0,
+  "v_slow_pathway": 0.0561,
+  "v_accessory": 2.0,
+  "v_flutter_ring": 0.6705,
+  "v_flutter_exit": 1.0,
+  "v_vt_ring": 0.5989,
+  "v_vt_exit": 0.5,
+  "flutter_period_ms": 200.0,
+  "flutter_cti_scale": 0.5,
+  "vt_period_ms": 340.0,
+  "vt_channel_scale": 0.35,
   "apd_atrial": 190.0,
   "apd_ventricular": 280.0,
   "apd_conduction": 110.0
  },
  "named": {
   "SAN": 29429,
+  "AVN_atrial_exit": 11893,
   "AVN_entry": 29437,
   "AVN_exit": 29447,
   "His_proximal": 29448,
@@ -310,12 +551,127 @@
   "LAF_end": 29666,
   "LPF_end": 29722,
   "Bachmann_start": 29465,
-  "Bachmann_end": 29532
+  "Bachmann_end": 29532,
+  "PAC_RA": 23,
+  "PAC_LA": 15236,
+  "Slow_pathway_start": 31889,
+  "Slow_pathway_second": 31891,
+  "AP_left_free_wall_atrial": 31904,
+  "AP_left_free_wall_ventricular": 31908,
+  "AP_left_free_wall_atrial_tissue": 17347,
+  "AP_left_free_wall_ventricular_tissue": 24156,
+  "AP_right_free_wall_atrial": 31909,
+  "AP_right_free_wall_ventricular": 31912,
+  "AP_right_free_wall_atrial_tissue": 4330,
+  "AP_right_free_wall_ventricular_tissue": 18077,
+  "AP_posteroseptal_atrial": 31913,
+  "AP_posteroseptal_ventricular": 31918,
+  "AP_posteroseptal_atrial_tissue": 14460,
+  "AP_posteroseptal_ventricular_tissue": 20758,
+  "AP_anteroseptal_atrial": 31919,
+  "AP_anteroseptal_ventricular": 31922,
+  "AP_anteroseptal_atrial_tissue": 11429,
+  "AP_anteroseptal_ventricular_tissue": 19474,
+  "Flutter_start": 31923,
+  "Flutter_cti_end": 31947,
+  "VT_start": 31993,
+  "VT_exit": 32025
  },
  "stimulus": {
   "site": "SAN",
   "node": 29429,
   "time_ms": 0.0
+ },
+ "scar": {
+  "centre": [
+   12.7,
+   -25.59,
+   12.99
+  ]
+ },
+ "masks": [
+  "ap_anteroseptal",
+  "ap_left_free_wall",
+  "ap_posteroseptal",
+  "ap_right_free_wall",
+  "avn_node",
+  "crista_terminalis",
+  "cti",
+  "flutter_ring",
+  "scar_core",
+  "slow_pathway",
+  "triangle_koch",
+  "vt_ring"
+ ],
+ "edgesets": [
+  "ap_anteroseptal",
+  "ap_left_free_wall",
+  "ap_posteroseptal",
+  "ap_right_free_wall",
+  "cti",
+  "flutter_ring",
+  "vt_channel",
+  "vt_ring"
+ ],
+ "apSites": {
+  "left_free_wall": {
+   "atrial": [
+    11.865224935343901,
+    20.202607005099058,
+    -24.92333035197854
+   ],
+   "ventricular": [
+    16.662248099118543,
+    18.612605903071223,
+    -25.954842347387178
+   ]
+  },
+  "right_free_wall": {
+   "atrial": [
+    -45.94149794412977,
+    -9.564584947675066,
+    9.129568030197344
+   ],
+   "ventricular": [
+    -47.67260783704199,
+    -11.965663665185039,
+    11.43320846993852
+   ]
+  },
+  "posteroseptal": {
+   "atrial": [
+    -6.363800747622653,
+    7.638108494317836,
+    -18.688631469127028
+   ],
+   "ventricular": [
+    -8.086471336044921,
+    5.819477995471225,
+    -13.1257934819309
+   ]
+  },
+  "anteroseptal": {
+   "atrial": [
+    -23.361191773209647,
+    8.013493218641848,
+    2.657867296251525
+   ],
+   "ventricular": [
+    -19.300462136797346,
+    8.370427626063508,
+    4.635820439300938
+   ]
+  }
+ },
+ "loops": {
+  "flutter": {
+   "period_ms": 200.0,
+   "cti_scale": 0.5
+  },
+  "vt": {
+   "period_ms": 340.0,
+   "channel_scale": 0.35
+  }
  },
  "paths": {
   "SAN": {
@@ -447,6 +803,106 @@
     -18.08,
     22.42
    ]
+  },
+  "ap_left_free_wall": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 5.2,
+   "mid": [
+    14.26,
+    19.41,
+    -25.44
+   ]
+  },
+  "ap_right_free_wall": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 3.8,
+   "mid": [
+    -47.1,
+    -11.17,
+    10.67
+   ]
+  },
+  "ap_posteroseptal": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 6.1,
+   "mid": [
+    -7.4,
+    6.55,
+    -15.35
+   ]
+  },
+  "ap_anteroseptal": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 4.5,
+   "mid": [
+    -20.65,
+    8.25,
+    3.98
+   ]
+  },
+  "sub_flutter_ring": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 94.8,
+   "mid": [
+    -21.89,
+    5.58,
+    -0.58
+   ]
+  },
+  "sub_cti": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 31.2,
+   "mid": [
+    -35.04,
+    -12.93,
+    -2.82
+   ]
+  },
+  "sub_crista": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 50.5,
+   "mid": [
+    -57.39,
+    18.27,
+    -18.05
+   ]
+  },
+  "slow_pathway": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 14.0,
+   "mid": [
+    -20.48,
+    5.63,
+    -7.31
+   ]
+  },
+  "sub_vt_circuit": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 118.8,
+   "mid": [
+    21.23,
+    -23.31,
+    27.19
+   ]
+  },
+  "sub_vt_channel": {
+   "kind": "sub",
+   "schematic": true,
+   "length_mm": 42.5,
+   "mid": [
+    5.33,
+    -11.44,
+    6.68
+   ]
   }
  },
  "ranges": {
@@ -535,6 +991,17 @@
   "cs_internodal_anterior",
   "cs_internodal_middle",
   "cs_internodal_posterior",
+  "sub_ap_anteroseptal",
+  "sub_ap_left_free_wall",
+  "sub_ap_posteroseptal",
+  "sub_ap_right_free_wall",
+  "sub_crista",
+  "sub_cti",
+  "sub_flutter_ring",
+  "sub_scar",
+  "sub_slow_pathway",
+  "sub_vt_channel",
+  "sub_vt_circuit",
   "endo_LA",
   "endo_LV",
   "endo_RA",

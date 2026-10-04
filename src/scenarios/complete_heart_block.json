@@ -1,0 +1,146 @@
+{
+  "id": "complete_heart_block",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Complete (third-degree) heart block",
+  "summary": "No impulse crosses the AV node. The atria beat on at the sinus rate while a slow escape rhythm drives the ventricles.",
+  "source": "Slides 39-40 (third-degree AV block); 16, 20-21 (nodal and infranodal blocks)",
+  "period_ms": 3000,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "escape",
+      "stimuli": [
+        {
+          "site": "His_proximal",
+          "time_ms": 500
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1600
+        }
+      ]
+    },
+    {
+      "tag": "escape",
+      "stimuli": [
+        {
+          "site": "His_proximal",
+          "time_ms": 2000
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2400
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "avn",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "select": "cs_AVN",
+  "camera": {
+    "dir": [
+      0,
+      0,
+      1
+    ],
+    "distance": 2.9
+  },
+  "epi_opacity": 0.35,
+  "critical_site": "AVN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "p1",
+      "label": "Sinus beat",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "The sinus node fires and the atria activate normally.",
+      "ecg": "A normal P wave."
+    },
+    {
+      "id": "block",
+      "label": "Block at the AV node",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 0
+      },
+      "caption": "The impulse reaches the AV node and goes no further. In complete heart block no atrial impulse crosses to the ventricles.",
+      "ecg": "A P wave with no QRS after it."
+    },
+    {
+      "id": "escape",
+      "label": "Escape rhythm",
+      "at": {
+        "node": "His_proximal",
+        "wave": 1
+      },
+      "caption": "A pacemaker below the block takes over. This junctional escape focus fires at about 40 per minute and drives the ventricles through the normal conduction system.",
+      "ecg": "A narrow QRS appears with no P wave before it: it is not related to the atria."
+    },
+    {
+      "id": "p2",
+      "label": "Atria carry on",
+      "at": {
+        "node": "SAN",
+        "wave": 2
+      },
+      "caption": "The sinus node keeps firing at its own rate, and each P wave is blocked at the AV node.",
+      "ecg": "P waves march on at their own regular rate, unrelated to the QRS complexes: AV dissociation."
+    },
+    {
+      "id": "escape2",
+      "label": "Next escape beat",
+      "at": {
+        "node": "His_proximal",
+        "wave": 4
+      },
+      "caption": "The escape rhythm fires again, slower than the atria. The atrial and ventricular rates are independent.",
+      "ecg": "Atrial rate faster than ventricular rate, each running regularly on its own."
+    }
+  ],
+  "teaching_points": [
+    "Third-degree AV block: no atrial impulse reaches the ventricles; atria and ventricles beat independently (AV dissociation) (slide 39).",
+    "The escape rhythm decides the QRS: a junctional focus above the bundle branches gives a narrow QRS, a ventricular focus gives a wide one, and the rate is slow (about 40 or less).",
+    "Nodal blocks are usually transient and have a more reliable junctional escape; infranodal blocks are less stable (slides 20-21)."
+  ]
+}

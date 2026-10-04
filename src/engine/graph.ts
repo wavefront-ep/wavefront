@@ -12,6 +12,10 @@ export interface GraphMeta {
   paths: Record<string, { kind: string; schematic: boolean; length_mm: number; mid: [number, number, number] }>;
   purkinje: Record<string, { centre: [number, number, number]; terminals: number }>;
   reference: { atrial_ms: [number, number]; ventricular_ms: [number, number] };
+  masks: string[];
+  edgesets: string[];
+  apSites: Record<string, { atrial: number[]; ventricular: number[] }>;
+  loops: { flutter: { period_ms: number; cti_scale: number }; vt: { period_ms: number; channel_scale: number } };
   arrays: Record<string, { offset: number; dtype: string; shape: number[] }>;
 }
 
@@ -31,6 +35,12 @@ export interface Graph {
   elen: Float32Array;
   ekind: Uint8Array;
   edelay: Float32Array;
+  /** 0 both ways, 1 first to second node only, 2 second to first only. */
+  edir: Uint8Array;
+  /** Edges that are off unless a scenario enables them (accessory pathways). */
+  optional: Uint32Array;
+  masks: Record<string, Uint16Array>;
+  edgesets: Record<string, Uint32Array>;
   maps: Record<string, VertexMap>;
 }
 
@@ -41,6 +51,11 @@ export async function loadGraph(jsonUrl: string, binUrl: string): Promise<Graph>
     fetch(jsonUrl).then((r) => r.json() as Promise<GraphMeta>),
     fetch(binUrl).then((r) => r.arrayBuffer()),
   ]);
+  return parseGraph(meta, buf);
+}
+
+/** Build the typed arrays from the metadata and the binary blob (also used by the Node tooling). */
+export function parseGraph(meta: GraphMeta, buf: ArrayBuffer): Graph {
   const get = (key: string) => {
     const a = meta.arrays[key];
     const n = a.shape.reduce((x, y) => x * y, 1);
@@ -71,5 +86,16 @@ export async function loadGraph(jsonUrl: string, binUrl: string): Promise<Graph>
   const di = get('delay_idx') as Uint32Array;
   const dv = get('delay_val') as Float32Array;
   for (let i = 0; i < di.length; i++) edelay[di[i]] = dv[i];
-  return { meta, pos, cls: get('cls'), region: get('region'), edges, elen, ekind: get('ekind'), edelay, maps };
+  const edir = new Uint8Array(m);
+  const ri = get('dir_idx') as Uint32Array;
+  const rv = get('dir_val') as Uint8Array;
+  for (let i = 0; i < ri.length; i++) edir[ri[i]] = rv[i];
+  const masks: Record<string, Uint16Array> = {};
+  for (const n of meta.masks) masks[n] = get(`mask_${n}`) as Uint16Array;
+  const edgesets: Record<string, Uint32Array> = {};
+  for (const n of meta.edgesets) edgesets[n] = get(`es_${n}`) as Uint32Array;
+  return {
+    meta, pos, cls: get('cls'), region: get('region'), edges, elen, ekind: get('ekind'), edelay, edir,
+    optional: get('opt_idx') as Uint32Array, masks, edgesets, maps,
+  };
 }

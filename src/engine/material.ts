@@ -21,6 +21,8 @@ export const shared = {
   uMapMax: { value: 260 },
   uIso: { value: 10 },
   uMapTex: { value: null as DataTexture | null },
+  uHLCol: { value: new Color('#8FB8AE') },
+  uHLAmt: { value: 0 },
 };
 
 export const MYOCARDIUM = { front: '#F2B24A', act: '#E2704C', refr: '#BDA6C2' };
@@ -29,8 +31,14 @@ export const CONDUCTION = { front: '#F8D46A', act: '#E58A2E', refr: '#CDBF98' };
 const VERT_DECL = /* glsl */ `
 attribute vec4 aT0;
 attribute vec4 aT1;
+attribute vec4 aT2;
+attribute vec4 aT3;
+attribute float aHL;
 varying vec4 vT0;
 varying vec4 vT1;
+varying vec4 vT2;
+varying vec4 vT3;
+varying float vHL;
 `;
 
 const FRAG_DECL = /* glsl */ `
@@ -46,15 +54,32 @@ uniform float uMapMin;
 uniform float uMapMax;
 uniform float uIso;
 uniform sampler2D uMapTex;
+uniform vec3 uHLCol;
+uniform float uHLAmt;
 varying vec4 vT0;
 varying vec4 vT1;
+varying vec4 vT2;
+varying vec4 vT3;
+varying float vHL;
 float actGlow = 0.0;
+float firstStart(vec4 v, float best) {
+  for (int i = 0; i < 4; i++) best = min(best, v[i]);
+  return best;
+}
+float latestStart(vec4 v, float t, float best) {
+  for (int i = 0; i < 4; i++) {
+    float a = v[i];
+    if (a <= t && a > best && a < 1.0e8) best = a;
+  }
+  return best;
+}
 `;
 
 const FRAG_COLOR = /* glsl */ `
+diffuseColor.rgb = mix(diffuseColor.rgb, uHLCol, vHL * uHLAmt);
 if (uMode == 1) {
   float tt = vT0.x;
-  if (tt >= uMapMin && tt <= uMapMax) {
+  if (tt < 1.0e8 && tt >= uMapMin && tt <= uMapMax) {
     float k = clamp((tt - uMapMin) / (uMapMax - uMapMin), 0.0, 1.0);
     vec3 c = texture2D(uMapTex, vec2(k, 0.5)).rgb;
     float f = tt / uIso;
@@ -63,13 +88,7 @@ if (uMode == 1) {
     diffuseColor.rgb = mix(c, vec3(0.02), line * 0.5);
   }
 } else {
-  float bestT = -1.0e9;
-  for (int i = 0; i < 4; i++) {
-    float a = vT0[i];
-    if (a <= uTime && a > bestT && a < 1.0e8) bestT = a;
-    float b = vT1[i];
-    if (b <= uTime && b > bestT && b < 1.0e8) bestT = b;
-  }
+  float bestT = latestStart(vT3, uTime, latestStart(vT2, uTime, latestStart(vT1, uTime, latestStart(vT0, uTime, -1.0e9))));
   if (bestT > -1.0e8) {
     float dt = uTime - bestT;
     float fr = 1.0 - smoothstep(0.0, uWidth, dt);
@@ -99,13 +118,13 @@ export function applyActivation(material: Material, cfg: ActivationCfg & { palet
     Object.assign(shader.uniforms, shared, own);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${VERT_DECL}`)
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvT0 = aT0;\nvT1 = aT1;');
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvT0 = aT0;\nvT1 = aT1;\nvT2 = aT2;\nvT3 = aT3;\nvHL = aHL;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${FRAG_DECL}`)
       .replace('#include <color_fragment>', `#include <color_fragment>\n${FRAG_COLOR}`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += vec3(1.0, 0.62, 0.3) * actGlow;');
   };
-  material.customProgramCacheKey = () => 'activation-v1';
+  material.customProgramCacheKey = () => 'activation-v2';
 }
 
 // ---------------------------------------------------------------- colour maps

@@ -1,0 +1,132 @@
+{
+  "id": "atrial_flutter_typical",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Typical atrial flutter",
+  "summary": "A wavefront circles the tricuspid annulus about 300 times a minute; the AV node passes every second wave.",
+  "source": "Slides 66-68 (atrial flutter, macro-reentry)",
+  "period_ms": 2000,
+  "waves": [
+    {
+      "tag": "flutter",
+      "stimuli": [
+        {
+          "site": "Flutter_start",
+          "time_ms": 0
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "flutter",
+      "first_ms": 200,
+      "every_ms": 200,
+      "laps": 8,
+      "exit_sites": [
+        {
+          "site": "Flutter_start",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "edgeset": "cti",
+      "velocity_scale": 0.5
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 300
+    }
+  ],
+  "show": [
+    "sub_flutter_ring",
+    "sub_cti",
+    "sub_crista"
+  ],
+  "highlight": [
+    "cti"
+  ],
+  "camera": {
+    "dir": [
+      -0.55,
+      -0.45,
+      0.7
+    ],
+    "distance": 1.9,
+    "focus": "sub_flutter_ring"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "cti",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "flutter": "flutter"
+    }
+  },
+  "events": [
+    {
+      "id": "start",
+      "label": "Circuit",
+      "at": {
+        "node": "Flutter_start",
+        "wave": 0
+      },
+      "caption": "A single wavefront circles the tricuspid annulus counter-clockwise: a macro-reentrant circuit. The circuit is drawn schematically.",
+      "ecg": "The flutter waves form a continuous sawtooth with no flat baseline between them."
+    },
+    {
+      "id": "cti",
+      "label": "Cavotricuspid isthmus",
+      "at": {
+        "node": "Flutter_cti_end",
+        "wave": 0
+      },
+      "caption": "The wavefront crosses the cavotricuspid isthmus, a narrow strip of right atrium between the tricuspid annulus and the inferior vena cava. Conduction is slow here, and this strip is the usual ablation target.",
+      "ecg": "Typical flutter gives negative sawtooth waves in the inferior leads, with an atrial rate near 300 per minute."
+    },
+    {
+      "id": "avn",
+      "label": "AV node",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 0
+      },
+      "caption": "Each wave reaches the AV node, but the node has a long refractory period and cannot conduct every one.",
+      "ecg": "Flutter waves continue; the QRS follows only some of them."
+    },
+    {
+      "id": "qrs",
+      "label": "Conducted beat",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "A conducted impulse activates the ventricles through the normal system, so the QRS is narrow.",
+      "ecg": "A narrow QRS superimposed on the flutter waves."
+    },
+    {
+      "id": "blocked",
+      "label": "Blocked wave",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 1
+      },
+      "caption": "The next flutter wave arrives while the AV node is still refractory, and it is blocked. The result is 2:1 conduction: a ventricular rate of about 150.",
+      "ecg": "A flutter wave with no QRS after it. The ventricular rhythm is regular at half the atrial rate."
+    }
+  ],
+  "teaching_points": [
+    "Typical flutter is a macro-reentrant circuit around the tricuspid annulus, rate about 300 per minute, with sawtooth waves most visible in leads II, III and aVF (slide 66).",
+    "The AV node limits how many impulses reach the ventricles: 2:1 is common (ventricular rate about 150); 4:1 and variable block also occur (slide 66).",
+    "The cavotricuspid isthmus is the critical slow strip and the usual ablation target (slides 67-68)."
+  ]
+}

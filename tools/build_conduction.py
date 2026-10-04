@@ -23,21 +23,28 @@ sys.path.insert(0, str(Path(__file__).parent))
 from build_heart import write_glb  # noqa: E402
 from conduction_geometry import Geometry, arclen  # noqa: E402
 from heartdata import ROOT  # noqa: E402
+from substrates import Substrates  # noqa: E402
 
 OUT = ROOT / "public/heart"
 
 # Edge kinds (index = kind id used by the engine).
-KINDS = ["atrial", "ventricular", "san", "bachmann", "avn", "his", "bundle", "purkinje", "avn_in", "pmj", "interatrial"]
+KINDS = ["atrial", "ventricular", "san", "bachmann", "avn", "his", "bundle", "purkinje", "avn_in", "pmj", "interatrial",
+         "slow_pathway", "accessory", "flutter_ring", "flutter_exit", "vt_ring", "vt_exit"]
 # Conduction velocities in m/s (= mm/ms). SPEC section 5 starting values; to be confirmed.
 CONSTANTS = dict(
     v_atrial=1.0, v_ventricular=0.5, v_san=0.3, v_bachmann=2.0, v_avn=0.08, v_his=2.0,
     v_bundle=3.0, v_purkinje=3.0, v_avn_in=1.0, v_pmj=0.5, v_interatrial=0.03, pmj_delay_ms=3.0,
+    # substrate kinds: the slow pathway and the two rings get their velocity from the loop periods below
+    v_slow_pathway=0.056, v_accessory=2.0, v_flutter_ring=0.5, v_flutter_exit=1.0, v_vt_ring=0.5, v_vt_exit=0.5,
+    flutter_period_ms=200.0, flutter_cti_scale=0.5, vt_period_ms=340.0, vt_channel_scale=0.35,
     apd_atrial=190.0, apd_ventricular=280.0, apd_conduction=110.0,
 )
 VEL = {k: CONSTANTS[f"v_{k}"] for k in KINDS if f"v_{k}" in CONSTANTS}
 VEL_BY_KIND = np.array([CONSTANTS["v_atrial"], CONSTANTS["v_ventricular"], CONSTANTS["v_san"], CONSTANTS["v_bachmann"],
                         CONSTANTS["v_avn"], CONSTANTS["v_his"], CONSTANTS["v_bundle"], CONSTANTS["v_purkinje"],
-                        CONSTANTS["v_avn_in"], CONSTANTS["v_pmj"], CONSTANTS["v_interatrial"]])
+                        CONSTANTS["v_avn_in"], CONSTANTS["v_pmj"], CONSTANTS["v_interatrial"],
+                        CONSTANTS["v_slow_pathway"], CONSTANTS["v_accessory"], CONSTANTS["v_flutter_ring"],
+                        CONSTANTS["v_flutter_exit"], CONSTANTS["v_vt_ring"], CONSTANTS["v_vt_exit"]])
 
 ATRIAL_LABELS = [3, 4] + list(range(11, 25))
 VENT_LABELS = [1, 2]
@@ -133,6 +140,10 @@ class Builder:
             return KINDS.index("interatrial") if self.reg[a] != self.reg[b] else 0
 
         self.edges = [(int(a), int(b), float(l), kind(a, b), 0.0) for (a, b), l in zip(e, el)]
+        self.edir = {}  # edge index -> 1 (a to b only) or 2 (b to a only)
+        self.opt = set()  # edges that are off unless a scenario enables them
+        self.edgesets = {}  # name -> edge indices
+        self.masks = {}  # name -> node indices
         self.node_pos = [p for p in self.pos]
         self.node_cls = list(self.cls)
         self.node_reg = list(self.reg)
@@ -140,6 +151,18 @@ class Builder:
         self.named = {}
         self.tissue_tree = {c: cKDTree(self.pos[self.cls == c]) for c in (0, 1)}
         self.tissue_ids = {c: np.where(self.cls == c)[0] for c in (0, 1)}
+
+    def add_edge(self, a, b, kind, delay=0.0, direction=0, sets=(), optional=False):
+        i = len(self.edges)
+        length = float(np.linalg.norm(np.asarray(self.node_pos[a]) - np.asarray(self.node_pos[b])))
+        self.edges.append((a, b, length, KINDS.index(kind), delay))
+        if direction:
+            self.edir[i] = direction
+        if optional:
+            self.opt.add(i)
+        for st in sets:
+            self.edgesets.setdefault(st, []).append(i)
+        return i
 
     def add_node(self, p, cls=2, reg=0):
         self.node_pos.append(np.asarray(p, dtype=float))
@@ -193,6 +216,8 @@ class Builder:
         # AV node: atrial muscle enters at the posterior-inferior end only
         avn = n["AVN"]
         self.link_to_tissue(avn[0], 0, 3.5, "avn_in")
+        _, j = self.tissue_tree[0].query(self.node_pos[avn[0]])
+        self.named["AVN_atrial_exit"] = int(self.tissue_ids[0][j])  # atrial muscle next to the AV node entry
         self.named["AVN_entry"], self.named["AVN_exit"] = avn[0], avn[-1]
         # His
         his = n["His"]
@@ -240,16 +265,153 @@ class Builder:
                 self.link_to_tissue(node_of[t], 1, 4.5, "pmj", CONSTANTS["pmj_delay_ms"], max_links=2)
             self.purk_nodes[which] = node_of
 
+
+    # --------------------------------------------------------------------- substrates (Phase 3)
+    def assemble_substrates(self):
+        g = self.g
+        self.subs = Substrates(g).build_all()
+        S = self.subs.sub
+        n = self.path_nodes
+
+        # ectopic sites for premature beats (named stimulus sites)
+        ra = np.where((self.cls == 0) & (self.reg == 4))[0]
+        la = np.where((self.cls == 0) & (self.reg == 3))[0]
+        cra = self.pos[ra].mean(0)
+        lat = ra[np.abs(self.pos[ra][:, 1] - cra[1]) < 8]
+        self.named["PAC_RA"] = int(lat[np.argmin(self.pos[lat][:, 0])])  # lateral right atrial wall
+        self.named["PAC_LA"] = int(la[np.argmax(self.pos[la][:, 1] - 0.3 * self.pos[la][:, 2])])  # superior-posterior left atrium
+
+        # slow AV nodal pathway: atrial input at its posteroseptal end only, joined to the lower end of the AV node
+        chain = g.paths["slow_pathway"]["points"]
+        ids = self.add_chain("slow_pathway", chain, "slow_pathway")
+        self.link_to_tissue_directed(ids[0], 0, 3.5, "avn_in", into_node=True, max_links=3)
+        self.add_edge(ids[-1], n["AVN"][-1], "slow_pathway")
+        L = sum(np.linalg.norm(np.asarray(self.node_pos[a]) - np.asarray(self.node_pos[b])) for a, b in zip(ids[:-1], ids[1:]))
+        CONSTANTS["v_slow_pathway"] = round(float(L / 250.0), 4)  # about 250 ms to cross, against about 67 ms for the fast route
+        self.masks["avn_node"] = list(n["AVN"])
+        self.masks["slow_pathway"] = list(ids)
+        self.named["Slow_pathway_start"], self.named["Slow_pathway_second"] = ids[0], ids[2]
+
+        # accessory pathways: all off unless a scenario enables the site
+        self.ap_nodes = {}
+        for site, d in S["ap_sites"].items():
+            pts = g.paths[f"ap_{site}"]["points"]
+            ids = self.add_chain(f"ap_{site}", pts, "accessory")
+            for k in range(len(ids) - 1):
+                self.edgesets.setdefault(f"ap_{site}", []).append(len(self.edges) - (len(ids) - 1) + k)
+                self.opt.add(len(self.edges) - (len(ids) - 1) + k)
+            ea = self.add_node_link_tissue(ids[0], 0, 3.0, "accessory", f"ap_{site}")
+            ev = self.add_node_link_tissue(ids[-1], 1, 3.5, "accessory", f"ap_{site}")
+            self.masks[f"ap_{site}"] = list(ids)
+            self.named[f"AP_{site}_atrial"], self.named[f"AP_{site}_ventricular"] = ids[0], ids[-1]
+            self.named[f"AP_{site}_atrial_tissue"] = int(self.tissue_ids[0][ea[0]])
+            self.named[f"AP_{site}_ventricular_tissue"] = int(self.tissue_ids[1][ev[0]])
+            self.ap_nodes[site] = ids
+
+        # flutter ring: directed round the tricuspid annulus; every ring node feeds the atrial wall
+        fr = S["flutter_ring"]
+        ring = fr["points"]
+        ids = [self.add_node(p) for p in ring]
+        arc = set(fr["cti"])
+        for k in range(len(ids)):
+            nxt = (k + 1) % len(ids)
+            sets = ["flutter_ring"] + (["cti"] if k in arc and (k + 1) in arc else [])
+            self.add_edge(ids[k], ids[nxt], "flutter_ring", direction=1, sets=sets)
+            self.link_to_tissue_directed(ids[k], 0, 3.5, "flutter_exit", into_node=False, max_links=2)
+        self.path_nodes["sub_flutter_ring"] = ids
+        self.path_nodes["sub_cti"] = [ids[k] for k in fr["cti"]]
+        self.masks["flutter_ring"] = list(ids)
+        self.masks["cti"] = [ids[k] for k in fr["cti"]]
+        self.named["Flutter_start"] = ids[0]
+        self.named["Flutter_cti_end"] = ids[fr["cti"][-1]]
+        total = sum(self.edges[i][2] for i in self.edgesets["flutter_ring"])
+        cti_len = sum(self.edges[i][2] for i in self.edgesets["cti"])
+        CONSTANTS["v_flutter_ring"] = round(float((total - cti_len + cti_len / CONSTANTS["flutter_cti_scale"]) / (CONSTANTS["flutter_period_ms"] - 12.0)), 4)
+
+        # crista terminalis mask: right atrial muscle within 3.5 mm of the ridge
+        cr = S["crista"]["points"]
+        ra = np.where((self.cls == 0) & (self.reg == 4))[0]
+        d, _ = cKDTree(cr).query(self.pos[ra])
+        self.masks["crista_terminalis"] = ra[d < 3.5].tolist()
+        # cavotricuspid isthmus tissue: right atrial muscle within 4 mm of the isthmus arc
+        arcpts = ring[fr["cti"]]
+        d, _ = cKDTree(arcpts).query(self.pos[ra])
+        self.masks["cti"] = sorted(set(self.masks["cti"]) | set(ra[d < 4.0].tolist()))
+        # triangle of Koch (approximate): right atrial muscle within 12 mm of the AV node and slow pathway
+        centre = (np.asarray(self.node_pos[n["AVN"][-1]]) + np.asarray(self.node_pos[self.masks["slow_pathway"][0]])) / 2
+        d = np.linalg.norm(self.pos[ra] - centre, axis=1)
+        self.masks["triangle_koch"] = ra[d < 12.0].tolist()
+
+        # scar and ventricular re-entry circuit
+        sc = S["scar"]
+        ring = sc["ring"]
+        ids = [self.add_node(p) for p in ring]
+        slow = sc["slow"]
+        for k in range(len(ids)):
+            nxt = (k + 1) % len(ids)
+            sets = ["vt_ring"] + (["vt_channel"] if k < slow else [])
+            self.add_edge(ids[k], ids[nxt], "vt_ring", direction=1, sets=sets)
+        exit_id = ids[sc["exit"]]
+        self.link_to_tissue_directed(exit_id, 1, 5.0, "vt_exit", into_node=False, max_links=4, delay=2.0)
+        self.path_nodes["sub_vt_circuit"] = ids
+        self.path_nodes["sub_vt_channel"] = ids[: slow + 1]
+        self.masks["vt_ring"] = list(ids)
+        self.named["VT_start"], self.named["VT_exit"] = ids[0], exit_id
+        total = sum(self.edges[i][2] for i in self.edgesets["vt_ring"])
+        ch = sum(self.edges[i][2] for i in self.edgesets["vt_channel"])
+        CONSTANTS["v_vt_ring"] = round(float((total - ch + ch / CONSTANTS["vt_channel_scale"]) / (CONSTANTS["vt_period_ms"] - 10.0)), 4)
+        lv = np.where((self.cls == 1))[0]
+        d = np.linalg.norm(self.pos[lv] - np.asarray(sc["centre"]), axis=1)
+        self.masks["scar_core"] = lv[d < sc["core_r"]].tolist()
+        # velocities were updated: refresh the lookup used by the reference solver
+        for i, k in enumerate(KINDS):
+            key = f"v_{k}"
+            if key in CONSTANTS:
+                VEL_BY_KIND[i] = CONSTANTS[key]
+
+    def link_to_tissue_directed(self, node, cls, radius, kind, into_node, max_links=3, delay=0.0):
+        """Couple `node` to nearby tissue in one direction only: tissue to node (`into_node`) or node to tissue."""
+        tree, ids = self.tissue_tree[cls], self.tissue_ids[cls]
+        near = tree.query_ball_point(self.node_pos[node], radius)
+        if not near:
+            _, j = tree.query(self.node_pos[node])
+            near = [int(j)]
+        near = sorted(near, key=lambda j: np.linalg.norm(self.pos[ids[j]] - self.node_pos[node]))[:max_links]
+        for j in near:
+            t = int(ids[j])
+            # edge (node, tissue): direction 1 = node to tissue, 2 = tissue to node
+            self.add_edge(node, t, kind, delay=delay, direction=2 if into_node else 1)
+
+    def add_node_link_tissue(self, node, cls, radius, kind, setname):
+        tree, ids = self.tissue_tree[cls], self.tissue_ids[cls]
+        near = tree.query_ball_point(self.node_pos[node], radius)
+        if not near:
+            _, j = tree.query(self.node_pos[node])
+            near = [int(j)]
+        near = sorted(near, key=lambda j: np.linalg.norm(self.pos[ids[j]] - self.node_pos[node]))[:3]
+        for j in near:
+            i = self.add_edge(node, int(ids[j]), kind, sets=(setname,), optional=True)
+        return near
+
     # --------------------------------------------------------------------- reference solver
-    def solve(self, constants=CONSTANTS):
+    def solve(self, constants=CONSTANTS, stimuli=None):
+        """Reference solve of one sinus beat. Respects edge directions and leaves optional edges (accessory
+        pathways) off."""
         npos = len(self.node_pos)
-        e = np.array([(a, b) for a, b, *_ in self.edges])
-        el = np.array([x[2] for x in self.edges])
-        ek = np.array([x[3] for x in self.edges])
-        ed = np.array([x[4] for x in self.edges])
+        keep = [i for i in range(len(self.edges)) if i not in self.opt]
+        a = np.array([self.edges[i][0] for i in keep])
+        b = np.array([self.edges[i][1] for i in keep])
+        el = np.array([self.edges[i][2] for i in keep])
+        ek = np.array([self.edges[i][3] for i in keep])
+        ed = np.array([self.edges[i][4] for i in keep])
+        dr = np.array([self.edir.get(i, 0) for i in keep])
         t = el / VEL_BY_KIND[ek] + ed
-        A = coo_matrix((np.r_[t, t], (np.r_[e[:, 0], e[:, 1]], np.r_[e[:, 1], e[:, 0]])), shape=(npos, npos)).tocsr()
-        return dijkstra(A, directed=False, indices=self.named["SAN"])
+        fwd = dr != 2
+        bwd = dr != 1
+        rows = np.r_[a[fwd], b[bwd]]
+        cols = np.r_[b[fwd], a[bwd]]
+        A = coo_matrix((np.r_[t[fwd], t[bwd]], (rows, cols)), shape=(npos, npos)).tocsr()
+        return dijkstra(A, directed=True, indices=self.named["SAN"])
 
 
 def tube(points, radii, sides=8):
@@ -294,6 +456,7 @@ def radius_profile(n, base, swell=1.0):
 def main():
     b = Builder()
     b.assemble()
+    b.assemble_substrates()
     g = b.g
     # ---------------- reference activation
     t = b.solve()
@@ -322,11 +485,11 @@ def main():
         pts = d["points"]
         rad = radius_profile(len(pts), d["radius"], sw.get(name, 1.0) if name in ("SAN", "AVN") else 1.0)
         V, N, F, ring = tube(pts, rad, sides=10 if name in ("SAN", "AVN") else 8)
-        mesh_name = f"cs_{name}"
+        mesh_name = f"cs_{name}" if d["kind"] != "sub" else (name if name.startswith("sub_") else f"sub_{name}")
         meshes[mesh_name] = (V * 0.01, N, F)
         if name in b.path_nodes:
             ids = b.path_nodes[name]
-            node_of_vertex[mesh_name] = np.array([ids[i] for i in ring])
+            node_of_vertex[mesh_name] = np.array([ids[i % len(ids)] for i in ring])
         else:  # internodal bands: schematic, not in the graph
             node_of_vertex[mesh_name] = None
     # RBB entry and RBB drawn as one structure
@@ -334,6 +497,10 @@ def main():
     V, N, F, ring = tube(ent, np.full(len(ent), g.paths["RBB_entry"]["radius"]), 8)
     meshes["cs_RBB_entry"] = (V * 0.01, N, F)
     node_of_vertex["cs_RBB_entry"] = np.array([b.path_nodes["RBB_entry"][i] for i in ring])
+
+    sp = b.subs.sub["scar_patch"]
+    meshes["sub_scar"] = (sp["V"] * 0.01, sp["N"], sp["F"])
+    node_of_vertex["sub_scar"] = None
 
     for which in ("LV", "RV"):
         node_of = b.purk_nodes[which]
@@ -394,6 +561,13 @@ def main():
     nz = np.where(delay != 0)[0]
     put("delay_idx", nz.astype(np.uint32))
     put("delay_val", delay[nz])
+    put("dir_idx", np.array(sorted(b.edir), dtype=np.uint32))
+    put("dir_val", np.array([b.edir[i] for i in sorted(b.edir)], dtype=np.uint8))
+    put("opt_idx", np.array(sorted(b.opt), dtype=np.uint32))
+    for name, nodes in b.masks.items():
+        put(f"mask_{name}", np.array(sorted(set(nodes)), dtype=np.uint16))
+    for name, idx in b.edgesets.items():
+        put(f"es_{name}", np.array(sorted(set(idx)), dtype=np.uint32))
     for name, (idx, w) in mapping.items():
         put(f"map_{name}_idx", idx)
         put(f"map_{name}_w", w)
@@ -408,6 +582,12 @@ def main():
         "kinds": KINDS, "constants": CONSTANTS,
         "named": {k: int(v) for k, v in b.named.items() if v is not None},
         "stimulus": {"site": "SAN", "node": int(b.named["SAN"]), "time_ms": 0.0},
+        "scar": {"centre": [round(float(x), 2) for x in b.subs.sub["scar"]["centre"]]},
+        "masks": sorted(b.masks),
+        "edgesets": sorted(b.edgesets),
+        "apSites": b.subs.sub["ap_sites"],
+        "loops": {"flutter": {"period_ms": CONSTANTS["flutter_period_ms"], "cti_scale": CONSTANTS["flutter_cti_scale"]},
+                  "vt": {"period_ms": CONSTANTS["vt_period_ms"], "channel_scale": CONSTANTS["vt_channel_scale"]}},
         "paths": {k: {"kind": g.paths[k]["kind"], "schematic": bool(g.paths[k]["schematic"]),
                       "length_mm": round(arclen(g.paths[k]["points"]), 1),
                       "mid": [round(float(x), 2) for x in g.paths[k]["points"][len(g.paths[k]["points"]) // 2]]}

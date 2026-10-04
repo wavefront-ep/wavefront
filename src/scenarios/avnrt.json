@@ -1,0 +1,154 @@
+{
+  "id": "avnrt",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "AV nodal reentrant tachycardia (AVNRT)",
+  "summary": "Two pathways in the AV node form a circuit: down the slow pathway, back up the fast one.",
+  "source": "Slides 50-56 (reentry, AVNRT circuit, initiation, ECG)",
+  "period_ms": 2800,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "pac",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 270
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "lap",
+      "first_after": {
+        "wave": 1,
+        "node": "AVN_entry"
+      },
+      "every_ms": 327,
+      "laps": 6,
+      "exit_sites": [
+        {
+          "site": "AVN_atrial_exit",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "direction": "antegrade"
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 300
+    },
+    {
+      "region": "slow_pathway",
+      "erp_ms": 150
+    }
+  ],
+  "show": [
+    "sub_slow_pathway"
+  ],
+  "highlight": [
+    "triangle_koch"
+  ],
+  "select": "cs_AVN",
+  "camera": {
+    "dir": [
+      -0.9,
+      0.2,
+      0.55
+    ],
+    "distance": 1.55,
+    "focus": "AVN"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "slow_pathway",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "lap": "retro"
+    }
+  },
+  "events": [
+    {
+      "id": "sinus",
+      "label": "Sinus beat",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "In sinus rhythm the impulse reaches the AV node by two routes, a fast pathway and a slow pathway. It takes the fast one, which is the AV node route shown in yellow.",
+      "ecg": "A normal P wave, PR interval and narrow QRS."
+    },
+    {
+      "id": "pac",
+      "label": "Premature atrial beat",
+      "at": {
+        "node": "PAC_RA",
+        "wave": 1
+      },
+      "caption": "A premature atrial beat arrives early, while the fast pathway is still refractory. The fast pathway has the longer refractory period.",
+      "ecg": "An early P wave."
+    },
+    {
+      "id": "slow",
+      "label": "Down the slow pathway",
+      "at": {
+        "node": "Slow_pathway_second",
+        "wave": 1
+      },
+      "caption": "Blocked in the fast pathway, the impulse goes down the slow pathway, which recovers quickly. It conducts slowly.",
+      "ecg": "The PR interval is long: the impulse is crawling down the slow pathway."
+    },
+    {
+      "id": "bottom",
+      "label": "Reaches the His bundle",
+      "at": {
+        "node": "AVN_exit",
+        "wave": 1
+      },
+      "caption": "At the lower end of the pathways the impulse enters the His bundle and the ventricles, and also turns back up the fast pathway, which has now recovered.",
+      "ecg": "A narrow QRS."
+    },
+    {
+      "id": "echo",
+      "label": "Back up the fast pathway",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 1
+      },
+      "caption": "The impulse reaches the atria again through the fast pathway: an atrial echo. It can re-enter the slow pathway, and the circuit is established.",
+      "ecg": "A retrograde P wave, buried in or just after the QRS."
+    },
+    {
+      "id": "tachy",
+      "label": "Tachycardia",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 3
+      },
+      "caption": "Round and round: down the slow pathway, up the fast pathway. Atria and ventricles are activated almost together, at about 180 per minute.",
+      "ecg": "A regular narrow-complex tachycardia in which the P wave is hidden in the QRS (a small notch at its end)."
+    }
+  ],
+  "teaching_points": [
+    "AVNRT uses two pathways in the AV node: a fast one with a long refractory period and a slow one with a short refractory period (slides 50-52).",
+    "Sinus beats take the fast pathway; a premature atrial beat blocks in the fast pathway, goes down the slow one and returns by the fast one (slide 53).",
+    "Atria and ventricles are activated simultaneously, so the P wave is hidden in or just after the QRS (slide 55).",
+    "The slow pathway is the usual ablation target."
+  ]
+}

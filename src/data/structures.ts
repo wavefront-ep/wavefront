@@ -2,7 +2,7 @@
 // their resting colour, and the short functional note shown on selection.
 // The notes are authored text and are listed in REVIEW.md for the reviewer.
 
-export type LayerGroup = 'epicardium' | 'endocardium' | 'vessel' | 'valve' | 'conduction';
+export type LayerGroup = 'epicardium' | 'endocardium' | 'vessel' | 'valve' | 'conduction' | 'substrate';
 export type Chamber = 'RA' | 'LA' | 'RV' | 'LV';
 
 export interface Structure {
@@ -34,6 +34,12 @@ export const COLORS = {
   valve: '#E9DFCB',
   highlight: '#8FB8AE',
   conduction: '#EFD98F',
+  slowPathway: '#DDBB66',
+  accessory: '#C98170',
+  ring: '#7C93A8',
+  channel: '#566F85',
+  scar: '#8C95A0',
+  crista: '#A9C3B8',
 };
 
 const endo = (c: Chamber) => (c === 'RA' || c === 'LA' ? COLORS.endoAtrium : COLORS.endoVentricle);
@@ -231,7 +237,47 @@ const conduction: Structure[] = [
   }),
 ];
 
-structures.push(...conduction);
+const sub = (s: Omit<Structure, 'group' | 'schematic'> & { schematic?: boolean }): Structure => ({ group: 'substrate', schematic: true, ...s });
+
+const apNote = (site: string) =>
+  `An accessory pathway is an extra strand of muscle across the AV groove that bypasses the AV node. It conducts quickly and recovers slowly. This one is at the ${site}; pathways can also lie at the left free wall, posteroseptal, right free wall or anteroseptal sites. Drawn schematically.`;
+
+const substrates: Structure[] = [
+  sub({
+    mesh: 'sub_slow_pathway', name: 'Slow AV nodal pathway (schematic)', pathKey: 'slow_pathway', label: 'Slow pathway (schematic)', color: COLORS.slowPathway,
+    note: 'The slow pathway enters the AV node from the posteroseptal right atrium, near the coronary sinus. It conducts slowly and recovers quickly. With the faster AV node route (the fast pathway) it forms the two limbs of the AV nodal reentry circuit. Drawn schematically.',
+  }),
+  sub({ mesh: 'sub_ap_left_free_wall', name: 'Accessory pathway, left free wall (schematic)', pathKey: 'ap_left_free_wall', label: 'Accessory pathway (schematic)', color: COLORS.accessory, note: apNote('left free wall') }),
+  sub({ mesh: 'sub_ap_right_free_wall', name: 'Accessory pathway, right free wall (schematic)', pathKey: 'ap_right_free_wall', label: 'Accessory pathway (schematic)', color: COLORS.accessory, note: apNote('right free wall') }),
+  sub({ mesh: 'sub_ap_posteroseptal', name: 'Accessory pathway, posteroseptal (schematic)', pathKey: 'ap_posteroseptal', label: 'Accessory pathway (schematic)', color: COLORS.accessory, note: apNote('posteroseptal region') }),
+  sub({ mesh: 'sub_ap_anteroseptal', name: 'Accessory pathway, anteroseptal (schematic)', pathKey: 'ap_anteroseptal', label: 'Accessory pathway (schematic)', color: COLORS.accessory, note: apNote('anteroseptal region') }),
+  sub({
+    mesh: 'sub_flutter_ring', name: 'Flutter circuit (schematic)', pathKey: 'sub_flutter_ring', label: 'Flutter circuit (schematic)', color: COLORS.ring,
+    note: 'In typical atrial flutter a wavefront circulates counter-clockwise around the tricuspid annulus, about 300 times a minute. The circuit is drawn schematically on the atrial side of the annulus.',
+  }),
+  sub({
+    mesh: 'sub_cti', name: 'Cavotricuspid isthmus', pathKey: 'sub_cti', label: 'Cavotricuspid isthmus', color: COLORS.channel, schematic: true,
+    note: 'The narrow strip of right atrial muscle between the tricuspid annulus and the inferior vena cava. Conduction is slow here and the circuit must pass through it, which makes it the usual ablation target in typical flutter. Its position and extent are schematic.',
+  }),
+  sub({
+    mesh: 'sub_crista', name: 'Crista terminalis (schematic)', pathKey: 'sub_crista', label: 'Crista terminalis (schematic)', color: COLORS.crista,
+    note: 'A muscular ridge on the lateral wall of the right atrium running between the superior and inferior venae cavae. It separates the smooth posterior part of the atrium from the trabeculated anterior part. Its course here is schematic: the mesh has no ridge.',
+  }),
+  sub({
+    mesh: 'sub_scar', name: 'Scar', pathKey: 'scar', label: 'Scar', color: COLORS.scar, schematic: true,
+    note: 'Scar from an old infarct: dead muscle that does not conduct. Surviving strands of muscle through and around it can form slow channels, the substrate for ventricular tachycardia. Its position is schematic.',
+  }),
+  sub({
+    mesh: 'sub_vt_circuit', name: 'Re-entry circuit (schematic)', pathKey: 'sub_vt_circuit', label: 'Re-entry circuit (schematic)', color: COLORS.ring,
+    note: 'The impulse circulates around the scar, slowing in a protected channel and leaving at an exit site into normal muscle with each lap. The circuit is drawn schematically.',
+  }),
+  sub({
+    mesh: 'sub_vt_channel', name: 'Slow channel through the scar (schematic)', pathKey: 'sub_vt_channel', label: 'Slow channel (schematic)', color: COLORS.channel,
+    note: 'The protected, slowly conducting channel of surviving muscle through the scar, the critical part of the circuit and the usual ablation target. Drawn schematically.',
+  }),
+];
+
+structures.push(...conduction, ...substrates);
 
 export const STRUCTURES = structures;
 export const BY_MESH: Record<string, Structure> = Object.fromEntries(structures.map((s) => [s.mesh, s]));

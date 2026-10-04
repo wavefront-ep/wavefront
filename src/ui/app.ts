@@ -1,11 +1,9 @@
 import { BY_MESH, CHAMBERS, Chamber, STRUCTURES } from '../data/structures';
 import { TOUR } from '../data/tour';
-import { ActivationEngine, ActivationResult } from '../engine/activation';
 import { PaletteId } from '../engine/material';
 import { CutMode, HeartScene, PlacedLabel } from '../scene/HeartScene';
 import { VIEWS } from '../scene/views';
-import { Ecg } from '../ecg/morphology';
-import { Scenario } from '../scenarios/types';
+import { GROUPS, Loaded, SCENARIOS, ScenarioLoader } from './loader';
 import { PlayBar } from './playbar';
 import { Vector3 } from 'three';
 
@@ -40,8 +38,7 @@ export function buildApp(root: HTMLElement) {
   };
   const explore = railBtn(ICONS.explore, 'Explore');
   explore.setAttribute('aria-current', 'true');
-  const mech = railBtn(ICONS.mechanisms, 'Mechanisms (not yet available)');
-  mech.setAttribute('aria-disabled', 'true');
+  const mech = railBtn(ICONS.mechanisms, 'Mechanisms');
   rail.append(explore, mech, el('div', 'spacer'));
 
   // Top bar: the three things a new visitor should find first, as words rather than icons.
@@ -77,6 +74,10 @@ export function buildApp(root: HTMLElement) {
   const drawer = el('aside', 'drawer');
   drawer.setAttribute('aria-label', 'Layers, views and structure details');
 
+  const secMech = el('section', 'sec');
+  secMech.id = 'sec-mech';
+  secMech.appendChild(el('h2', undefined, 'Mechanisms'));
+
   const secStructure = el('section', 'sec');
   secStructure.appendChild(el('h2', undefined, 'Structure'));
   const structBody = el('div');
@@ -107,12 +108,12 @@ export function buildApp(root: HTMLElement) {
     const t = drawer.querySelector<HTMLElement>(`#${id}`)!;
     drawer.scrollTo({ top: t.offsetTop - 64, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
-  for (const [id, name] of [['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
-    const b = el('button', undefined, name);
+  for (const [id, name] of [['sec-mech', 'Mechanisms'], ['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
+    const b = el('button', id === 'sec-mech' ? 'nav-mech' : undefined, name);
     b.addEventListener('click', () => goTo(id));
     nav.appendChild(b);
   }
-  drawer.append(nav, secStructure, secCut, secLayers, secView, secCredit);
+  drawer.append(nav, secMech, secStructure, secCut, secLayers, secView, secCredit);
 
   // ---------------------------------------------------------- scene and bar
   const scene = new HeartScene(viewport);
@@ -299,10 +300,12 @@ export function buildApp(root: HTMLElement) {
     el('p', 'cap', 'Blue-grey marks vessels carrying blood towards the lungs and the venae cavae; coral marks the aorta and pulmonary veins. This is a convention, not a measurement.'),
   );
 
+  let scopeId = 'all';
   let palette: PaletteId = 'safe';
   let mapRange: [number, number] = [0, 260];
   let ranges: Record<string, [number, number]> = { all: [0, 260], atria: [0, 110], ventricles: [150, 260] };
   const setScope = (id: string) => {
+    scopeId = id;
     mapRange = ranges[id];
     scene.setMapRange(mapRange[0], mapRange[1]);
     scopeBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
@@ -410,10 +413,10 @@ export function buildApp(root: HTMLElement) {
   viewport.addEventListener('wheel', dismissHint, { once: true, passive: true });
   window.addEventListener('keydown', dismissHint, { once: true });
 
-  // ---------------------------------------------------------- simulation
-  let engine: ActivationEngine | null = null;
-  let scenario: Scenario | null = null;
-  let result: ActivationResult | null = null;
+  // ---------------------------------------------------------- scenarios
+  let loader: ScenarioLoader | null = null;
+  let current: { id: string; view: 'this' | 'normal' } | null = null;
+  let mode: 'explore' | 'mechanisms' = 'explore';
 
   const syncControls = () => {
     epi.input.checked = L.epicardium;
@@ -426,32 +429,146 @@ export function buildApp(root: HTMLElement) {
     cutSlider.disabled = scene.cut.mode === 'off';
   };
 
-  const openBeat = () => {
-    if (!result) return;
+  // mechanism picker: groups collapsed by default, one scenario selected at a time
+  const infoBox = el('div', 'mech-info');
+  const itemBtns = new Map<string, HTMLButtonElement>();
+  const pickerLists: HTMLElement[] = [];
+  for (const grp of GROUPS) {
+    const items = SCENARIOS.filter((x) => x.group === grp.id);
+    if (!items.length) continue;
+    const wrap = el('div', 'mech-group');
+    const head = el('button', 'mech-head', `<span>${grp.name}</span><span class="mech-count">${items.length}</span>`);
+    head.setAttribute('aria-expanded', 'false');
+    const list = el('ul', 'list');
+    list.hidden = true;
+    pickerLists.push(list);
+    head.addEventListener('click', () => {
+      const open = head.getAttribute('aria-expanded') !== 'true';
+      head.setAttribute('aria-expanded', String(open));
+      list.hidden = !open;
+    });
+    for (const it of items) {
+      const li = el('li');
+      const b = el('button', 'vbtn', `<span>${it.title}</span>`);
+      b.setAttribute('aria-pressed', 'false');
+      b.disabled = true;
+      b.addEventListener('click', () => openScenario(it.id));
+      li.appendChild(b);
+      list.appendChild(li);
+      itemBtns.set(it.id, b);
+    }
+    wrap.append(head, list);
+    secMech.appendChild(wrap);
+  }
+  secMech.appendChild(infoBox);
+  const showInfo = (id: string | null) => {
+    infoBox.innerHTML = '';
+    itemBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
+    const sc = SCENARIOS.find((x) => x.id === id);
+    if (!sc) {
+      infoBox.appendChild(el('p', 'struct-empty', 'Choose a rhythm to see which part of the heart is involved and what the impulse does.'));
+      return;
+    }
+    infoBox.appendChild(el('h3', 'struct-name', sc.title));
+    infoBox.appendChild(el('p', 'mech-summary', sc.summary));
+    const more = el('button', 'pb-text mech-more', 'Show details');
+    more.setAttribute('aria-expanded', 'false');
+    const details = el('div', 'mech-details');
+    details.hidden = true;
+    details.append(el('ul', 'mech-points', sc.teaching_points.map((t) => `<li>${t}</li>`).join('')), el('p', 'struct-tag', `Deck: ${sc.source}.`));
+    more.addEventListener('click', () => {
+      const open = details.hidden;
+      details.hidden = !open;
+      more.setAttribute('aria-expanded', String(open));
+      more.textContent = open ? 'Hide details' : 'Show details';
+    });
+    infoBox.append(more, details);
+  };
+  showInfo(null);
+
+  /** Show a scenario (or, with view 'normal', the sinus beat beside it) in the heart, bar and ECG. */
+  const openScenario = async (id: string, view: 'this' | 'normal' = 'this') => {
+    if (!loader) return;
     endTour();
-    scene.select(null, true);
+    const data: Loaded = await loader.get(id);
+    const shown: Loaded = view === 'normal' ? await loader.get('sinus_rhythm') : data;
+    const sc = data.sc;
+    const fresh = !current || current.id !== id;
+    current = { id, view };
+    showInfo(id);
+    scene.setActivation(shown.result, shown.constants);
+    scene.playback.duration = shown.sc.period_ms;
+    ranges = shown.scopes;
+    setScope(scopeId);
+    bar.setEvents(shown.events, shown.sc.period_ms);
+    if (shown.ecg) bar.setEcg(shown.ecg);
+    bar.setScenario(sc.title, id !== 'sinus_rhythm', view);
+    const mine = view === 'this';
+    scene.setSubstrates(mine ? sc.show ?? [] : []);
+    scene.setHighlight(mine ? sc.highlight ?? [] : []);
+    scene.select(mine && sc.select ? sc.select : null, true);
+    setConduction(true);
+    if (mine && sc.epi_opacity !== undefined) setOpacity(sc.epi_opacity);
+    if (fresh && mine && sc.cut) {
+      scene.setCut(sc.cut.mode, sc.cut.offset, !sc.camera);
+      cutBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === sc.cut!.mode)));
+      cutSlider.disabled = false;
+      cutSlider.value = String(sc.cut.offset);
+      cutVal.textContent = `${Math.round(sc.cut.offset * 100)} mm`;
+    } else if (fresh && scene.cut.mode !== 'off') {
+      setCut('off', false);
+    }
+    if (fresh && mine && sc.camera) scene.setCamera(new Vector3(...sc.camera.dir), sc.camera.distance, sc.camera.focus ? scene.pathPoint(sc.camera.focus) : null);
     lower.hidden = true;
     bar.show('beat');
     bar.setStyleState(scene.style, mapRange, palette);
-    setConduction(true);
     scene.setTime(0);
     scene.play();
     app.classList.add('bar-open');
+    syncControls();
   };
+  const openBeat = () => void openScenario('sinus_rhythm');
+  bar.onCompare = (v) => current && void openScenario(current.id, v);
+
   const closeBar = () => {
     scene.pause();
     scene.select(null, true);
+    scene.setSubstrates([]);
+    scene.setHighlight([]);
     bar.hide();
     lower.hidden = false;
     app.classList.remove('bar-open');
     tourBtn.setAttribute('aria-pressed', 'false');
     tourStep = -1;
+    current = null;
   };
   bar.onClose = () => {
     closeBar();
     if (scene.style === 'map') setStyle('live');
   };
-  playBeat.addEventListener('click', openBeat);
+
+  const setMode = (m: 'explore' | 'mechanisms') => {
+    mode = m;
+    app.dataset.mode = m;
+    explore.setAttribute('aria-current', String(m === 'explore'));
+    mech.setAttribute('aria-current', String(m === 'mechanisms'));
+    if (bar.visible) bar.onClose();
+    playBeat.textContent = m === 'explore' ? 'Play sinus beat' : 'Choose a rhythm';
+    if (m === 'mechanisms') {
+      setDrawer(true);
+      requestAnimationFrame(() => goTo('sec-mech'));
+    }
+  };
+  explore.addEventListener('click', () => setMode('explore'));
+  mech.addEventListener('click', () => setMode('mechanisms'));
+  app.dataset.mode = 'explore';
+  playBeat.addEventListener('click', () => {
+    if (mode === 'explore') openBeat();
+    else {
+      setDrawer(true);
+      goTo('sec-mech');
+    }
+  });
 
   // guided tour
   let tourStep = -1;
@@ -483,7 +600,7 @@ export function buildApp(root: HTMLElement) {
     scene.relabel();
   };
   const startTour = () => {
-    if (!result) return;
+    if (!loader) return;
     lower.hidden = true;
     tourBtn.setAttribute('aria-pressed', 'true');
     bar.show('tour');
@@ -516,9 +633,9 @@ export function buildApp(root: HTMLElement) {
     if (k === 'l') setLabels(!L.labels);
     else if (k === 'h') app.classList.toggle('chrome-hidden');
     else if (k === 'escape') scene.select(null);
-    else if (e.key === ' ' && result && t?.tagName !== 'BUTTON') {
+    else if (e.key === ' ' && loader && t?.tagName !== 'BUTTON') {
       e.preventDefault();
-      if (!bar.visible) openBeat();
+      if (!bar.visible && mode === 'explore') openBeat();
       else if (bar.currentMode === 'beat') scene.togglePlay();
     } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       const d = e.key === 'ArrowRight' ? 1 : -1;
@@ -527,26 +644,12 @@ export function buildApp(root: HTMLElement) {
     }
   });
 
-  /** Called once the graph is loaded and the scenario has been solved. */
-  const attachSimulation = (
-    eng: ActivationEngine,
-    sc: Scenario,
-    res: ActivationResult,
-    events: { id: string; label: string; t: number; caption: string; ecg?: string }[],
-    scopes: Record<string, [number, number]>,
-    ecg: Ecg | null,
-  ) => {
-    engine = eng;
-    scenario = sc;
-    result = res;
-    scene.playback.duration = sc.period_ms;
-    ranges = scopes;
-    mapRange = ranges.all;
-    scene.setMapRange(mapRange[0], mapRange[1]);
-    bar.setEvents(events, sc.period_ms);
-    if (ecg) bar.setEcg(ecg);
+  /** Called once the activation graph is loaded: the picker and the primary action become usable. */
+  const attachScenarios = (l: ScenarioLoader) => {
+    loader = l;
     playBeat.disabled = false;
+    itemBtns.forEach((b) => (b.disabled = false));
   };
 
-  return { scene, app, loading, chamberInputs, attachSimulation, get engine() { return engine; }, get scenario() { return scenario; } };
+  return { scene, app, loading, chamberInputs, attachScenarios, openScenario, get current() { return current; } };
 }

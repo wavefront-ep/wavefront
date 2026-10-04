@@ -53,3 +53,19 @@ activation, Q/R/S inside the ventricular activation window, T wave from QRS end 
 duration. It shares the scrubber's time axis, lights the wave segment the playhead is in, and numbers each
 sequence event on the strip. Scenarios choose a template
 (`ecg.template`); only `normal_sinus` exists so far.
+
+## Phase 3 additions
+
+- **Directed edges.** Some edges conduct one way only (the flutter and VT rings, exits into muscle, atrium to slow
+  pathway). A scenario can also set a whole edge kind to antegrade-only, retrograde-only or off (one-way block).
+- **Scenario modifiers** (data): scale or block edge kinds, named edge sets (for example the isthmus), or node
+  regions (for example the scar); enable optional edges (accessory pathways are off unless a scenario enables one);
+  per-region refractory periods; decremental conduction on an edge kind.
+- **Waves and loops.** A scenario lists explicit waves and authored loops. A loop's first lap can be anchored to
+  the time an earlier wave reaches a node (`first_after`), which takes a second solve. At most 16 waves are
+  carried per vertex.
+- **Substrates.** `tools/substrates.py` places accessory pathway sites, the flutter ring and isthmus, crista,
+  slow pathway and scar circuit from the mesh. `tools/build_conduction.py` adds them to the graph and writes the
+  tubes (`sub_*`) and region masks.
+- **Checking a scenario without the browser:** `npx tsx scripts/run-scenario.mts src/scenarios/avnrt.json` prints,
+  for every wave, the atrial and ventricular activation windows.

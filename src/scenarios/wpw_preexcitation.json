@@ -1,0 +1,102 @@
+{
+  "id": "wpw_preexcitation",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Wolff-Parkinson-White pre-excitation",
+  "summary": "An accessory pathway lets the impulse reach the ventricle early, bypassing the AV node delay.",
+  "source": "Slides 61, 63 (pre-excitation, WPW)",
+  "period_ms": 1000,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "enable": "ap_left_free_wall"
+    }
+  ],
+  "show": [
+    "sub_ap_left_free_wall"
+  ],
+  "camera": {
+    "dir": [
+      0.95,
+      0.1,
+      -0.35
+    ],
+    "distance": 1.9,
+    "focus": "ap_left_free_wall"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "ap_left_free_wall",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "sinus": "delta"
+    }
+  },
+  "events": [
+    {
+      "id": "san",
+      "label": "Sinus node",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "A normal sinus beat begins. This heart has an accessory pathway, a strand of muscle across the left AV groove that bypasses the AV node.",
+      "ecg": "The trace is still flat."
+    },
+    {
+      "id": "avn",
+      "label": "AV node",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 0
+      },
+      "caption": "The impulse reaches the AV node and begins its slow passage.",
+      "ecg": "The P wave is still being written."
+    },
+    {
+      "id": "ap",
+      "label": "Accessory pathway",
+      "at": {
+        "node": "AP_left_free_wall_atrial",
+        "wave": 0
+      },
+      "caption": "The impulse also reaches the accessory pathway, which conducts quickly and without delay. The adjacent ventricular wall is activated early: pre-excitation.",
+      "ecg": "The PR interval is short and the QRS begins with a slurred upstroke, the delta wave."
+    },
+    {
+      "id": "his",
+      "label": "AV node route arrives",
+      "at": {
+        "node": "His_proximal",
+        "wave": 0
+      },
+      "caption": "The impulse that took the normal route now emerges from the His bundle and joins the early activation, so the ventricles are activated partly by each route.",
+      "ecg": "The QRS is wider than normal because the two wavefronts fuse."
+    },
+    {
+      "id": "end",
+      "label": "Fusion complete",
+      "at": {
+        "lastTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Ventricular activation finishes later than the first pre-excited site, giving a wide QRS.",
+      "ecg": "A wide QRS with a delta wave, followed by repolarisation changes."
+    }
+  ],
+  "teaching_points": [
+    "Pre-excitation: an accessory pathway activates part of the ventricle early (short PR, delta wave, wide QRS) (slide 61).",
+    "The accessory pathway conducts without the AV node delay and can carry the impulse in either direction.",
+    "Pre-excited atrial fibrillation can conduct very fast over the pathway and is dangerous (slides 85-87)."
+  ]
+}

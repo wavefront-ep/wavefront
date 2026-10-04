@@ -13,6 +13,7 @@ function chain() {
     ekind: new Uint8Array(n - 1),
     edelay: new Float32Array(n - 1),
     cls: new Uint8Array(n),
+    edir: new Uint8Array(n - 1),
   };
   return { g, adj: buildAdjacency(g), et: edgeTimes(g, [1]) };
 }
@@ -61,4 +62,37 @@ test('conduction block: a front cannot pass a node that has not recovered', () =
   expect(T[1][2]).toBe(70);
   expect(T[1][3]).toBe(Infinity);
   expect(T[1][4]).toBe(Infinity);
+});
+
+test('directed edges conduct one way only', () => {
+  const { g } = chain();
+  g.edir[2] = 1; // edge 2-3 conducts 2 to 3 only
+  const adj = buildAdjacency(g);
+  const et = edgeTimes(g, [1]);
+  const fwd = solveWave(adj, et, g.nodes, [{ node: 0, time: 0 }]);
+  expect(fwd[5]).toBe(50);
+  const back = solveWave(adj, et, g.nodes, [{ node: 5, time: 0 }]);
+  expect(back[3]).toBe(20);
+  expect(back[2]).toBe(Infinity); // cannot cross backwards
+});
+
+test('per-kind direction: a one-way block set by the scenario', () => {
+  const { g, adj, et } = chain();
+  const opts = { ekind: g.ekind, kindDir: [1] }; // kind 0: first-to-second only
+  const T = solveWave(adj, et, g.nodes, [{ node: 3, time: 0 }], undefined, opts);
+  expect(T[4]).toBe(10);
+  expect(T[2]).toBe(Infinity);
+});
+
+test('decremental conduction: arriving soon after recovery adds delay', () => {
+  const { g, adj, et } = chain();
+  const refractory = new Float32Array(g.nodes).fill(100);
+  const opts = { ekind: g.ekind, decrement: [{ kind: 0, max: 20, tau: 50 }] };
+  // second wave at 130: node 1 recovered at 110, so it arrives 30 after recovery... at node 1 (arrival 140)
+  const waves = solveWaves(adj, et, g.nodes, [[{ node: 0, time: 0 }], [{ node: 0, time: 105 }]], refractory, opts);
+  // node 1 was excited at 10, recovers at 110; arrival would be 115, i.e. 5 ms after recovery: extra = 20 * exp(-5/50)
+  expect(waves[1][1]).toBeCloseTo(115 + 20 * Math.exp(-5 / 50), 3);
+  // a much later wave adds almost nothing
+  const late = solveWaves(adj, et, g.nodes, [[{ node: 0, time: 0 }], [{ node: 0, time: 1000 }]], refractory, opts);
+  expect(late[1][1]).toBeCloseTo(1010, 1);
 });
