@@ -87,3 +87,30 @@ test('substrate structures can be selected and are labelled schematic', async ({
   await expect(page.locator('#sec-structure .struct-name')).toContainText('Accessory pathway');
   await expect(page.locator('#sec-structure .struct-tag')).toContainText('Schematic');
 });
+
+test('Play returns a rotated or scrubbed scenario to its intended start', async ({ page }) => {
+  await openHeart(page, 1600, 900);
+  await waitForSim(page);
+  await page.evaluate(() => (window as any).epOpen('avnrt'));
+  await settle(page, 1800);
+  // wander off: another view, another time
+  await page.evaluate(() => { const s = (window as any).epHeart; s.setView('posterior', false); s.setTime(900); });
+  await settle(page, 300);
+  await page.getByRole('button', { name: 'Play or pause (space)' }).click();
+  await settle(page, 1500);
+  const s = await state(page);
+  expect(s.playing).toBe(true);
+  expect(s.time).toBeLessThan(120); // restarted from 0, not from 900
+  const dir = s.camera.map((c: number, i: number) => c - s.target[i]);
+  const len = Math.hypot(...(dir as [number, number, number]));
+  const want = [-0.9, 0.2, 0.55];
+  const wl = Math.hypot(...(want as [number, number, number]));
+  const dot = dir.reduce((a: number, c: number, i: number) => a + (c / len) * (want[i] / wl), 0);
+  expect(dot).toBeGreaterThan(0.97); // camera back at the scenario's framing
+  // pausing and resuming does not jump back
+  await page.getByRole('button', { name: 'Play or pause (space)' }).click();
+  const t1 = (await state(page)).time;
+  await page.getByRole('button', { name: 'Play or pause (space)' }).click();
+  await settle(page, 300);
+  expect((await state(page)).time).toBeGreaterThanOrEqual(t1);
+});

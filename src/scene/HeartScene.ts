@@ -477,7 +477,11 @@ export class HeartScene {
     this.invalidate();
   }
 
+  /** Called just before playback starts; the UI uses it to return to a scenario's intended starting state. */
+  onBeforePlay: () => void = () => {};
+
   play() {
+    this.onBeforePlay();
     if (this.playback.t >= this.playback.duration - 1) this.setTime(0);
     this.playback.playing = true;
     this.lastFrame = performance.now();

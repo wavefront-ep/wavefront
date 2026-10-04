@@ -486,6 +486,29 @@ export function buildApp(root: HTMLElement) {
   };
   showInfo(null);
 
+  // The intended starting state of a scenario: its cutaway and camera. The first Play press after a
+  // scenario opens returns here, so a rotated or scrubbed view always starts the animation properly.
+  let startArmed = false;
+  const applyStartView = (sc: (typeof SCENARIOS)[number], mine: boolean) => {
+    if (mine && sc.cut) {
+      scene.setCut(sc.cut.mode, sc.cut.offset, !sc.camera);
+      cutBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === sc.cut!.mode)));
+      cutSlider.disabled = false;
+      cutSlider.value = String(sc.cut.offset);
+      cutVal.textContent = `${Math.round(sc.cut.offset * 100)} mm`;
+    } else if (scene.cut.mode !== 'off') {
+      setCut('off', false);
+    }
+    if (mine && sc.camera) scene.setCamera(new Vector3(...sc.camera.dir), sc.camera.distance, sc.camera.focus ? scene.pathPoint(sc.camera.focus) : null);
+  };
+  scene.onBeforePlay = () => {
+    if (!startArmed || !current) return;
+    startArmed = false;
+    const sc = SCENARIOS.find((x) => x.id === current!.id)!;
+    scene.setTime(0);
+    applyStartView(sc, current.view === 'this');
+  };
+
   /** Show a scenario (or, with view 'normal', the sinus beat beside it) in the heart, bar and ECG. */
   const openScenario = async (id: string, view: 'this' | 'normal' = 'this', autoplay = false) => {
     if (!loader) return;
@@ -509,21 +532,13 @@ export function buildApp(root: HTMLElement) {
     scene.select(mine && sc.select ? sc.select : null, true);
     setConduction(true);
     if (mine && sc.epi_opacity !== undefined) setOpacity(sc.epi_opacity);
-    if (fresh && mine && sc.cut) {
-      scene.setCut(sc.cut.mode, sc.cut.offset, !sc.camera);
-      cutBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === sc.cut!.mode)));
-      cutSlider.disabled = false;
-      cutSlider.value = String(sc.cut.offset);
-      cutVal.textContent = `${Math.round(sc.cut.offset * 100)} mm`;
-    } else if (fresh && scene.cut.mode !== 'off') {
-      setCut('off', false);
-    }
-    if (fresh && mine && sc.camera) scene.setCamera(new Vector3(...sc.camera.dir), sc.camera.distance, sc.camera.focus ? scene.pathPoint(sc.camera.focus) : null);
+    if (fresh) applyStartView(sc, mine);
     lower.hidden = true;
     bar.show('beat');
     bar.setStyleState(scene.style, mapRange, palette);
     scene.setFocusLabels(mine ? sc.labels ?? [] : []);
     scene.setTime(0);
+    startArmed = !autoplay; // a paused scenario starts from its intended state when Play is pressed
     if (autoplay) scene.play();
     else scene.pause();
     app.classList.add('bar-open');
