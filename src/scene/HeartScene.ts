@@ -104,7 +104,11 @@ export class HeartScene {
   onPlayState: (playing: boolean) => void = () => {};
 
   /** Playhead for the activation animation. Times are in milliseconds of heart time. */
-  readonly playback = { t: 0, playing: false, speed: 0.05, loop: true, duration: 1000 };
+  readonly playback = { t: 0, playing: false, speed: 0.05, loop: true, duration: 1000, guided: true };
+  /** Guided playback: the sequence events, each with the real time (ms) to hold on it so it can be read. */
+  private guide: { t: number; dwell: number }[] = [];
+  private hold = 0;
+  private heldIdx = -1;
   style: 'live' | 'map' = 'live';
   private engine: ActivationEngine | null = null;
   private ghosts = new Map<string, Mesh>();
@@ -469,9 +473,28 @@ export class HeartScene {
     this.invalidate();
   }
 
+  setGuide(events: { t: number; dwell: number }[]) {
+    this.guide = [...events].sort((a, b) => a.t - b.t);
+    this.hold = 0;
+    this.heldIdx = this.lastEventAt(this.playback.t - 1);
+  }
+
+  setGuided(on: boolean) {
+    this.playback.guided = on;
+    this.hold = 0;
+  }
+
+  private lastEventAt(t: number) {
+    let k = -1;
+    for (let i = 0; i < this.guide.length; i++) if (this.guide[i].t <= t + 0.5) k = i;
+    return k;
+  }
+
   setTime(ms: number) {
     const p = this.playback;
     p.t = Math.max(0, Math.min(p.duration, ms));
+    this.hold = 0; // a jump (scrub, step, start) cancels any hold
+    this.heldIdx = this.lastEventAt(p.t - 1); // events strictly before the playhead count as already read
     shared.uTime.value = p.t;
     this.onTime(p.t);
     this.invalidate();
@@ -485,6 +508,14 @@ export class HeartScene {
     if (this.playback.t >= this.playback.duration - 1) this.setTime(0);
     this.playback.playing = true;
     this.lastFrame = performance.now();
+    // starting on an event (usually t = 0): read it before moving on
+    if (this.playback.guided && this.hold <= 0) {
+      const i = this.guide.findIndex((e) => Math.abs(e.t - this.playback.t) < 0.5);
+      if (i >= 0 && i !== this.heldIdx) {
+        this.hold = this.guide[i].dwell;
+        this.heldIdx = i;
+      }
+    }
     this.onPlayState(true);
     this.invalidate();
   }
@@ -696,15 +727,50 @@ export class HeartScene {
     this.invalidate();
   }
 
+  /** Playback. In guided mode it pauses on every sequence event long enough to read its caption, and
+   *  crosses the quiet stretches between events quickly: a stretch never takes more than 2.5 s of real
+   *  time, however slow the base speed. Close events (a few ms apart) therefore each get their own pause,
+   *  and a long pause in the rhythm does not take a minute to play. */
   private stepPlayback(now: number) {
     const p = this.playback;
     if (!p.playing) return;
     const dt = Math.min(64, now - this.lastFrame);
     this.lastFrame = now;
-    let t = p.t + dt * p.speed;
-    if (t >= p.duration) {
-      if (p.loop) t -= p.duration;
-      else {
+    if (this.hold > 0) {
+      this.hold -= dt;
+      if (this.hold > 0) return;
+    }
+    let speed = p.speed;
+    let nextEvent = Infinity;
+    if (p.guided && this.guide.length) {
+      let prev = 0;
+      for (const e of this.guide) {
+        if (e.t <= p.t + 0.01) prev = e.t;
+        else {
+          nextEvent = e.t;
+          break;
+        }
+      }
+      const end = nextEvent === Infinity ? p.duration : nextEvent;
+      speed = Math.max(p.speed, (end - prev) / 2500);
+    }
+    let t = p.t + dt * speed;
+    if (p.guided && t >= nextEvent) {
+      t = nextEvent; // stop exactly on the event and hold
+      const idx = this.guide.findIndex((e) => e.t === nextEvent);
+      this.hold = this.guide[idx].dwell;
+      this.heldIdx = idx;
+    } else if (t >= p.duration) {
+      if (p.loop) {
+        t -= p.duration;
+        this.heldIdx = -1;
+        // an event at the very start is held on the way round as well
+        if (p.guided && this.guide.length && this.guide[0].t <= t) {
+          t = this.guide[0].t;
+          this.hold = this.guide[0].dwell;
+          this.heldIdx = 0;
+        }
+      } else {
         t = p.duration;
         p.playing = false;
         this.onPlayState(false);

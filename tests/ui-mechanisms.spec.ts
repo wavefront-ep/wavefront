@@ -52,7 +52,8 @@ for (const id of IDS) {
     expect(nEvents).toBe(sc.events.length);
     await expect(page.locator('.pb-ecg-mark')).toHaveCount(nEvents);
     await expect(page.locator('.pb-ecg path.pb-ecg-trace')).toBeVisible();
-    expect(s.time).toBeGreaterThan(0);
+    // guided playback holds on the first step, so the playhead may still be at its start
+    expect(s.time).toBeGreaterThanOrEqual(0);
     expect(s.time).toBeLessThan(sc.period_ms + 1);
     // normal vs this rhythm
     await page.getByRole('button', { name: 'Normal', exact: true }).click();

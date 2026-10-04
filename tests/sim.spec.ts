@@ -60,6 +60,7 @@ test('the sinus beat plays, pauses on space, and steps between events', async ({
   await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeEnabled();
   await page.getByRole('button', { name: 'Play sinus beat' }).click();
   await expect(page.locator('.playbar')).toBeVisible();
+  await page.evaluate(() => (window as any).epHeart.setGuided(false)); // continuous playback for this check
   await settle(page, 700);
   let s = await state(page);
   expect(s.playing).toBe(true);

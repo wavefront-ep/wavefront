@@ -37,6 +37,7 @@ export class PlayBar {
   private compare = el('div', 'pb-compare');
   private compareBtns = new Map<string, HTMLButtonElement>();
   onCompare: (view: 'normal' | 'this') => void = () => {};
+  private guidedBtn = el('button', 'pb-text', 'Guided');
   private caption = el('p', 'pb-caption');
   private captionLabel = el('strong', 'pb-caption-label');
   private captionText = el('span');
@@ -84,7 +85,16 @@ export class PlayBar {
       this.compareBtns.set(id, b);
     }
     this.compare.hidden = true;
-    this.head.append(this.title, this.compare);
+    this.guidedBtn.setAttribute('aria-pressed', String(scene.playback.guided));
+    this.guidedBtn.title = 'Pause on each step long enough to read it, and skip quickly across quiet stretches';
+    this.guidedBtn.addEventListener('click', () => {
+      const on = this.guidedBtn.getAttribute('aria-pressed') !== 'true';
+      this.guidedBtn.setAttribute('aria-pressed', String(on));
+      scene.setGuided(on);
+    });
+    const opts = el('div', 'pb-compare');
+    opts.append(this.guidedBtn, this.compare);
+    this.head.append(this.title, opts);
 
     // ---- beat face
     this.playBtn.setAttribute('aria-label', 'Play or pause (space)');
@@ -203,6 +213,7 @@ export class PlayBar {
   show(mode: 'beat' | 'tour') {
     this.mode = mode;
     this.root.hidden = false;
+    this.head.hidden = mode !== 'beat';
     this.beat.hidden = mode !== 'beat';
     this.tour.hidden = mode !== 'tour';
     this.root.dataset.mode = mode;

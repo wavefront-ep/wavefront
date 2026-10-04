@@ -238,7 +238,7 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius
 .pb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
 .pb-head:empty { display: none; }
 .pb-title { font-size: 11px; letter-spacing: 0.1em; font-variant-caps: all-small-caps; color: var(--muted); }
-.pb-compare { display: flex; gap: 14px; }
+.pb-compare { display: flex; gap: 14px; align-items: baseline; }
 .pb-compare[hidden] { display: none; }
 
 /* ---- mechanisms picker ---- */

@@ -527,6 +527,13 @@ export function buildApp(root: HTMLElement) {
     ranges = shown.scopes;
     setScope(scopeId);
     bar.setEvents(shown.events, shown.sc.period_ms);
+    // time to hold on each step so its caption can be read: about 1.5 s plus 90 ms a word, 3 to 6.5 s
+    scene.setGuide(
+      shown.events.map((e) => {
+        const words = `${e.caption} ${e.ecg ?? ''}`.trim().split(/\s+/).length;
+        return { t: e.t, dwell: Math.min(6500, Math.max(3000, 1500 + words * 90)) };
+      }),
+    );
     if (shown.ecg) bar.setEcg(shown.ecg);
     bar.setScenario(sc.title, id !== 'sinus_rhythm', view);
     const mine = view === 'this';
