@@ -50,7 +50,6 @@ export class PlayBar {
   private time = el('span', 'pb-time', '0 ms');
   private speedBtns: HTMLButtonElement[] = [];
   private loopBtn = el('button', 'pb-btn', ICON.loop);
-  private styleBtns = new Map<string, HTMLButtonElement>();
   private legend = el('div', 'pb-legend');
   private legendCanvas = el('canvas');
   private legendTicks = el('div', 'pb-legend-ticks');
@@ -66,7 +65,6 @@ export class PlayBar {
   private mode: 'beat' | 'tour' | null = null;
   onClose: () => void = () => {};
   onTourStep: (delta: number) => void = () => {};
-  onStyle: (s: 'live' | 'map') => void = () => {};
   private tourTitle = el('span', 'pb-tour-title');
   private tourCount = el('span', 'pb-tour-count');
   private tourBack = el('button', 'pb-text', 'Back');
@@ -121,16 +119,6 @@ export class PlayBar {
     }
     this.loopBtn.setAttribute('aria-label', 'Loop');
     this.loopBtn.setAttribute('aria-pressed', String(scene.playback.loop));
-    const style = el('div', 'pb-style');
-    style.setAttribute('role', 'group');
-    style.setAttribute('aria-label', 'Display style');
-    for (const [id, name] of [['live', 'Wave'], ['map', 'Map']] as const) {
-      const b = el('button', 'pb-text', name);
-      b.setAttribute('aria-pressed', String(id === 'live'));
-      b.addEventListener('click', () => this.onStyle(id));
-      style.appendChild(b);
-      this.styleBtns.set(id, b);
-    }
     const close = el('button', 'pb-btn', ICON.close);
     close.setAttribute('aria-label', 'Close the beat player');
 
@@ -145,20 +133,20 @@ export class PlayBar {
     transport.append(this.guidedLabel, el('div', 'pb-transport-btns'));
     transport.lastElementChild!.append(prev, this.playBtn, next);
     const right = el('div', 'pb-right');
-    right.append(this.time, speed, this.loopBtn, style, close);
+    right.append(this.time, speed, this.loopBtn, close);
     controls.append(transport, scrub, right);
 
     const ecgLabel = el('div', 'pb-ecg-label', 'Lead II<br><em>schematic</em>');
     this.ecgRow.append(ecgLabel, this.ecgBox, this.ecgVals);
     this.ecgRow.hidden = true;
     this.ecgNote.hidden = true;
-    this.beat.append(this.ecgRow, controls, this.legend);
+    this.beat.append(this.ecgRow, controls);
 
     // ---- tour face
     const tourRow = el('div', 'pb-controls');
     const exit = el('button', 'pb-text', 'End tour');
     tourRow.append(this.tourBack, this.tourCount, this.tourNext, el('span', 'pb-spacer'), exit);
-    this.tour.append(this.tourTitle, tourRow);
+    this.tour.append(this.tourTitle, tourRow, this.legend);
     exit.addEventListener('click', () => this.onClose());
     this.tourBack.addEventListener('click', () => this.onTourStep(-1));
     this.tourNext.addEventListener('click', () => this.onTourStep(1));
@@ -239,7 +227,6 @@ export class PlayBar {
   }
 
   setStyleState(style: 'live' | 'map', range: [number, number], palette: PaletteId) {
-    this.styleBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === style)));
     this.legend.hidden = style !== 'map';
     if (style === 'map') this.drawLegend(range, palette);
   }

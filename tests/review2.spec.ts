@@ -59,25 +59,6 @@ test('conduction system anatomy with labels, six views', async ({ page }) => {
   await page.screenshot({ path: `${OUT}/conduction_shortaxis_cut.png` });
 });
 
-test('activation maps: palettes and scopes', async ({ page }) => {
-  await setup(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
-  await page.evaluate(() => { const s = (window as any).epHeart; s.pause(); s.layers.conduction = false; s.layers.epiOpacity = 1; s.applyLayers(); });
-  await page.getByRole('button', { name: 'Map', exact: true }).click();
-  await page.getByRole('button', { name: 'Layers and views' }).click();
-  for (const [pal, label] of [['safe', 'Colour-blind safe'], ['carto', 'CARTO-style (red early, purple late)']] as const) {
-    await page.getByRole('button', { name: label }).click();
-    for (const [scope, sl] of [['all', 'Whole heart'], ['atria', 'Atria only'], ['ventricles', 'Ventricles only']] as const) {
-      await page.getByRole('button', { name: sl }).click();
-      for (const v of ['anterior', 'posterior']) {
-        await page.evaluate((v) => (window as any).epHeart.setView(v, false), v);
-        await settle(page, 500);
-        await page.screenshot({ path: `${OUT}/map_${pal}_${scope}_${v}.png` });
-      }
-    }
-  }
-});
-
 test('guided tour', async ({ page }) => {
   await setup(page);
   await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();

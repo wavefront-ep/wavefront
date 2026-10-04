@@ -121,20 +121,20 @@ test('the conduction list selects a structure and shows a schematic note where i
   await expect(page.locator('.struct-name')).toHaveText('Sinoatrial node');
 });
 
-test('activation map: legend in ms, palettes and scopes', async ({ page }) => {
+test('activation map is only offered on the last tour step', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
   await page.getByRole('button', { name: 'Play sinus beat' }).click();
-  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Map', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Layers and views' }).click();
+  await expect(page.getByText('Activation display')).toHaveCount(0);
+  await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
+  await expect(page.locator('.pb-legend')).toBeHidden();
+  for (let i = 0; i < 7; i++) await page.getByRole('button', { name: 'Next' }).click();
   expect((await state(page)).style).toBe('map');
   await expect(page.locator('.pb-legend')).toBeVisible();
-  await expect(page.locator('.pb-legend')).toContainText('ms on the timeline');
-  await page.getByRole('button', { name: 'Layers and views' }).click();
-  await page.getByRole('button', { name: 'CARTO-style (red early, purple late)' }).click();
-  await page.getByRole('button', { name: 'Ventricles only' }).click();
-  const first = await page.locator('.pb-legend-ticks span').first().innerText();
-  expect(Number(first)).toBeGreaterThan(100); // starts near the first ventricular activation
-  await page.getByRole('button', { name: 'Wave', exact: true }).click();
+  await expect(page.locator('.pb-legend')).toContainText('ms');
+  await page.getByRole('button', { name: 'Back' }).click();
   expect((await state(page)).style).toBe('live');
 });
 

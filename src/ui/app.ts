@@ -260,73 +260,17 @@ export function buildApp(root: HTMLElement) {
   const labels = check('Labels', L.labels, (v) => setLabels(v), 'row', 'L');
   secLayers.appendChild(labels.label);
 
-  // activation display
-  const dispTitle = el('p', 'subhead', 'Activation display');
-  const dispSeg = el('div', 'seg');
-  const styleBtns = new Map<string, HTMLButtonElement>();
-  for (const [id, name] of [['live', 'Live wave'], ['map', 'Activation map']] as const) {
-    const b = el('button', 'vbtn', `<span>${name}</span>`);
-    b.setAttribute('aria-pressed', String(id === 'live'));
-    b.addEventListener('click', () => setStyle(id));
-    dispSeg.appendChild(b);
-    styleBtns.set(id, b);
-  }
-  const palSeg = el('div', 'seg');
-  const palBtns = new Map<PaletteId, HTMLButtonElement>();
-  for (const [id, name] of [['safe', 'Colour-blind safe'], ['carto', 'CARTO-style (red early, purple late)']] as const) {
-    const b = el('button', 'vbtn', `<span>${name}</span>`);
-    b.setAttribute('aria-pressed', String(id === 'safe'));
-    b.addEventListener('click', () => setPalette(id));
-    palSeg.appendChild(b);
-    palBtns.set(id, b);
-  }
-  palSeg.hidden = true;
-  const scopeSeg = el('div', 'seg');
-  const scopeBtns = new Map<string, HTMLButtonElement>();
-  for (const [id, name] of [['all', 'Whole heart'], ['atria', 'Atria only'], ['ventricles', 'Ventricles only']] as const) {
-    const b = el('button', 'vbtn', `<span>${name}</span>`);
-    b.setAttribute('aria-pressed', String(id === 'all'));
-    b.addEventListener('click', () => setScope(id));
-    scopeSeg.appendChild(b);
-    scopeBtns.set(id, b);
-  }
-  scopeSeg.hidden = true;
-  const scopeTitle = el('p', 'subhead sm', 'Range');
-  const palTitle = el('p', 'subhead sm', 'Colours');
-  scopeTitle.hidden = true;
-  palTitle.hidden = true;
-  secLayers.append(dispTitle, dispSeg, scopeTitle, scopeSeg, palTitle, palSeg);
   secLayers.appendChild(
     el('p', 'cap', 'Blue-grey marks vessels carrying blood towards the lungs and the venae cavae; coral marks the aorta and pulmonary veins. This is a convention, not a measurement.'),
   );
 
-  let scopeId = 'all';
-  let palette: PaletteId = 'safe';
-  let mapRange: [number, number] = [0, 260];
-  let ranges: Record<string, [number, number]> = { all: [0, 260], atria: [0, 110], ventricles: [150, 260] };
-  const setScope = (id: string) => {
-    scopeId = id;
-    mapRange = ranges[id];
-    scene.setMapRange(mapRange[0], mapRange[1]);
-    scopeBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
-    bar.setStyleState(scene.style, mapRange, palette);
-  };
+  // The activation map is shown only on the last step of the guided tour.
+  const mapRange: [number, number] = [0, 260];
+  const palette: PaletteId = 'safe';
   const setStyle = (s: 'live' | 'map') => {
     scene.setStyle(s);
-    styleBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === s)));
-    palSeg.hidden = s !== 'map';
-    scopeSeg.hidden = s !== 'map';
-    scopeTitle.hidden = s !== 'map';
-    palTitle.hidden = s !== 'map';
     bar.setStyleState(s, mapRange, palette);
   };
-  const setPalette = (p: PaletteId) => {
-    palette = p;
-    scene.setPalette(p);
-    palBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === p)));
-    bar.setStyleState(scene.style, mapRange, palette);
-  };
-  bar.onStyle = setStyle;
 
   // cutaway
   const cutBtns = new Map<CutMode, HTMLButtonElement>();
@@ -524,8 +468,6 @@ export function buildApp(root: HTMLElement) {
     showInfo(id);
     scene.setActivation(shown.result, shown.constants);
     scene.playback.duration = shown.sc.period_ms;
-    ranges = shown.scopes;
-    setScope(scopeId);
     bar.setEvents(shown.events, shown.sc.period_ms);
     // time to hold on each step so its caption can be read: about 1.5 s plus 90 ms a word, 3 to 6.5 s
     scene.setGuide(
@@ -545,7 +487,6 @@ export function buildApp(root: HTMLElement) {
     if (fresh) applyStartView(sc, mine);
     lower.hidden = true;
     bar.show('beat');
-    bar.setStyleState(scene.style, mapRange, palette);
     scene.setFocusLabels(mine ? sc.labels ?? [] : []);
     scene.setTime(0);
     startArmed = !autoplay; // a paused scenario starts from its intended state when Play is pressed
@@ -627,8 +568,12 @@ export function buildApp(root: HTMLElement) {
     scene.applyLayers();
     scene.relabel();
   };
-  const startTour = () => {
+  const startTour = async () => {
     if (!loader) return;
+    const sinus = await loader.get('sinus_rhythm'); // the map step always shows the normal beat
+    if (scene.style === 'map') setStyle('live');
+    scene.setActivation(sinus.result, sinus.constants);
+    scene.setMapRange(mapRange[0], mapRange[1]);
     lower.hidden = true;
     tourBtn.setAttribute('aria-pressed', 'true');
     bar.show('tour');
