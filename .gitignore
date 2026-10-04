@@ -5,3 +5,6 @@ node_modules/
 dist/
 # raw source meshes; keep only processed assets
 assets/raw/
+.venv/
+test-results/
+playwright-report/
