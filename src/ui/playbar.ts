@@ -24,7 +24,7 @@ const ICON = {
   close: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>',
 };
 
-const SPEEDS = [0.1, 0.25, 0.5, 1];
+const SPEEDS = [0.02, 0.05, 0.1, 0.25, 0.5, 1];
 
 /** Bottom bar. Two faces: the beat player (caption, transport, scrubber with event ticks, speed,
  *  loop) and the guided-tour stepper. Hidden until one of them is opened. */

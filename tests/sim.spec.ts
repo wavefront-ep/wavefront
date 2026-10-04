@@ -169,3 +169,26 @@ test('scenario data is validated', async ({ page }) => {
   });
   expect(ok).toContain('missing');
 });
+
+test('very slow speeds are available', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  for (const s of [0.02, 0.05]) {
+    await page.getByRole('button', { name: `${s}×` }).click();
+    expect(await page.evaluate(() => (window as any).epHeart.playback.speed)).toBe(s);
+  }
+});
+
+test('four-chamber cut keeps the conduction system in view and labelled', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Layers and views' }).click();
+  await page.getByLabel('Conduction system').check();
+  await page.getByLabel('Labels').check();
+  await page.getByRole('button', { name: 'Four-chamber cut' }).click();
+  await settle(page, 2500);
+  expect((await state(page)).cut.offset).toBeCloseTo(-0.26, 2);
+  const labels = await page.locator('.overlay text').allTextContents();
+  for (const l of ['SA node', 'AV node', 'His bundle', 'Left bundle branch', 'Right bundle branch']) expect(labels).toContain(l);
+});

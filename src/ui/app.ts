@@ -233,6 +233,10 @@ export function buildApp(root: HTMLElement) {
     L.conduction = v;
     csList.hidden = !v;
     cond.input.checked = v;
+    if (scene.cut.mode === 'fourChamber' && scene.cut.offset === (v ? 0 : CONDUCTION_CUT_OFFSET)) {
+      scene.setCut('fourChamber', defaultOffset('fourChamber'));
+      showOffset(defaultOffset('fourChamber'));
+    }
     if (auto) {
       if (v && L.epiOpacity > 0.9) {
         opacityBeforeConduction = L.epiOpacity;
@@ -335,10 +339,18 @@ export function buildApp(root: HTMLElement) {
   cutSlider.disabled = true;
   cutSlider.setAttribute('aria-label', 'Cut plane position');
   const cutVal = el('span', undefined, '0 mm');
+  // The plane through the apex and both AV valve centres lies 2 to 24 mm behind most of the
+  // conduction system, so with that layer on it starts 26 mm further forward to keep it in view.
+  const CONDUCTION_CUT_OFFSET = -0.26;
+  const defaultOffset = (mode: CutMode) => (mode === 'fourChamber' && L.conduction ? CONDUCTION_CUT_OFFSET : 0);
+  const showOffset = (v: number) => {
+    cutSlider.value = String(v);
+    cutVal.textContent = `${v > 0 ? '+' : ''}${Math.round(v * 100)} mm`;
+  };
   const setCut = (mode: CutMode, moveCamera = true) => {
-    scene.setCut(mode, 0, moveCamera);
-    cutSlider.value = '0';
-    cutVal.textContent = '0 mm';
+    const off = defaultOffset(mode);
+    scene.setCut(mode, off, moveCamera);
+    showOffset(off);
     cutSlider.disabled = mode === 'off';
     cutBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === mode)));
   };
@@ -358,7 +370,7 @@ export function buildApp(root: HTMLElement) {
   cutRow.appendChild(cutVal);
   secCut.append(seg, cutSlider, cutRow);
   secCut.appendChild(
-    el('p', 'cap', 'The four-chamber plane passes through the apex and the centres of the mitral and tricuspid valves. Valves are drawn as closed planes.'),
+    el('p', 'cap', 'The four-chamber plane passes through the apex and the centres of the mitral and tricuspid valves. Valves are drawn as closed planes. With the conduction system on, the plane starts 26 mm further forward so the nodes and bundles stay in view.'),
   );
 
   // labels overlay
@@ -451,9 +463,9 @@ export function buildApp(root: HTMLElement) {
     if (s.conduction !== undefined) setConduction(s.conduction, false);
     if (s.labels !== undefined) setLabels(s.labels);
     if (s.cut !== undefined) {
-      scene.setCut(s.cut, 0, false);
-      cutSlider.value = '0';
-      cutVal.textContent = '0 mm';
+      const off = s.cut === 'fourChamber' && (s.conduction ?? L.conduction) ? CONDUCTION_CUT_OFFSET : 0;
+      scene.setCut(s.cut, off, false);
+      showOffset(off);
     }
     if (s.style) setStyle(s.style);
     else if (scene.style === 'map') setStyle('live');
