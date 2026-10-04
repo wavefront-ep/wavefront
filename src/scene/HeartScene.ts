@@ -1,6 +1,7 @@
 import {
   BackSide,
   Box3,
+  BufferAttribute,
   BufferGeometry,
   Color,
   DirectionalLight,
@@ -10,6 +11,7 @@ import {
   Intersection,
   Material,
   Mesh,
+  MeshBasicMaterial,
   MeshPhysicalMaterial,
   MOUSE,
   Object3D,
@@ -28,6 +30,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { BY_MESH, COLORS, Chamber, EXTRA_LABELS, STRUCTURES } from '../data/structures';
 import { VIEW_BY_ID } from './views';
+import { ActivationEngine, ActivationResult, NWAVE, UNREACHED } from '../engine/activation';
+import { CONDUCTION, MYOCARDIUM, PaletteId, applyActivation, paletteTexture, shared } from '../engine/material';
 
 (BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
 (BufferGeometry.prototype as any).disposeBoundsTree = disposeBoundsTree;
@@ -41,6 +45,7 @@ export interface LayerState {
   chambers: Record<Chamber, boolean>;
   vessels: boolean;
   valves: boolean;
+  conduction: boolean;
   labels: boolean;
 }
 
@@ -55,7 +60,7 @@ export interface LabelItem {
   point: Vector3;
   meshes: string[];
   /** 'centre': middle of the visible patch (whole structures); 'nearest': visible point closest to the landmark. */
-  mode: 'centre' | 'nearest';
+  mode: 'centre' | 'nearest' | 'always';
   /** Surface samples (position + normal) on the meshes the label names. */
   samples: { p: Vector3; n: Vector3 }[];
 }
@@ -86,6 +91,7 @@ export class HeartScene {
     chambers: { RA: true, LA: true, RV: true, LV: true },
     vessels: true,
     valves: true,
+    conduction: false,
     labels: false,
   };
   readonly cut: CutState = { mode: 'off', offset: 0 };
@@ -94,6 +100,17 @@ export class HeartScene {
   onHover: (mesh: string | null, x: number, y: number) => void = () => {};
   onLabels: (labels: PlacedLabel[]) => void = () => {};
   onViewChange: (id: string | null) => void = () => {};
+  onTime: (t: number) => void = () => {};
+  onPlayState: (playing: boolean) => void = () => {};
+
+  /** Playhead for the activation animation. Times are in milliseconds of heart time. */
+  readonly playback = { t: 0, playing: false, speed: 0.25, loop: true, duration: 1000 };
+  style: 'live' | 'map' = 'live';
+  private engine: ActivationEngine | null = null;
+  private ghosts = new Map<string, Mesh>();
+  private pathMid = new Map<string, Vector3>();
+  private lastFrame = 0;
+  private paletteTex = shared.uMapTex.value;
 
   private meshes = new Map<string, Mesh>();
   private backs = new Map<string, Mesh>();
@@ -214,6 +231,11 @@ export class HeartScene {
         side: info.group === 'endocardium' ? DoubleSide : FrontSide,
       });
       mesh.material = front;
+      if (info.group === 'epicardium' || info.group === 'endocardium') {
+        const atrial = info.chamber === 'RA' || info.chamber === 'LA';
+        applyActivation(front, { apd: atrial ? 190 : 280, width: 20, tail: 70, front: '', act: '', refr: '', palette: MYOCARDIUM });
+        this.initTimeAttributes(mesh.geometry);
+      }
       this.meshes.set(mesh.name, mesh);
       // Cut tissue is shown as the back face of the wall seen through the clipping plane.
       if (info.group === 'epicardium' || info.group === 'vessel') {
@@ -261,6 +283,14 @@ export class HeartScene {
     };
   }
 
+  private setupConductionLabels() {
+    for (const st of STRUCTURES) {
+      if (st.group !== 'conduction' || !st.label || !st.pathKey) continue;
+      const p = this.pathMid.get(st.pathKey);
+      if (p) this.labelItems.push({ text: st.label, point: p, meshes: [st.mesh], mode: 'always', samples: [] });
+    }
+  }
+
   private setupLabels() {
     const sample = (names: string[]) => {
       const out: { p: Vector3; n: Vector3 }[] = [];
@@ -289,6 +319,164 @@ export class HeartScene {
     this.labelItems = items;
   }
 
+
+  // ---------------------------------------------------------------- activation
+
+  private initTimeAttributes(g: BufferGeometry) {
+    const n = g.getAttribute('position').count;
+    g.setAttribute('aT0', new BufferAttribute(new Float32Array(n * 4).fill(UNREACHED), 4));
+    g.setAttribute('aT1', new BufferAttribute(new Float32Array(n * 4).fill(UNREACHED), 4));
+  }
+
+  /** Conduction system tubes (cs_* meshes), each with a faint see-through twin so the structures
+   *  stay readable through the wall. */
+  async loadConduction(url: string, engine: ActivationEngine): Promise<void> {
+    const gltf = await new GLTFLoader().loadAsync(url);
+    this.engine = engine;
+    const meta = engine.graph.meta;
+    for (const [k, p] of Object.entries(meta.paths)) this.pathMid.set(k, new Vector3(...p.mid).multiplyScalar(0.01));
+    for (const [k, p] of Object.entries(meta.purkinje)) this.pathMid.set(k, new Vector3(...p.centre).multiplyScalar(0.01));
+    const parent = new Object3D();
+    gltf.scene.traverse((o: Object3D) => {
+      const mesh = o as Mesh;
+      if (!mesh.isMesh) return;
+      const info = BY_MESH[mesh.name];
+      if (!info) return;
+      (mesh.geometry as any).computeBoundsTree();
+      this.initTimeAttributes(mesh.geometry);
+      const base = new Color(info.color);
+      this.baseColor.set(mesh.name, base);
+      const fine = mesh.name.startsWith('cs_Purkinje');
+      const mk = (ghost: boolean) => {
+        // The see-through twin is unlit so the yellow reads as a clean overlay on the pink wall.
+        const m = ghost
+          ? new MeshBasicMaterial({ color: base.clone(), side: DoubleSide, transparent: true, opacity: fine ? 0.16 : 0.34, depthTest: false, depthWrite: false })
+          : new MeshPhysicalMaterial({ color: base.clone(), roughness: 0.5, metalness: 0, side: DoubleSide });
+        applyActivation(m, { apd: meta.constants.apd_conduction, width: 16, tail: 50, front: '', act: '', refr: '', palette: CONDUCTION });
+        return m;
+      };
+      mesh.material = mk(false);
+      mesh.renderOrder = 3;
+      const ghost = new Mesh(mesh.geometry, mk(true));
+      ghost.name = `${mesh.name}__ghost`;
+      ghost.raycast = () => {};
+      ghost.renderOrder = 6;
+      this.meshes.set(mesh.name, mesh);
+      this.ghosts.set(mesh.name, ghost);
+      parent.add(ghost);
+    });
+    this.scene.add(gltf.scene, parent);
+    this.setupConductionLabels();
+    this.applyLayers();
+  }
+
+  /** Push solver output to the GPU: per-vertex activation times for every mapped mesh. */
+  setActivation(result: ActivationResult) {
+    const engine = this.engine;
+    if (!engine) return;
+    const c = engine.constants;
+    for (const [name, mesh] of this.meshes) {
+      const times = engine.vertexTimes(name, result);
+      if (!times) continue;
+      const n = times.length / NWAVE;
+      const a0 = mesh.geometry.getAttribute('aT0') as BufferAttribute;
+      const a1 = mesh.geometry.getAttribute('aT1') as BufferAttribute;
+      for (let i = 0; i < n; i++) {
+        for (let k = 0; k < 4; k++) {
+          (a0.array as Float32Array)[i * 4 + k] = times[i * NWAVE + k];
+          (a1.array as Float32Array)[i * 4 + k] = times[i * NWAVE + 4 + k];
+        }
+      }
+      a0.needsUpdate = true;
+      a1.needsUpdate = true;
+      const own = (mesh.material as MeshPhysicalMaterial).userData.activation;
+      const info = BY_MESH[name];
+      if (own) {
+        own.uAPD.value = info.group === 'conduction' ? c.apd_conduction : info.chamber === 'RA' || info.chamber === 'LA' ? c.apd_atrial : c.apd_ventricular;
+      }
+    }
+    for (const [name, ghost] of this.ghosts) {
+      const own = (ghost.material as Material).userData.activation;
+      if (own) own.uAPD.value = c.apd_conduction;
+      void name;
+    }
+    this.invalidate();
+  }
+
+  setStyle(style: 'live' | 'map') {
+    this.style = style;
+    shared.uMode.value = style === 'map' ? 1 : 0;
+    this.invalidate();
+  }
+
+  setPalette(id: PaletteId) {
+    this.paletteTex?.dispose();
+    this.paletteTex = paletteTexture(id);
+    shared.uMapTex.value = this.paletteTex;
+    this.invalidate();
+  }
+
+  setMapRange(min: number, max: number) {
+    shared.uMapMin.value = min;
+    shared.uMapMax.value = max;
+    this.invalidate();
+  }
+
+  setTime(ms: number) {
+    const p = this.playback;
+    p.t = Math.max(0, Math.min(p.duration, ms));
+    shared.uTime.value = p.t;
+    this.onTime(p.t);
+    this.invalidate();
+  }
+
+  play() {
+    if (this.playback.t >= this.playback.duration - 1) this.setTime(0);
+    this.playback.playing = true;
+    this.lastFrame = performance.now();
+    this.onPlayState(true);
+    this.invalidate();
+  }
+
+  pause() {
+    this.playback.playing = false;
+    this.onPlayState(false);
+  }
+
+  togglePlay() {
+    if (this.playback.playing) this.pause();
+    else this.play();
+  }
+
+  /** Fly the camera to look at a conduction structure (or any scene-unit point). */
+  focusOn(point: Vector3, distance = 1.7) {
+    const dir = this.camera.position.clone().sub(this.controls.target).normalize();
+    this.flyTo(dir, distance, point.clone());
+    this.currentView = null;
+    this.onViewChange(null);
+  }
+
+  focusStructure(mesh: string) {
+    const key = BY_MESH[mesh]?.pathKey;
+    const p = key ? this.pathMid.get(key) : null;
+    if (p) this.focusOn(p);
+  }
+
+  /** Free camera placement for the guided tour: direction towards the camera, distance and target. */
+  setCamera(dir: Vector3, distance: number, target: Vector3 | null = null, animate = true) {
+    this.flyTo(dir, distance, target ?? this.center.clone(), animate);
+    this.currentView = null;
+    this.onViewChange(null);
+  }
+
+  get heartCentre() {
+    return this.center.clone();
+  }
+
+  pathPoint(key: string) {
+    return this.pathMid.get(key)?.clone() ?? null;
+  }
+
   // ---------------------------------------------------------------- state
 
   applyLayers() {
@@ -300,7 +488,10 @@ export class HeartScene {
       else if (s.group === 'endocardium') vis = !!L.chambers[s.chamber!];
       else if (s.group === 'vessel') vis = L.vessels;
       else if (s.group === 'valve') vis = L.valves;
+      else if (s.group === 'conduction') vis = L.conduction;
       mesh.visible = vis;
+      const gh = this.ghosts.get(name);
+      if (gh) gh.visible = vis;
       const m = mesh.material as MeshPhysicalMaterial;
       if (s.group === 'epicardium') {
         const o = L.epiOpacity;
@@ -353,11 +544,12 @@ export class HeartScene {
     this.onViewChange(null);
   }
 
-  select(mesh: string | null) {
+  /** `silent` highlights without notifying the UI (used by the guided tour). */
+  select(mesh: string | null, silent = false) {
     this.selected = mesh;
     this.refreshTint();
     this.invalidate();
-    this.onSelect(mesh);
+    if (!silent) this.onSelect(mesh);
   }
 
   private setHover(mesh: string | null) {
@@ -372,6 +564,7 @@ export class HeartScene {
     if (!mesh) return [];
     const s = BY_MESH[mesh];
     if (s?.chamber) return [`epi_${s.chamber}`, `endo_${s.chamber}`];
+    if (s?.family) return STRUCTURES.filter((x) => x.family === s.family).map((x) => x.mesh);
     return [mesh];
   }
 
@@ -382,6 +575,8 @@ export class HeartScene {
     for (const [name, mesh] of this.meshes) {
       const t = sel.includes(name) ? 0.8 : hov.includes(name) ? 0.42 : 0;
       (mesh.material as MeshPhysicalMaterial).color.copy(this.baseColor.get(name)!).lerp(sage, t);
+      const gh = this.ghosts.get(name);
+      if (gh) (gh.material as MeshBasicMaterial).color.copy(this.baseColor.get(name)!).lerp(sage, t);
     }
   }
 
@@ -449,6 +644,26 @@ export class HeartScene {
     this.invalidate();
   }
 
+  private stepPlayback(now: number) {
+    const p = this.playback;
+    if (!p.playing) return;
+    const dt = Math.min(64, now - this.lastFrame);
+    this.lastFrame = now;
+    let t = p.t + dt * p.speed;
+    if (t >= p.duration) {
+      if (p.loop) t -= p.duration;
+      else {
+        t = p.duration;
+        p.playing = false;
+        this.onPlayState(false);
+      }
+    }
+    p.t = t;
+    shared.uTime.value = t;
+    this.onTime(t);
+    this.dirty = true;
+  }
+
   private stepTween(now: number) {
     const tw = this.tween;
     if (!tw) return;
@@ -497,6 +712,7 @@ export class HeartScene {
 
   private loop(now: number) {
     requestAnimationFrame(this.loop);
+    this.stepPlayback(now);
     this.stepTween(now);
     const moved = this.controls.update();
     const camKey = this.camera.position.toArray().concat(this.controls.target.toArray()).map((v) => v.toFixed(4)).join();
@@ -543,7 +759,21 @@ export class HeartScene {
     const objs = this.visibleObjects();
     const placed: PlacedLabel[] = [];
     const cam = this.camera.position;
+    const centreDepth = this.center.clone().sub(cam).dot(this.camera.getWorldDirection(new Vector3()));
     for (const it of this.labelItems) {
+      if (it.mode === 'always') {
+        // Conduction structures sit inside the wall, so occlusion by the surface is ignored; hide
+        // those on the far side of the heart instead.
+        if (!this.layers.conduction) continue;
+        const depth = it.point.clone().sub(cam).dot(this.camera.getWorldDirection(new Vector3()));
+        if (this.clipped(it.point) || depth > centreDepth + 0.1) continue;
+        const pp = it.point.clone().project(this.camera);
+        const ax2 = ((pp.x + 1) / 2) * w;
+        const ay2 = ((1 - pp.y) / 2) * h;
+        const side2 = ax2 < (minX + maxX) / 2 ? 'left' : 'right';
+        placed.push({ text: it.text, anchor: new Vector2(ax2, ay2), side: side2, y: ay2, x: side2 === 'left' ? minX - 28 : maxX + 28 });
+        continue;
+      }
       // Anchor at the middle of the patch of the named surface that the camera can actually see:
       // take camera-facing samples, keep those with a clear line of sight, then use the one
       // closest to the mean of the kept points.
@@ -580,8 +810,9 @@ export class HeartScene {
       for (let i = 1; i < col.length; i++) if (col[i].y - col[i - 1].y < gap) col[i].y = col[i - 1].y + gap;
       const overflow = col.length ? col[col.length - 1].y - (h - 24) : 0;
       if (overflow > 0) col.forEach((l) => (l.y -= overflow));
+      // Keep the text on screen when the heart is zoomed past the edges of the stage.
       col.forEach((l) => {
-        l.x = Math.min(Math.max(l.x, 12), w - 12);
+        l.x = side === 'left' ? Math.min(Math.max(l.x, 190), w - 40) : Math.max(Math.min(l.x, w - 190), 40);
       });
     }
     this.onLabels(placed);
@@ -597,6 +828,9 @@ export class HeartScene {
       cut: { ...this.cut },
       view: this.currentView,
       selected: this.selected,
+      time: this.playback.t,
+      playing: this.playback.playing,
+      style: this.style,
       camera: this.camera.position.toArray(),
       target: this.controls.target.toArray(),
       visible: [...this.meshes.values()].filter((m) => m.visible).map((m) => m.name),

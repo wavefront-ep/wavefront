@@ -1,12 +1,17 @@
-import { BY_MESH, CHAMBERS, Chamber } from '../data/structures';
+import { BY_MESH, CHAMBERS, Chamber, STRUCTURES } from '../data/structures';
+import { TOUR } from '../data/tour';
+import { ActivationEngine, ActivationResult } from '../engine/activation';
+import { PaletteId } from '../engine/material';
 import { CutMode, HeartScene, PlacedLabel } from '../scene/HeartScene';
 import { VIEWS } from '../scene/views';
+import { Scenario } from '../scenarios/types';
+import { PlayBar } from './playbar';
+import { Vector3 } from 'three';
 
-const svg = (d: string) =>
-  `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="${d}"/></svg>`;
+const svg = (d: string) => `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="${d}"/></svg>`;
 
 const ICONS = {
-  // Outline of a heart-like form with a vertical axis: explore the anatomy.
+  // Outline of a heart-like form: explore the anatomy.
   explore: svg('M10 17C5 13.5 3 10.5 3 7.8 3 5.6 4.7 4 6.6 4c1.4 0 2.6.8 3.4 2 .8-1.2 2-2 3.4-2C15.3 4 17 5.6 17 7.8c0 2.7-2 5.7-7 9.2Z'),
   // A flat trace with one excursion: arrhythmia mechanisms.
   mechanisms: svg('M2 11h4l1.5-5 3 9 1.7-4H18'),
@@ -14,6 +19,8 @@ const ICONS = {
   layers: svg('M3 5h14M3 10h14M3 15h14'),
   // A circle crossed by a straight cut.
   cut: svg('M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14ZM3 14.5 17 5.5'),
+  // A path with three stops: the guided tour.
+  tour: svg('M4 15c3 0 3-5 6-5s3-5 6-5M4 15h.01M10 10h.01M16 5h.01'),
 };
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: string) {
@@ -41,20 +48,27 @@ export function buildApp(root: HTMLElement) {
   const mech = railBtn(ICONS.mechanisms, 'Mechanisms (not yet available)');
   mech.setAttribute('aria-disabled', 'true');
   rail.append(explore, mech, el('div', 'spacer'));
+  const tourBtn = railBtn(ICONS.tour, 'Guided tour');
   const cutBtn = railBtn(ICONS.cut, 'Cutaway');
   const layersBtn = railBtn(ICONS.layers, 'Layers and views');
   layersBtn.setAttribute('aria-pressed', 'false');
-  rail.append(cutBtn, layersBtn);
+  rail.append(tourBtn, cutBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
+  const viewport = el('div', 'viewport');
   const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   overlay.setAttribute('class', 'overlay');
   overlay.setAttribute('aria-hidden', 'true');
   const hoverLabel = el('div', 'hoverlabel');
+  const lower = el('div', 'lower');
+  const playBeat = el('button', 'primary', 'Play sinus beat');
+  playBeat.disabled = true;
   const hint = el('div', 'hint', 'Drag to rotate. Scroll to zoom. Select a structure for its name.');
+  lower.append(playBeat, hint);
   const loading = el('div', 'loading', 'Loading the heart');
-  stage.append(overlay, hoverLabel, hint, loading);
+  viewport.append(overlay, hoverLabel, lower, loading);
+  stage.appendChild(viewport);
 
   // ---------------------------------------------------------- drawer
   const drawer = el('aside', 'drawer');
@@ -78,7 +92,7 @@ export function buildApp(root: HTMLElement) {
 
   const secCredit = el('section', 'sec');
   secCredit.appendChild(
-    el('p', 'cap', 'Heart geometry: Rodero et al., PLoS Computational Biology 2021, average shape of a healthy-adult statistical model (CC BY 4.0). Surface extracted, smoothed and decimated for this viewer.'),
+    el('p', 'cap', 'Heart geometry: Rodero et al., PLoS Computational Biology 2021, average shape of a healthy-adult statistical model (CC BY 4.0). Surface extracted, smoothed and decimated for this viewer. Conduction system placement and activation are schematic.'),
   );
   secStructure.id = 'sec-structure';
   secCut.id = 'sec-cutaway';
@@ -96,12 +110,14 @@ export function buildApp(root: HTMLElement) {
     nav.appendChild(b);
   }
   drawer.append(nav, secStructure, secCut, secLayers, secView, secCredit);
-  app.append(rail, stage, drawer);
 
-  // ---------------------------------------------------------- scene
-  const scene = new HeartScene(stage);
+  // ---------------------------------------------------------- scene and bar
+  const scene = new HeartScene(viewport);
   (window as any).epHeart = scene;
-  stage.insertBefore(scene.renderer.domElement, overlay);
+  viewport.insertBefore(scene.renderer.domElement, overlay);
+  const bar = new PlayBar(scene);
+  stage.appendChild(bar.root);
+  app.append(rail, stage, drawer);
 
   // ---------------------------------------------------------- behaviour
   const setDrawer = (open: boolean) => {
@@ -123,6 +139,7 @@ export function buildApp(root: HTMLElement) {
     }
     structBody.appendChild(el('h3', 'struct-name', s.name));
     structBody.appendChild(el('p', 'struct-note', s.note));
+    if (s.schematic) structBody.appendChild(el('p', 'struct-tag', 'Schematic: the drawn course or position is illustrative.'));
   };
   showStructure(null);
 
@@ -175,11 +192,13 @@ export function buildApp(root: HTMLElement) {
   const opRow = el('div', 'slider-row', '<span>Opacity</span>');
   const opVal = el('span', undefined, '100%');
   opRow.appendChild(opVal);
-  opacity.addEventListener('input', () => {
-    L.epiOpacity = Number(opacity.value);
-    opVal.textContent = `${Math.round(L.epiOpacity * 100)}%`;
+  const setOpacity = (v: number) => {
+    L.epiOpacity = v;
+    opacity.value = String(v);
+    opVal.textContent = `${Math.round(v * 100)}%`;
     scene.applyLayers();
-  });
+  };
+  opacity.addEventListener('input', () => setOpacity(Number(opacity.value)));
   const opWrap = el('div');
   opWrap.style.padding = '0 0 8px 24px';
   opWrap.append(opacity, opRow);
@@ -193,11 +212,111 @@ export function buildApp(root: HTMLElement) {
   }
   secLayers.appendChild(check('Great vessels', L.vessels, (v) => ((L.vessels = v), scene.applyLayers())).label);
   secLayers.appendChild(check('Valves', L.valves, (v) => ((L.valves = v), scene.applyLayers())).label);
+
+  // conduction system: the surface turns see-through so the structures read, and a list lets
+  // students jump to each one (the finest fibres are too thin to click).
+  let opacityBeforeConduction: number | null = null;
+  const csList = el('ul', 'list cs-list');
+  csList.hidden = true;
+  const csItems = STRUCTURES.filter((s) => s.group === 'conduction' && s.label && s.mesh !== 'cs_RBB_entry');
+  for (const s of csItems) {
+    const li = el('li');
+    const b = el('button', 'vbtn', `<span>${s.name}</span>`);
+    b.addEventListener('click', () => {
+      scene.select(s.mesh);
+      scene.focusStructure(s.mesh);
+    });
+    li.appendChild(b);
+    csList.appendChild(li);
+  }
+  const setConduction = (v: boolean, auto = true) => {
+    L.conduction = v;
+    csList.hidden = !v;
+    cond.input.checked = v;
+    if (auto) {
+      if (v && L.epiOpacity > 0.9) {
+        opacityBeforeConduction = L.epiOpacity;
+        setOpacity(0.35);
+      } else if (!v && opacityBeforeConduction !== null) {
+        if (L.epiOpacity < 0.5) setOpacity(opacityBeforeConduction);
+        opacityBeforeConduction = null;
+      }
+    }
+    scene.applyLayers();
+    scene.relabel();
+  };
+  const cond = check('Conduction system', L.conduction, (v) => setConduction(v));
+  secLayers.appendChild(cond.label);
+  secLayers.appendChild(csList);
+
   const labels = check('Labels', L.labels, (v) => setLabels(v), 'row', 'L');
   secLayers.appendChild(labels.label);
+
+  // activation display
+  const dispTitle = el('p', 'subhead', 'Activation display');
+  const dispSeg = el('div', 'seg');
+  const styleBtns = new Map<string, HTMLButtonElement>();
+  for (const [id, name] of [['live', 'Live wave'], ['map', 'Activation map']] as const) {
+    const b = el('button', 'vbtn', `<span>${name}</span>`);
+    b.setAttribute('aria-pressed', String(id === 'live'));
+    b.addEventListener('click', () => setStyle(id));
+    dispSeg.appendChild(b);
+    styleBtns.set(id, b);
+  }
+  const palSeg = el('div', 'seg');
+  const palBtns = new Map<PaletteId, HTMLButtonElement>();
+  for (const [id, name] of [['safe', 'Colour-blind safe'], ['carto', 'CARTO-style (red early, purple late)']] as const) {
+    const b = el('button', 'vbtn', `<span>${name}</span>`);
+    b.setAttribute('aria-pressed', String(id === 'safe'));
+    b.addEventListener('click', () => setPalette(id));
+    palSeg.appendChild(b);
+    palBtns.set(id, b);
+  }
+  palSeg.hidden = true;
+  const scopeSeg = el('div', 'seg');
+  const scopeBtns = new Map<string, HTMLButtonElement>();
+  for (const [id, name] of [['all', 'Whole heart'], ['atria', 'Atria only'], ['ventricles', 'Ventricles only']] as const) {
+    const b = el('button', 'vbtn', `<span>${name}</span>`);
+    b.setAttribute('aria-pressed', String(id === 'all'));
+    b.addEventListener('click', () => setScope(id));
+    scopeSeg.appendChild(b);
+    scopeBtns.set(id, b);
+  }
+  scopeSeg.hidden = true;
+  const scopeTitle = el('p', 'subhead sm', 'Range');
+  const palTitle = el('p', 'subhead sm', 'Colours');
+  scopeTitle.hidden = true;
+  palTitle.hidden = true;
+  secLayers.append(dispTitle, dispSeg, scopeTitle, scopeSeg, palTitle, palSeg);
   secLayers.appendChild(
     el('p', 'cap', 'Blue-grey marks vessels carrying blood towards the lungs and the venae cavae; coral marks the aorta and pulmonary veins. This is a convention, not a measurement.'),
   );
+
+  let palette: PaletteId = 'safe';
+  let mapRange: [number, number] = [0, 260];
+  let ranges: Record<string, [number, number]> = { all: [0, 260], atria: [0, 110], ventricles: [150, 260] };
+  const setScope = (id: string) => {
+    mapRange = ranges[id];
+    scene.setMapRange(mapRange[0], mapRange[1]);
+    scopeBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
+    bar.setStyleState(scene.style, mapRange, palette);
+  };
+  const setStyle = (s: 'live' | 'map') => {
+    scene.setStyle(s);
+    styleBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === s)));
+    palSeg.hidden = s !== 'map';
+    scopeSeg.hidden = s !== 'map';
+    scopeTitle.hidden = s !== 'map';
+    palTitle.hidden = s !== 'map';
+    bar.setStyleState(s, mapRange, palette);
+  };
+  const setPalette = (p: PaletteId) => {
+    palette = p;
+    scene.setPalette(p);
+    palBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === p)));
+    bar.setStyleState(scene.style, mapRange, palette);
+  };
+  bar.onStyle = setStyle;
 
   // cutaway
   const cutBtns = new Map<CutMode, HTMLButtonElement>();
@@ -216,8 +335,8 @@ export function buildApp(root: HTMLElement) {
   cutSlider.disabled = true;
   cutSlider.setAttribute('aria-label', 'Cut plane position');
   const cutVal = el('span', undefined, '0 mm');
-  const setCut = (mode: CutMode) => {
-    scene.setCut(mode, 0, true);
+  const setCut = (mode: CutMode, moveCamera = true) => {
+    scene.setCut(mode, 0, moveCamera);
     cutSlider.value = '0';
     cutVal.textContent = '0 mm';
     cutSlider.disabled = mode === 'off';
@@ -272,9 +391,101 @@ export function buildApp(root: HTMLElement) {
 
   // hint fades after first interaction
   const dismissHint = () => hint.classList.add('gone');
-  stage.addEventListener('pointerdown', dismissHint, { once: true });
-  stage.addEventListener('wheel', dismissHint, { once: true, passive: true });
+  viewport.addEventListener('pointerdown', dismissHint, { once: true });
+  viewport.addEventListener('wheel', dismissHint, { once: true, passive: true });
   window.addEventListener('keydown', dismissHint, { once: true });
+
+  // ---------------------------------------------------------- simulation
+  let engine: ActivationEngine | null = null;
+  let scenario: Scenario | null = null;
+  let result: ActivationResult | null = null;
+
+  const syncControls = () => {
+    epi.input.checked = L.epicardium;
+    opacity.value = String(L.epiOpacity);
+    opVal.textContent = `${Math.round(L.epiOpacity * 100)}%`;
+    cond.input.checked = L.conduction;
+    csList.hidden = !L.conduction;
+    labels.input.checked = L.labels;
+    cutBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === scene.cut.mode)));
+    cutSlider.disabled = scene.cut.mode === 'off';
+  };
+
+  const openBeat = () => {
+    if (!result) return;
+    endTour();
+    scene.select(null, true);
+    lower.hidden = true;
+    bar.show('beat');
+    bar.setStyleState(scene.style, mapRange, palette);
+    setConduction(true);
+    scene.setTime(0);
+    scene.play();
+    app.classList.add('bar-open');
+  };
+  const closeBar = () => {
+    scene.pause();
+    scene.select(null, true);
+    bar.hide();
+    lower.hidden = false;
+    app.classList.remove('bar-open');
+    tourStep = -1;
+  };
+  bar.onClose = () => {
+    closeBar();
+    if (scene.style === 'map') setStyle('live');
+  };
+  playBeat.addEventListener('click', openBeat);
+
+  // guided tour
+  let tourStep = -1;
+  const applyTourStep = (i: number) => {
+    const s = TOUR[i];
+    tourStep = i;
+    scene.pause();
+    L.epicardium = true;
+    if (s.epiOpacity !== undefined) {
+      opacityBeforeConduction = null;
+      setOpacity(s.epiOpacity);
+    }
+    if (s.conduction !== undefined) setConduction(s.conduction, false);
+    if (s.labels !== undefined) setLabels(s.labels);
+    if (s.cut !== undefined) {
+      scene.setCut(s.cut, 0, false);
+      cutSlider.value = '0';
+      cutVal.textContent = '0 mm';
+    }
+    if (s.style) setStyle(s.style);
+    else if (scene.style === 'map') setStyle('live');
+    scene.select(s.select ?? null, true);
+    if (s.time !== undefined) scene.setTime(s.time);
+    const target = s.focus ? scene.pathPoint(s.focus) : null;
+    scene.setCamera(new Vector3(...s.dir), s.distance, target);
+    syncControls();
+    bar.setTour(i, TOUR.length, s.title, s.text);
+    scene.applyLayers();
+    scene.relabel();
+  };
+  const startTour = () => {
+    if (!result) return;
+    lower.hidden = true;
+    bar.show('tour');
+    app.classList.add('bar-open');
+    applyTourStep(0);
+  };
+  const endTour = () => {
+    if (tourStep < 0) return;
+    tourStep = -1;
+    bar.hide();
+    app.classList.remove('bar-open');
+    lower.hidden = false;
+  };
+  bar.onTourStep = (d) => {
+    const n = tourStep + d;
+    if (n >= TOUR.length) return bar.onClose();
+    if (n >= 0) applyTourStep(n);
+  };
+  tourBtn.addEventListener('click', () => (tourStep >= 0 ? bar.onClose() : startTour()));
 
   // keyboard
   window.addEventListener('keydown', (e) => {
@@ -286,10 +497,36 @@ export function buildApp(root: HTMLElement) {
     const k = e.key.toLowerCase();
     if (k === 'l') setLabels(!L.labels);
     else if (k === 'h') app.classList.toggle('chrome-hidden');
-    else if (k === 'escape') {
-      scene.select(null);
+    else if (k === 'escape') scene.select(null);
+    else if (e.key === ' ' && result && t?.tagName !== 'BUTTON') {
+      e.preventDefault();
+      if (!bar.visible) openBeat();
+      else if (bar.currentMode === 'beat') scene.togglePlay();
+    } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const d = e.key === 'ArrowRight' ? 1 : -1;
+      if (bar.currentMode === 'beat') bar.stepEvent(d);
+      else if (bar.currentMode === 'tour') bar.onTourStep(d);
     }
   });
 
-  return { scene, app, loading, chamberInputs };
+  /** Called once the graph is loaded and the scenario has been solved. */
+  const attachSimulation = (
+    eng: ActivationEngine,
+    sc: Scenario,
+    res: ActivationResult,
+    events: { id: string; label: string; t: number; caption: string }[],
+    scopes: Record<string, [number, number]>,
+  ) => {
+    engine = eng;
+    scenario = sc;
+    result = res;
+    scene.playback.duration = sc.period_ms;
+    ranges = scopes;
+    mapRange = ranges.all;
+    scene.setMapRange(mapRange[0], mapRange[1]);
+    bar.setEvents(events, sc.period_ms);
+    playBeat.disabled = false;
+  };
+
+  return { scene, app, loading, chamberInputs, attachSimulation, get engine() { return engine; }, get scenario() { return scenario; } };
 }

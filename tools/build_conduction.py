@@ -27,17 +27,17 @@ from heartdata import ROOT  # noqa: E402
 OUT = ROOT / "public/heart"
 
 # Edge kinds (index = kind id used by the engine).
-KINDS = ["atrial", "ventricular", "san", "bachmann", "avn", "his", "bundle", "purkinje", "avn_in", "pmj"]
+KINDS = ["atrial", "ventricular", "san", "bachmann", "avn", "his", "bundle", "purkinje", "avn_in", "pmj", "interatrial"]
 # Conduction velocities in m/s (= mm/ms). SPEC section 5 starting values; to be confirmed.
 CONSTANTS = dict(
-    v_atrial=1.0, v_ventricular=0.5, v_san=0.3, v_bachmann=1.5, v_avn=0.08, v_his=2.0,
-    v_bundle=3.0, v_purkinje=3.0, v_avn_in=1.0, v_pmj=0.5, pmj_delay_ms=3.0,
+    v_atrial=1.0, v_ventricular=0.5, v_san=0.3, v_bachmann=2.0, v_avn=0.08, v_his=2.0,
+    v_bundle=3.0, v_purkinje=3.0, v_avn_in=1.0, v_pmj=0.5, v_interatrial=0.03, pmj_delay_ms=3.0,
     apd_atrial=190.0, apd_ventricular=280.0, apd_conduction=110.0,
 )
 VEL = {k: CONSTANTS[f"v_{k}"] for k in KINDS if f"v_{k}" in CONSTANTS}
 VEL_BY_KIND = np.array([CONSTANTS["v_atrial"], CONSTANTS["v_ventricular"], CONSTANTS["v_san"], CONSTANTS["v_bachmann"],
                         CONSTANTS["v_avn"], CONSTANTS["v_his"], CONSTANTS["v_bundle"], CONSTANTS["v_purkinje"],
-                        CONSTANTS["v_avn_in"], CONSTANTS["v_pmj"]])
+                        CONSTANTS["v_avn_in"], CONSTANTS["v_pmj"], CONSTANTS["v_interatrial"]])
 
 ATRIAL_LABELS = [3, 4] + list(range(11, 25))
 VENT_LABELS = [1, 2]
@@ -94,7 +94,23 @@ def tissue_graph(P, T, L, r_atrial=1.7, r_vent=3.0):
     ok = (ca >= 0) & (cb >= 0) & (ca != cb)
     ca, cb = ca[ok], cb[ok]
     lo, hi = np.minimum(ca, cb), np.maximum(ca, cb)
-    code = np.unique(lo * (len(pos) + 1) + hi)
+    codes = [lo * (len(pos) + 1) + hi]
+
+    # Extra neighbour edges between nearby nodes of the same class. The tet-derived edges alone give
+    # a sparse, lattice-like graph whose shortest paths leave blotchy fronts; the extra edges are
+    # kept only if their mid-point lies inside tissue (so nothing jumps across a cavity).
+    for c, r in ((0, r_atrial), (1, r_vent)):
+        sel = np.where(cls == c)[0]
+        tree = cKDTree(pos[sel])
+        pairs = tree.query_pairs(r * 1.9, output_type="ndarray")
+        a_, b_ = sel[pairs[:, 0]], sel[pairs[:, 1]]
+        mid = (pos[a_] + pos[b_]) / 2
+        fine = np.where(has & (fine_cls == c))[0]
+        d_mid, _ = cKDTree(P[fine]).query(mid)
+        keep = d_mid < 1.3
+        a_, b_ = a_[keep], b_[keep]
+        codes.append(np.minimum(a_, b_) * (len(pos) + 1) + np.maximum(a_, b_))
+    code = np.unique(np.concatenate(codes))
     a, b = code // (len(pos) + 1), code % (len(pos) + 1)
     same = cls[a] == cls[b]
     a, b = a[same], b[same]
@@ -108,7 +124,15 @@ class Builder:
         P, T, L, _ = self.g.P, self.g.T, self.g.L, None
         self.pos, self.cls, self.reg, e, el, self.cluster = tissue_graph(P, T, L)
         self.n_tissue = len(self.pos)
-        self.edges = [(int(a), int(b), float(l), 0 if self.cls[a] == 0 else 1, 0.0) for (a, b), l in zip(e, el)]
+        # Contact between right and left atrial tissue (the mesh merges the two walls wherever they
+        # touch) is given its own slower edge kind: the interatrial septum and groove are poorly
+        # coupled apart from Bachmann's bundle and a few specific connections.
+        def kind(a, b):
+            if self.cls[a] == 1:
+                return 1
+            return KINDS.index("interatrial") if self.reg[a] != self.reg[b] else 0
+
+        self.edges = [(int(a), int(b), float(l), kind(a, b), 0.0) for (a, b), l in zip(e, el)]
         self.node_pos = [p for p in self.pos]
         self.node_cls = list(self.cls)
         self.node_reg = list(self.reg)
@@ -188,6 +212,7 @@ class Builder:
             self.named[f"{f}_end"] = n[f][-1]
         # Bachmann's bundle: coupled to atrial muscle at its two ends
         bb = n["Bachmann"]
+        self.named["Bachmann_start"], self.named["Bachmann_end"] = bb[0], bb[-1]
         for node in bb[:2]:
             self.link_to_tissue(node, 0, 3.5, "bachmann", max_links=3)
         for node in bb[-2:]:
@@ -214,7 +239,6 @@ class Builder:
             for t in pk["terminals"]:
                 self.link_to_tissue(node_of[t], 1, 4.5, "pmj", CONSTANTS["pmj_delay_ms"], max_links=2)
             self.purk_nodes[which] = node_of
-            self.named[f"Purkinje_{which}_first"] = None
 
     # --------------------------------------------------------------------- reference solver
     def solve(self, constants=CONSTANTS):
@@ -359,14 +383,17 @@ def main():
         blobs.append(raw + b"\0" * pad)
         off += len(raw) + pad
 
-    e = np.array([(a, c) for a, c, *_ in b.edges], dtype=np.uint32)
+    assert npos < 65536
+    e = np.array([(a, c) for a, c, *_ in b.edges], dtype=np.uint16)
     put("pos", np.array(b.node_pos, dtype=np.float32))
     put("cls", np.array(b.node_cls, dtype=np.uint8))
     put("region", np.array(b.node_reg, dtype=np.uint8))
-    put("edges", e)
-    put("elen", np.array([x[2] for x in b.edges], dtype=np.float32))
+    put("edges", e)  # edge length is recomputed from node positions at load
     put("ekind", np.array([x[3] for x in b.edges], dtype=np.uint8))
-    put("edelay", np.array([x[4] for x in b.edges], dtype=np.float32))
+    delay = np.array([x[4] for x in b.edges], dtype=np.float32)
+    nz = np.where(delay != 0)[0]
+    put("delay_idx", nz.astype(np.uint32))
+    put("delay_val", delay[nz])
     for name, (idx, w) in mapping.items():
         put(f"map_{name}_idx", idx)
         put(f"map_{name}_w", w)
@@ -382,7 +409,13 @@ def main():
         "named": {k: int(v) for k, v in b.named.items() if v is not None},
         "stimulus": {"site": "SAN", "node": int(b.named["SAN"]), "time_ms": 0.0},
         "paths": {k: {"kind": g.paths[k]["kind"], "schematic": bool(g.paths[k]["schematic"]),
-                      "length_mm": round(arclen(g.paths[k]["points"]), 1)} for k in g.paths},
+                      "length_mm": round(arclen(g.paths[k]["points"]), 1),
+                      "mid": [round(float(x), 2) for x in g.paths[k]["points"][len(g.paths[k]["points"]) // 2]]}
+                  for k in g.paths},
+        "ranges": {w: [int(min(b.purk_nodes[w].values())), int(max(b.purk_nodes[w].values())) + 1] for w in ("LV", "RV")},
+        "purkinje": {w: {"centre": [round(float(x), 2) for x in np.mean(
+            [g.surf[g.purk[w]["surf"]][0][v] for v in {v for e in g.purk[w]["edges"] for v in e}], axis=0)],
+            "terminals": len(g.purk[w]["terminals"])} for w in ("LV", "RV")},
         "landmarks": {k: [round(float(x), 2) for x in np.asarray(v).ravel()] for k, v in g.lm.items()
                       if k in ("apex", "base", "cfb", "svc_centre", "ivc_centre", "laa_ostium")},
         "reference": {"atrial_ms": [float(at.min()), float(at.max())], "ventricular_ms": [float(vt.min()), float(vt.max())]},

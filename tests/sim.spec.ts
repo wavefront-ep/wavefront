@@ -1,0 +1,171 @@
+import { expect, test } from '@playwright/test';
+import { openHeart, settle, state, waitForSim } from './helpers';
+
+const sim = (page: any) =>
+  page.evaluate(() => {
+    const { engine, result, events } = (window as any).epEngine;
+    const g = engine.graph;
+    const T = result.times[0];
+    const first = (pred: (i: number) => boolean) => {
+      let lo = Infinity, hi = -Infinity;
+      for (let i = 0; i < g.meta.tissueNodes; i++) if (pred(i) && Number.isFinite(T[i])) { lo = Math.min(lo, T[i]); hi = Math.max(hi, T[i]); }
+      return [lo, hi];
+    };
+    return {
+      atrial: first((i) => g.cls[i] === 0),
+      vent: first((i) => g.cls[i] === 1),
+      lv: first((i) => g.region[i] === 1),
+      rv: first((i) => g.region[i] === 2),
+      la: first((i) => g.region[i] === 3),
+      ra: first((i) => g.region[i] === 4),
+      ref: g.meta.reference,
+      events: events.map((e: any) => [e.id, e.t]),
+      unreached: Array.from({ length: g.meta.tissueNodes }, (_, i) => T[i]).filter((t) => !Number.isFinite(t)).length,
+    };
+  });
+
+test('browser solver reproduces the reference activation and normal intervals', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  const s = await sim(page);
+  expect(s.unreached).toBe(0);
+  // same graph, same velocities: matches the Python reference to within a millisecond
+  expect(s.atrial[0]).toBeCloseTo(s.ref.atrial_ms[0], 0);
+  expect(s.atrial[1]).toBeCloseTo(s.ref.atrial_ms[1], 0);
+  expect(s.vent[0]).toBeCloseTo(s.ref.ventricular_ms[0], 0);
+  expect(s.vent[1]).toBeCloseTo(s.ref.ventricular_ms[1], 0);
+  // normal sinus intervals (SPEC 5): P about 100 ms, PR about 160 ms, QRS about 90 ms
+  const pDuration = s.atrial[1] - s.atrial[0];
+  const pr = s.vent[0] - s.atrial[0];
+  const qrs = s.vent[1] - s.vent[0];
+  expect(pDuration).toBeGreaterThan(80);
+  expect(pDuration).toBeLessThan(120);
+  expect(pr).toBeGreaterThan(140);
+  expect(pr).toBeLessThan(180);
+  expect(qrs).toBeGreaterThan(75);
+  expect(qrs).toBeLessThan(115);
+  // sequence: right atrium first, left atrium last; left septum / LV before RV
+  expect(s.ra[0]).toBeLessThan(s.la[0]);
+  expect(s.la[1]).toBeGreaterThan(s.ra[1]);
+  expect(s.lv[0]).toBeLessThan(s.rv[0]);
+  // events in order
+  const ts = s.events.map((e: any) => e[1]);
+  expect(ts).toEqual([...ts].sort((a: number, b: number) => a - b));
+  expect(s.events.map((e: any) => e[0])).toEqual(['san', 'atria', 'avn', 'his', 'branches', 'purkinje', 'ventricles', 'end']);
+});
+
+test('the sinus beat plays, pauses on space, and steps between events', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await expect(page.locator('.playbar')).toBeVisible();
+  await settle(page, 700);
+  let s = await state(page);
+  expect(s.playing).toBe(true);
+  expect(s.time).toBeGreaterThan(0);
+  expect(s.layers.conduction).toBe(true);
+  await page.keyboard.press(' ');
+  s = await state(page);
+  expect(s.playing).toBe(false);
+  const events: [string, number][] = await page.evaluate(() => (window as any).epEngine.events.map((e: any) => [e.id, e.t]));
+  await page.evaluate(() => (window as any).epHeart.setTime(0));
+  await page.keyboard.press('ArrowRight');
+  expect((await state(page)).time).toBeCloseTo(events[1][1], 1);
+  await page.keyboard.press('ArrowRight');
+  expect((await state(page)).time).toBeCloseTo(events[2][1], 1);
+  await page.keyboard.press('ArrowLeft');
+  expect((await state(page)).time).toBeCloseTo(events[1][1], 1);
+  // the caption follows the playhead
+  await expect(page.locator('.pb-caption')).toContainText('atrial muscle');
+  await page.getByRole('button', { name: 'Close the beat player' }).click();
+  await expect(page.locator('.playbar')).toBeHidden();
+});
+
+test('speed defaults to slow and the control changes it', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.25);
+  await page.getByRole('button', { name: '0.1×' }).click();
+  expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.1);
+});
+
+test('conduction layer: tubes appear, the wall turns see-through, and it restores', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Layers and views' }).click();
+  expect((await state(page)).visible.some((n: string) => n.startsWith('cs_'))).toBe(false);
+  await page.getByLabel('Conduction system').check();
+  let s = await state(page);
+  expect(s.visible).toContain('cs_SAN');
+  expect(s.visible).toContain('cs_AVN');
+  expect(s.visible).toContain('cs_Purkinje_LV');
+  expect(s.layers.epiOpacity).toBeLessThan(0.5);
+  await page.getByLabel('Conduction system').uncheck();
+  s = await state(page);
+  expect(s.visible.some((n: string) => n.startsWith('cs_'))).toBe(false);
+  expect(s.layers.epiOpacity).toBe(1);
+});
+
+test('the conduction list selects a structure and shows a schematic note where it applies', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Layers and views' }).click();
+  await page.getByLabel('Conduction system').check();
+  await page.locator('.cs-list').getByRole('button', { name: "Bachmann's bundle (schematic)" }).click();
+  expect((await state(page)).selected).toBe('cs_Bachmann');
+  await expect(page.locator('.struct-tag')).toContainText('Schematic');
+  await page.locator('.cs-list').getByRole('button', { name: 'Sinoatrial node' }).click();
+  await expect(page.locator('.struct-name')).toHaveText('Sinoatrial node');
+});
+
+test('activation map: legend in ms, palettes and scopes', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  expect((await state(page)).style).toBe('map');
+  await expect(page.locator('.pb-legend')).toBeVisible();
+  await expect(page.locator('.pb-legend')).toContainText('ms after the sinus node fires');
+  await page.getByRole('button', { name: 'Layers and views' }).click();
+  await page.getByRole('button', { name: 'CARTO-style (red early, purple late)' }).click();
+  await page.getByRole('button', { name: 'Ventricles only' }).click();
+  const first = await page.locator('.pb-legend-ticks span').first().innerText();
+  expect(Number(first)).toBeGreaterThan(100); // starts near the first ventricular activation
+  await page.getByRole('button', { name: 'Wave', exact: true }).click();
+  expect((await state(page)).style).toBe('live');
+});
+
+test('guided tour walks eight steps and ends cleanly', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  await page.locator('.rail-btn[aria-label="Guided tour"]').click();
+  await expect(page.locator('.pb-tour-count')).toHaveText('1 of 8');
+  const titles: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    titles.push(await page.locator('.pb-tour-title').innerText());
+    await expect(page.locator('.pb-tour-count')).toHaveText(`${i + 1} of 8`);
+    if (i < 7) await page.getByRole('button', { name: 'Next' }).click();
+  }
+  expect(new Set(titles).size).toBe(8);
+  expect((await state(page)).style).toBe('map'); // last step shows the map
+  await page.getByRole('button', { name: 'Finish' }).click();
+  await expect(page.locator('.playbar')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeVisible();
+});
+
+test('scenario data is validated', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  const ok = await page.evaluate(async () => {
+    const { validateScenario } = await import('/src/scenarios/types.ts');
+    try {
+      validateScenario({ id: 'x' });
+      return 'accepted';
+    } catch (e: any) {
+      return e.message;
+    }
+  });
+  expect(ok).toContain('missing');
+});

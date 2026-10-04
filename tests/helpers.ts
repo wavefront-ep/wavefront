@@ -19,3 +19,8 @@ export async function settle(page: Page, ms = 1100) {
 }
 
 export const state = (page: Page) => page.evaluate(() => (window as any).epHeart.getState());
+
+/** Wait until the activation engine has solved the sinus beat. */
+export async function waitForSim(page: Page) {
+  await page.waitForFunction(() => (window as any).epEngine?.events?.length > 0, null, { timeout: 90000 });
+}

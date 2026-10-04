@@ -16,8 +16,13 @@ Legend: [x] present and correctly related, [~] present with a caveat, [ ] absent
 ## Valves
 - [~] Tricuspid, mitral, aortic, pulmonary as closed planes at the correct sites (view_superior, cut_fourchamber). Leaflets not modelled. Tricuspid vs mitral level at the septum not verified (REVIEW 9).
 
-## Conduction system
-- [ ] Not in Phase 1 (Phase 2).
+## Conduction system (Phase 2)
+- [~] SA node: subepicardial crescent lateral to the SVC-RA junction on the lateral right atrial wall. Crista terminalis absent from the mesh (REVIEW 18).
+- [~] Bachmann's bundle and internodal bands: drawn, labelled schematic (REVIEW 20).
+- [~] AV node on the right septal wall near the valve-plane convergence point; triangle of Koch borders and coronary sinus os not shown (REVIEW 17).
+- [x] His bundle through the central fibrous body to the muscular septal crest.
+- [~] Right bundle branch to the RV apex (no moderator band, REVIEW 23). Left bundle with septal, anterior and posterior fascicles (terminations schematic, REVIEW 22).
+- [~] Purkinje network as a fine terminal fan on both endocardial surfaces (algorithmic, labelled schematic, REVIEW 24).
 
 ## Views, layers and cutaway (SPEC 4.1, 4.3)
 - [x] Anterior, Posterior, Left lateral, Right lateral, Superior, Inferior, RAO, LAO (approximate) with animated transitions.

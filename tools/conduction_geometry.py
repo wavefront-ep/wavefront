@@ -171,6 +171,11 @@ class Geometry:
         b = int(np.argmin(np.linalg.norm(g.V - lm["laa_ostium"], axis=1)))
         path, _ = g.path(a, b)
         pts = resample(g.V[path], 1.0)
+        # Keep the first 66 mm: across the interatrial groove and onto the anterior left atrial wall.
+        # (In this mean mesh the appendage lies far posteriorly, so the full route to its ostium is
+        # much longer than a real Bachmann's bundle.)
+        cum = np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]
+        pts = pts[cum <= 66.0]
         # lift 0.4 mm off the surface using the nearest normals
         allV = np.vstack([self.surf["epi_RA"][0], self.surf["epi_LA"][0]])
         allN = np.vstack([self.surf["epi_RA"][1], self.surf["epi_LA"][1]])

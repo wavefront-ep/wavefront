@@ -1,0 +1,31 @@
+{
+  "id": "sinus_rhythm",
+  "mechanism": "normal",
+  "title": "Normal sinus beat",
+  "source": "Slides 5-6 (conduction system), 9 (normal sinus rhythm)",
+  "period_ms": 1000,
+  "stimuli": [{ "site": "SAN", "time_ms": 0 }],
+  "modifiers": [],
+  "events": [
+    { "id": "san", "label": "Sinus node", "at": { "node": "SAN" },
+      "caption": "The sinus node, high in the right atrium, fires and starts the beat." },
+    { "id": "atria", "label": "Atrial activation", "at": { "node": "Bachmann_start" },
+      "caption": "The impulse spreads through the right atrial muscle and enters Bachmann's bundle, which carries it across to the left atrium. The atria depolarise together as the P wave." },
+    { "id": "avn", "label": "AV node", "at": { "node": "AVN_entry" },
+      "caption": "The impulse reaches the AV node, the only normal electrical link to the ventricles. It conducts slowly, which makes the pause of the PR segment. The left atrium finishes activating meanwhile." },
+    { "id": "his", "label": "His bundle", "at": { "node": "His_proximal" },
+      "caption": "The impulse leaves the AV node and passes through the His bundle." },
+    { "id": "branches", "label": "Bundle branches", "at": { "node": "LBB_start" },
+      "caption": "The His bundle divides into the left and right bundle branches on either side of the septum." },
+    { "id": "purkinje", "label": "Purkinje fibres", "at": { "firstRange": ["LV", "RV"] },
+      "caption": "Purkinje fibres carry the impulse quickly over the inner surface of both ventricles." },
+    { "id": "ventricles", "label": "Ventricular activation", "at": { "firstTissue": "ventricular" },
+      "caption": "The ventricular muscle activates: the septum first, from left to right, then the apex and free walls from inside to outside. This is the QRS complex." },
+    { "id": "end", "label": "Activation complete", "at": { "lastTissue": "ventricular" },
+      "caption": "The base of the ventricles is the last region to activate. Repolarisation follows." }
+  ],
+  "teaching_points": [
+    "Normal sinus rhythm: the sinus node controls the whole heart, every P wave is followed by a QRS, rate 60 to 100 per minute (slide 9).",
+    "The AV node delay produces the PR interval; the Purkinje system makes the QRS narrow."
+  ]
+}
