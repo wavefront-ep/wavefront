@@ -12,6 +12,8 @@ const ICONS = {
   mechanisms: svg('M2 11h4l1.5-5 3 9 1.7-4H18'),
   // Three stacked rules: layers and views.
   layers: svg('M3 5h14M3 10h14M3 15h14'),
+  // A circle crossed by a straight cut.
+  cut: svg('M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14ZM3 14.5 17 5.5'),
 };
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: string) {
@@ -39,9 +41,10 @@ export function buildApp(root: HTMLElement) {
   const mech = railBtn(ICONS.mechanisms, 'Mechanisms (not yet available)');
   mech.setAttribute('aria-disabled', 'true');
   rail.append(explore, mech, el('div', 'spacer'));
+  const cutBtn = railBtn(ICONS.cut, 'Cutaway');
   const layersBtn = railBtn(ICONS.layers, 'Layers and views');
   layersBtn.setAttribute('aria-pressed', 'false');
-  rail.appendChild(layersBtn);
+  rail.append(cutBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -77,7 +80,22 @@ export function buildApp(root: HTMLElement) {
   secCredit.appendChild(
     el('p', 'cap', 'Heart geometry: Rodero et al., PLoS Computational Biology 2021, average shape of a healthy-adult statistical model (CC BY 4.0). Surface extracted, smoothed and decimated for this viewer.'),
   );
-  drawer.append(secStructure, secView, secLayers, secCut, secCredit);
+  secStructure.id = 'sec-structure';
+  secCut.id = 'sec-cutaway';
+  secLayers.id = 'sec-layers';
+  secView.id = 'sec-view';
+  const nav = el('nav', 'drawer-nav');
+  nav.setAttribute('aria-label', 'Jump to section');
+  const goTo = (id: string) => {
+    const t = drawer.querySelector<HTMLElement>(`#${id}`)!;
+    drawer.scrollTo({ top: t.offsetTop - 64, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
+  for (const [id, name] of [['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
+    const b = el('button', undefined, name);
+    b.addEventListener('click', () => goTo(id));
+    nav.appendChild(b);
+  }
+  drawer.append(nav, secStructure, secCut, secLayers, secView, secCredit);
   app.append(rail, stage, drawer);
 
   // ---------------------------------------------------------- scene
@@ -91,6 +109,10 @@ export function buildApp(root: HTMLElement) {
     layersBtn.setAttribute('aria-pressed', String(open));
   };
   layersBtn.addEventListener('click', () => setDrawer(!app.classList.contains('drawer-open')));
+  cutBtn.addEventListener('click', () => {
+    setDrawer(true);
+    requestAnimationFrame(() => goTo('sec-cutaway'));
+  });
 
   const showStructure = (mesh: string | null) => {
     structBody.innerHTML = '';

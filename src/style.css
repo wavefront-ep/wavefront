@@ -84,6 +84,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .loading.gone { opacity: 0; pointer-events: none; }
 
 /* ---- drawer ---- */
+.drawer-nav {
+  position: sticky; top: -22px; z-index: 2; margin: -22px -24px 18px; padding: 14px 24px 12px; background: var(--bg);
+  border-bottom: 1px solid var(--faint); display: flex; gap: 18px; white-space: nowrap;
+}
+.drawer-nav button { font-size: 12.5px; color: var(--muted); transition: color var(--t); }
+.drawer-nav button:hover { color: var(--ink); }
+
 .drawer {
   border-left: 1px solid var(--faint); overflow-y: auto; overflow-x: hidden; width: var(--drawer); background: var(--bg);
   padding: 22px 24px 40px; position: relative; z-index: 3;
