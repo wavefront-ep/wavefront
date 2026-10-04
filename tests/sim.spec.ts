@@ -82,11 +82,11 @@ test('the sinus beat plays, pauses on space, and steps between events', async ({
   await expect(page.locator('.playbar')).toBeHidden();
 });
 
-test('speed defaults to slow and the control changes it', async ({ page }) => {
+test('speed defaults to 0.05x and the control changes it', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
   await page.getByRole('button', { name: 'Play sinus beat' }).click();
-  expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.25);
+  expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.05);
   await page.getByRole('button', { name: '0.1×' }).click();
   expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.1);
 });

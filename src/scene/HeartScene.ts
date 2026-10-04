@@ -104,7 +104,7 @@ export class HeartScene {
   onPlayState: (playing: boolean) => void = () => {};
 
   /** Playhead for the activation animation. Times are in milliseconds of heart time. */
-  readonly playback = { t: 0, playing: false, speed: 0.25, loop: true, duration: 1000 };
+  readonly playback = { t: 0, playing: false, speed: 0.05, loop: true, duration: 1000 };
   style: 'live' | 'map' = 'live';
   private engine: ActivationEngine | null = null;
   private ghosts = new Map<string, Mesh>();
