@@ -1,0 +1,6 @@
+{ "id": "vf-base", "mechanism": "x", "group": "reentry", "title": "x", "summary": "x", "source": "x", "period_ms": 3000, "events": [], "teaching_points": [],
+  "tag": "vf",
+  "constants": { "apd_ventricular": 150, "v_ventricular": 0.5 },
+  "modifiers": [{ "kind": "avn", "velocity_scale": 0 }, { "kind": "slow_pathway", "velocity_scale": 0 }, { "kind": "pmj", "direction": "antegrade" }],
+  "candidate_sites": ["V_apex", "V_RVOT", "V_LV_lateral", "V_LV_base", "V_RV_free"],
+  "min_gap_ms": 70, "jitter_ms": 90, "min_reach_nodes": 120, "max_ms": 2600 }

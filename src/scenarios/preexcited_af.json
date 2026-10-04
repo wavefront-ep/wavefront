@@ -1,0 +1,258 @@
+{
+  "id": "preexcited_af",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Pre-excited atrial fibrillation",
+  "summary": "Atrial fibrillation in a patient with an accessory pathway. Impulses cross the pathway fast, giving a rapid, irregular, wide-complex rhythm.",
+  "source": "Slides 85-87 (atrial fibrillation with pre-excitation)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 126
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 252
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 378
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 540
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 636
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 744
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_low",
+          "time_ms": 912
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_lateral",
+          "time_ms": 1062
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 1170
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 1296
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "RA_low",
+          "time_ms": 1386
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1458
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1602
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1746
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1872
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "apd_atrial": 110
+  },
+  "modifiers": [
+    {
+      "enable": "ap_left_free_wall"
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 240
+    },
+    {
+      "region": "ap_left_free_wall",
+      "erp_ms": 190
+    }
+  ],
+  "decrement": [
+    {
+      "kind": "avn",
+      "max_ms": 12,
+      "tau_ms": 60
+    }
+  ],
+  "show": [
+    "sub_ap_left_free_wall"
+  ],
+  "labels": [
+    "sub_ap_left_free_wall",
+    "cs_AVN"
+  ],
+  "camera": {
+    "dir": [
+      0.95,
+      0.1,
+      -0.35
+    ],
+    "distance": 2.2,
+    "focus": "ap_left_free_wall"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "ap_left_free_wall",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "af": "fib"
+    },
+    "ventricular": {
+      "af": "delta"
+    }
+  },
+  "events": [
+    {
+      "id": "af",
+      "label": "Atrial fibrillation",
+      "at": {
+        "node": "PV_RSPV",
+        "wave": 0
+      },
+      "caption": "The atria fibrillate as before, but this heart also has an accessory pathway.",
+      "ecg": "Fibrillatory baseline."
+    },
+    {
+      "id": "ap",
+      "label": "Down the pathway",
+      "at": {
+        "node": "AP_left_free_wall_atrial",
+        "wave": 0
+      },
+      "caption": "Unlike the AV node, the pathway has no decremental delay and conducts fast impulses. It carries many atrial impulses straight to the ventricle.",
+      "ecg": "Wide QRS complexes (pre-excited)."
+    },
+    {
+      "id": "fast",
+      "label": "Fast and irregular",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 2
+      },
+      "caption": "The ventricular rate can be much faster than in ordinary atrial fibrillation, and the complexes vary as the AV node and pathway share the work.",
+      "ecg": "A fast, irregular wide-complex rhythm."
+    },
+    {
+      "id": "danger",
+      "label": "Risk of VF",
+      "at": {
+        "lastTissue": "ventricular",
+        "wave": 15
+      },
+      "caption": "Very rapid conduction over the pathway can degenerate into ventricular fibrillation. AV-node-blocking drugs can make this worse by pushing more impulses down the pathway.",
+      "ecg": "Irregular wide complexes at very short R-R intervals."
+    }
+  ],
+  "teaching_points": [
+    "In AF with pre-excitation the accessory pathway can conduct very fast, so the ventricular rate is rapid and irregular (slides 85-86).",
+    "It can degenerate into ventricular fibrillation (slide 87).",
+    "AV nodal blocking drugs are avoided because they do not slow the pathway."
+  ]
+}

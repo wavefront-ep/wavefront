@@ -1,0 +1,108 @@
+{
+  "id": "rbbb",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Right bundle branch block",
+  "summary": "The right bundle branch does not conduct. The right ventricle is activated late, cell to cell.",
+  "source": "Slide 92 (right bundle branch block)",
+  "period_ms": 1500,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1000
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "edgeset": "rbb",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "select": "cs_RBB",
+  "labels": [
+    "cs_His",
+    "cs_LBB",
+    "cs_RBB"
+  ],
+  "camera": {
+    "dir": [
+      -0.2,
+      0,
+      1
+    ],
+    "distance": 2.7
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "RBB",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "sinus": "rbbb"
+    }
+  },
+  "events": [
+    {
+      "id": "avn",
+      "label": "Normal until the His bundle",
+      "at": {
+        "node": "His_proximal",
+        "wave": 0
+      },
+      "caption": "The atria, the AV node and the His bundle work normally.",
+      "ecg": "A normal P wave and PR interval."
+    },
+    {
+      "id": "lbb",
+      "label": "Left bundle conducts",
+      "at": {
+        "node": "LBB_start",
+        "wave": 0
+      },
+      "caption": "The impulse goes down the left bundle branch and activates the septum and left ventricle in the normal way. The right bundle branch is blocked.",
+      "ecg": "The first part of the QRS looks normal."
+    },
+    {
+      "id": "rv",
+      "label": "Right ventricle late",
+      "at": {
+        "firstRegion": 2,
+        "wave": 0
+      },
+      "caption": "The right ventricle is activated late, cell to cell, after the left ventricle.",
+      "ecg": "A late second R wave (R') appears at the end of the QRS."
+    },
+    {
+      "id": "end",
+      "label": "Wide QRS",
+      "at": {
+        "lastTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Activation finishes much later than normal.",
+      "ecg": "QRS over 120 ms with an rSR' pattern and an inverted T wave."
+    }
+  ],
+  "teaching_points": [
+    "Right bundle branch block: the right ventricle is activated late and the QRS is wide (slide 92).",
+    "Left ventricular activation is normal, so the first part of the QRS is normal.",
+    "It can be a normal variant or a sign of right heart strain or disease."
+  ]
+}

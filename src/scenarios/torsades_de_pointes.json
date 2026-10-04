@@ -1,0 +1,205 @@
+{
+  "id": "torsades_de_pointes",
+  "mechanism": "triggered_activity",
+  "group": "formation",
+  "title": "Torsades de pointes (long QT)",
+  "summary": "In long QT, early afterdepolarisations trigger a polymorphic VT whose complexes twist about the baseline.",
+  "source": "Slides 49 (triggered activity, EAD), 80-82 (polymorphic VT, torsades, long QT)",
+  "period_ms": 3100,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 700
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_LV_lateral",
+          "time_ms": 960
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 1220
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_LV_base",
+          "time_ms": 1480
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1600
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_RV_free",
+          "time_ms": 1740
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 2000
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_LV_lateral",
+          "time_ms": 2260
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2400
+        }
+      ]
+    },
+    {
+      "tag": "tdp",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 2520
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "apd_ventricular": 170,
+    "v_ventricular": 0.6
+  },
+  "modifiers": [
+    {
+      "kind": "avn",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "highlight": [
+    "site_V_apex",
+    "site_V_LV_lateral",
+    "site_V_RVOT",
+    "site_V_LV_base",
+    "site_V_RV_free"
+  ],
+  "labels": [],
+  "camera": {
+    "dir": [
+      0.2,
+      -0.3,
+      1
+    ],
+    "distance": 2.9
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "multiple",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "tdp": "torsades"
+    }
+  },
+  "events": [
+    {
+      "id": "lqt",
+      "label": "Prolonged repolarisation",
+      "at": {
+        "at_ms": 350
+      },
+      "caption": "In long QT syndrome ventricular repolarisation is prolonged. During the plateau, calcium re-enters and the cell membrane oscillates: an early afterdepolarisation (EAD).",
+      "ecg": "A long QT interval."
+    },
+    {
+      "id": "trigger",
+      "label": "Triggered beat",
+      "at": {
+        "at_ms": 700
+      },
+      "caption": "An EAD reaches threshold and fires an extra beat. This is triggered activity, not a circuit: the focus changes from beat to beat.",
+      "ecg": "A premature wide complex, often after a long pause."
+    },
+    {
+      "id": "moves",
+      "label": "Moving focus",
+      "at": {
+        "at_ms": 960
+      },
+      "caption": "Each new beat is triggered from a different site. The ventricles are activated in a different order every time, so the QRS changes shape (polymorphic).",
+      "ecg": "The complexes change in size and direction: the twisting of the points."
+    },
+    {
+      "id": "twist",
+      "label": "Twisting",
+      "at": {
+        "at_ms": 1480
+      },
+      "caption": "The wide complexes wax and wane around the baseline. Hypokalaemia, hypomagnesaemia, bradycardia and many drugs can cause it, as can genetic long QT syndromes.",
+      "ecg": "A twisting, polymorphic wide-complex tachycardia. It may stop by itself or degenerate to VF."
+    }
+  ],
+  "teaching_points": [
+    "Triggered activity: early afterdepolarisations (phase 2-3) in long QT, delayed afterdepolarisations (phase 4) in digoxin toxicity and CPVT (slide 49).",
+    "Torsades de pointes is a polymorphic VT in the setting of a long QT interval (slides 80-82).",
+    "Causes: congenital long QT syndromes, hypokalaemia, hypomagnesaemia, drugs and bradycardia (slide 82).",
+    "This illustration shows the ventricular activation sequence only; the cellular mechanism is not simulated."
+  ]
+}

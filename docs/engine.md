@@ -69,3 +69,16 @@ sequence event on the strip. Scenarios choose a template
   tubes (`sub_*`) and region masks.
 - **Checking a scenario without the browser:** `npx tsx scripts/run-scenario.mts src/scenarios/avnrt.json` prints,
   for every wave, the atrial and ventricular activation windows.
+
+## Phase 3b additions
+
+- **Event-driven solver.** `solveWaves` runs every wave of a scenario in one simulation ordered by time. A node
+  accepts an impulse only when it has recovered from its last activation, so overlapping waves compete for
+  tissue and fibrillatory activity can emerge from refractoriness alone. Each wave still activates a node at
+  most once.
+- **Fibrillation sequences** (`scripts/build-fibrillation.mts`, inputs in `tools/af-base.json`, `vf-base.json`):
+  walk forward in time, firing candidate foci wherever tissue has recovered and the resulting wave can spread.
+  The output is copied into the scenario files.
+- **Bundle branch blocks** use the `lbb` and `rbb` edge sets; foci use the named stimulus sites (`V_*`, `PV_*`,
+  `RA_*`, `LA_*`) and the `site_*` region masks for highlighting.
+- **ECG templates** now include fibrillatory baseline, VF, torsades (twisting envelope), LBBB and RBBB.

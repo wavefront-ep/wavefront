@@ -1,0 +1,151 @@
+{
+  "id": "svt_aberrancy",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "SVT with aberrancy (AVNRT with right bundle branch block)",
+  "summary": "A supraventricular tachycardia conducted with a bundle branch block looks like a wide-complex tachycardia.",
+  "source": "Slide 93 (SVT with aberrancy)",
+  "period_ms": 2800,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "pac",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 270
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "lap",
+      "first_after": {
+        "wave": 1,
+        "node": "AVN_entry"
+      },
+      "every_ms": 327,
+      "laps": 6,
+      "exit_sites": [
+        {
+          "site": "AVN_atrial_exit",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "direction": "antegrade"
+    },
+    {
+      "edgeset": "rbb",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 300
+    },
+    {
+      "region": "slow_pathway",
+      "erp_ms": 150
+    }
+  ],
+  "show": [
+    "sub_slow_pathway"
+  ],
+  "highlight": [
+    "triangle_koch"
+  ],
+  "select": "cs_AVN",
+  "camera": {
+    "dir": [
+      -0.9,
+      0.2,
+      0.55
+    ],
+    "distance": 1.55,
+    "focus": "AVN"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "slow_pathway",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "lap": "retro"
+    },
+    "ventricular": {
+      "sinus": "rbbb",
+      "pac": "rbbb",
+      "lap": "rbbb"
+    }
+  },
+  "events": [
+    {
+      "id": "sinus",
+      "label": "Sinus beat",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "This patient has a right bundle branch block, so even sinus beats have a wide QRS.",
+      "ecg": "A wide QRS with a sinus P wave."
+    },
+    {
+      "id": "start",
+      "label": "AVNRT starts",
+      "at": {
+        "node": "PAC_RA",
+        "wave": 1
+      },
+      "caption": "A premature atrial beat starts AV nodal reentry exactly as in ordinary AVNRT: down the slow pathway, back up the fast one.",
+      "ecg": "An early P wave, then a regular tachycardia."
+    },
+    {
+      "id": "tachy",
+      "label": "Wide-complex tachycardia",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 3
+      },
+      "caption": "The circuit is entirely supraventricular, but every impulse is conducted with the same bundle branch block, so the QRS is wide.",
+      "ecg": "A regular wide-complex tachycardia that looks like ventricular tachycardia."
+    },
+    {
+      "id": "clue",
+      "label": "The clue",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 4
+      },
+      "caption": "The QRS is the same shape as in sinus rhythm. VT usually looks different from the patient's own conducted beats.",
+      "ecg": "The tachycardia QRS matches the sinus-rhythm QRS."
+    }
+  ],
+  "teaching_points": [
+    "Aberrancy: a supraventricular tachycardia conducted with a bundle branch block (existing or rate-related) gives a wide QRS (slide 93).",
+    "Most wide-complex tachycardias are ventricular tachycardia, so treat it as VT unless proven otherwise (slide 94).",
+    "A QRS identical to the patient's QRS in sinus rhythm supports SVT with aberrancy."
+  ],
+  "labels": [
+    "cs_AVN",
+    "sub_slow_pathway",
+    "cs_RBB"
+  ]
+}

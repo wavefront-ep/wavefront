@@ -1,0 +1,249 @@
+{
+  "id": "atrial_fibrillation",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Atrial fibrillation",
+  "summary": "Rapid, disorganised wavelets, often triggered at the pulmonary veins, activate the atria. The ventricular response is irregularly irregular.",
+  "source": "Slides 69-70, 73 (atrial fibrillation)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 126
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 252
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 378
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 540
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 636
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 744
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_low",
+          "time_ms": 912
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_lateral",
+          "time_ms": 1062
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 1170
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 1296
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "RA_low",
+          "time_ms": 1386
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1458
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1602
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1746
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1872
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "apd_atrial": 110
+  },
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 240
+    }
+  ],
+  "decrement": [
+    {
+      "kind": "avn",
+      "max_ms": 12,
+      "tau_ms": 60
+    }
+  ],
+  "highlight": [
+    "pv_ostia"
+  ],
+  "labels": [
+    "vein_LSPV",
+    "vein_LIPV",
+    "vein_RSPV",
+    "vein_RIPV"
+  ],
+  "camera": {
+    "dir": [
+      0.1,
+      0.4,
+      -1
+    ],
+    "distance": 2.3
+  },
+  "epi_opacity": 0.45,
+  "critical_site": "pv_ostia",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "af": "fib"
+    }
+  },
+  "events": [
+    {
+      "id": "trigger",
+      "label": "Pulmonary vein trigger",
+      "at": {
+        "node": "PV_RSPV",
+        "wave": 0
+      },
+      "caption": "Rapid firing from the pulmonary veins (tinted) starts the arrhythmia. The sleeves of atrial muscle around the veins are the usual triggers. Other atrial sites join in.",
+      "ecg": "The baseline begins to look irregular."
+    },
+    {
+      "id": "wavelets",
+      "label": "Disorganised activation",
+      "at": {
+        "node": "PV_RIPV",
+        "wave": 1
+      },
+      "caption": "New impulses arrive before the atria have fully recovered, so each activates only the tissue that is ready. Wavefronts collide and fragment: there is no single organised wave. The atrial rate is 400 to 600 per minute.",
+      "ecg": "Fibrillatory waves, small, fast and varying in shape, instead of P waves."
+    },
+    {
+      "id": "avn",
+      "label": "AV node filters",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "The AV node is bombarded and conducts only some impulses, at irregular intervals, depending on how recovered it is.",
+      "ecg": "Narrow QRS complexes at irregular intervals."
+    },
+    {
+      "id": "irregular",
+      "label": "Irregularly irregular",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 2
+      },
+      "caption": "The ventricular rhythm has no pattern. Compare the R-R intervals.",
+      "ecg": "An irregularly irregular narrow-complex rhythm with no P waves."
+    }
+  ],
+  "teaching_points": [
+    "Atrial fibrillation: rapid, disorganised atrial activity at 400-600 per minute from multiple foci or wavefronts, with an irregularly irregular ventricular response (slide 69).",
+    "Pulmonary vein triggers are the target of catheter ablation (pulmonary vein isolation).",
+    "It is not the only irregular narrow-complex tachycardia: ectopics, multifocal atrial tachycardia and flutter with variable block can mimic it (slides 71-74)."
+  ]
+}

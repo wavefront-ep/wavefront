@@ -1,0 +1,150 @@
+{
+  "id": "mobitz_i",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Second-degree AV block, Mobitz type I (Wenckebach)",
+  "summary": "The PR interval lengthens beat by beat until one P wave fails to conduct, then the cycle repeats.",
+  "source": "Slides 33-35 (Mobitz type I, Wenckebach)",
+  "period_ms": 4000,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 650
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1300
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1950
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2600
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 3250
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 630
+    }
+  ],
+  "decrement": [
+    {
+      "kind": "avn",
+      "max_ms": 28,
+      "tau_ms": 80
+    }
+  ],
+  "select": "cs_AVN",
+  "labels": [
+    "cs_AVN",
+    "cs_His"
+  ],
+  "camera": {
+    "dir": [
+      -0.9,
+      0.2,
+      0.55
+    ],
+    "distance": 1.6,
+    "focus": "AVN"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "AVN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "pr1",
+      "label": "Normal PR",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "The first impulse conducts through the AV node with a normal delay.",
+      "ecg": "A normal PR interval, about 160 ms."
+    },
+    {
+      "id": "pr2",
+      "label": "Longer PR",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 1
+      },
+      "caption": "The next impulse arrives while the AV node is still recovering. A node that has not fully recovered conducts more slowly, so the delay is longer.",
+      "ecg": "The PR interval is longer than the one before."
+    },
+    {
+      "id": "drop",
+      "label": "Dropped beat",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 2
+      },
+      "caption": "The third impulse arrives even earlier in the node's recovery and is blocked. The node has time to recover during the pause.",
+      "ecg": "A P wave with no QRS after it."
+    },
+    {
+      "id": "again",
+      "label": "Cycle repeats",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 3
+      },
+      "caption": "After the dropped beat the node has recovered fully and the sequence starts again.",
+      "ecg": "The PR is short again after the pause: grouped beating, 3:2 conduction here."
+    }
+  ],
+  "teaching_points": [
+    "Mobitz type I (Wenckebach): the PR interval lengthens until a P wave is blocked (slides 34-35).",
+    "The block is in the AV node. Without organic heart disease it is not strongly associated with increased morbidity or mortality (slide 34).",
+    "The mechanism is decremental conduction: the sooner an impulse arrives after the node recovers, the slower it conducts."
+  ]
+}

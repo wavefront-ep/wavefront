@@ -1,14 +1,15 @@
 // Produces the Phase 3 review package in review/phase3. Run: npx playwright test tests/review3.spec.ts
 import { test } from '@playwright/test';
+import { readdirSync } from 'node:fs';
 import { openHeart, settle, waitForSim } from './helpers';
 
 const OUT = 'review/phase3';
 test.describe.configure({ mode: 'serial' });
-const IDS = ['complete_heart_block', 'avnrt', 'wpw_preexcitation', 'avrt_orthodromic', 'atrial_flutter_typical', 'vt_scar_monomorphic'];
+const IDS = readdirSync('src/scenarios').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).filter((id) => id !== 'sinus_rhythm');
 
 for (const id of IDS) {
   test(`scenario ${id}`, async ({ page }) => {
-    await openHeart(page, 1600, 900);
+    await openHeart(page, 1400, 800);
     await waitForSim(page);
     await page.evaluate((id) => (window as any).epOpen(id), id);
     await settle(page, 2200);
@@ -17,7 +18,10 @@ for (const id of IDS) {
       const d = await loader.get(id);
       return d.events.map((e: any) => [e.id, e.t]);
     }, id);
-    for (const [eid, t] of events) {
+    // first, middle and last event of each scenario keep the package a reviewable size
+    const keep = new Set([0, Math.floor(events.length / 2), events.length - 1]);
+    for (const [i, [eid, t]] of events.entries()) {
+      if (!keep.has(i)) continue;
       await page.evaluate((t) => { const s = (window as any).epHeart; s.pause(); s.setTime(t + 4); }, t);
       await settle(page, 450);
       await page.screenshot({ path: `${OUT}/${id}_${eid}.png` });

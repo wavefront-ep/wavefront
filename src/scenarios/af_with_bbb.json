@@ -1,0 +1,250 @@
+{
+  "id": "af_with_bbb",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Atrial fibrillation with bundle branch block",
+  "summary": "A bundle branch block makes every conducted beat wide, so atrial fibrillation can look like VT. The rhythm is still irregularly irregular.",
+  "source": "Slide 88 (AF with existing bundle branch block)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 126
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 252
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 378
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 540
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 636
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 744
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_low",
+          "time_ms": 912
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "LA_lateral",
+          "time_ms": 1062
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 1170
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_LSPV",
+          "time_ms": 1296
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "RA_low",
+          "time_ms": 1386
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1458
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1602
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RIPV",
+          "time_ms": 1746
+        }
+      ]
+    },
+    {
+      "tag": "af",
+      "stimuli": [
+        {
+          "site": "PV_RSPV",
+          "time_ms": 1872
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "apd_atrial": 110
+  },
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    },
+    {
+      "edgeset": "lbb",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 240
+    }
+  ],
+  "decrement": [
+    {
+      "kind": "avn",
+      "max_ms": 12,
+      "tau_ms": 60
+    }
+  ],
+  "highlight": [
+    "pv_ostia"
+  ],
+  "labels": [
+    "cs_AVN",
+    "cs_LBB",
+    "cs_His"
+  ],
+  "camera": {
+    "dir": [
+      0.2,
+      0.2,
+      1
+    ],
+    "distance": 2.8
+  },
+  "epi_opacity": 0.45,
+  "critical_site": "pv_ostia",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "af": "fib"
+    },
+    "ventricular": {
+      "af": "lbbb"
+    }
+  },
+  "events": [
+    {
+      "id": "af",
+      "label": "Atrial fibrillation",
+      "at": {
+        "node": "PV_RSPV",
+        "wave": 0
+      },
+      "caption": "The atria fibrillate as in ordinary AF.",
+      "ecg": "Fibrillatory baseline."
+    },
+    {
+      "id": "lbbb",
+      "label": "Left bundle branch blocked",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "This patient also has a left bundle branch block, so conducted impulses activate the left ventricle late and the QRS is wide.",
+      "ecg": "A wide QRS of the same shape every time."
+    },
+    {
+      "id": "irregular",
+      "label": "Irregular",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 2
+      },
+      "caption": "Because the AV node conducts at irregular intervals, the rhythm is irregularly irregular, the main clue that this is AF and not VT.",
+      "ecg": "A wide-complex rhythm with irregular R-R intervals."
+    }
+  ],
+  "teaching_points": [
+    "With an existing bundle branch block, conducted AF has a wide QRS (slide 88).",
+    "The irregularity of the R-R intervals and the repeated QRS shape help to separate it from VT, which is usually regular.",
+    "Compare with pre-excited AF, where the QRS shape varies from beat to beat."
+  ],
+  "select": "cs_LBB"
+}

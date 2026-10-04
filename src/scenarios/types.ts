@@ -40,9 +40,9 @@ export type Modifier =
 export interface EcgRules {
   lead: string;
   /** Atrial morphology by wave tag: 'p', 'retro' or 'flutter'. */
-  atrial?: Record<string, 'p' | 'retro' | 'flutter'>;
+  atrial?: Record<string, 'p' | 'retro' | 'flutter' | 'fib'>;
   /** Ventricular morphology by wave tag: 'narrow', 'delta' or 'wide'. */
-  ventricular?: Record<string, 'narrow' | 'delta' | 'wide'>;
+  ventricular?: Record<string, 'narrow' | 'delta' | 'wide' | 'lbbb' | 'rbbb' | 'torsades' | 'vf'>;
 }
 
 export interface Scenario {

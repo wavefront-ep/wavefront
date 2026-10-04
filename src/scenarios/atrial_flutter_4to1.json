@@ -1,0 +1,129 @@
+{
+  "id": "atrial_flutter_4to1",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Atrial flutter with 4:1 conduction",
+  "summary": "Same circuit as typical flutter, but the AV node passes only every fourth wave.",
+  "source": "Slide 66 (atrial flutter, 2:1 and 4:1 conduction)",
+  "period_ms": 2000,
+  "waves": [
+    {
+      "tag": "flutter",
+      "stimuli": [
+        {
+          "site": "Flutter_start",
+          "time_ms": 0
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "flutter",
+      "first_ms": 200,
+      "every_ms": 200,
+      "laps": 8,
+      "exit_sites": [
+        {
+          "site": "Flutter_start",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "edgeset": "cti",
+      "velocity_scale": 0.5
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "avn_node",
+      "erp_ms": 700
+    }
+  ],
+  "show": [
+    "sub_flutter_ring",
+    "sub_cti",
+    "sub_crista"
+  ],
+  "highlight": [
+    "cti"
+  ],
+  "camera": {
+    "dir": [
+      -0.55,
+      -0.45,
+      0.7
+    ],
+    "distance": 1.9,
+    "focus": "sub_flutter_ring"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "cti",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "flutter": "flutter"
+    }
+  },
+  "events": [
+    {
+      "id": "start",
+      "label": "Circuit",
+      "at": {
+        "node": "Flutter_start",
+        "wave": 0
+      },
+      "caption": "The same macro-reentrant circuit around the tricuspid annulus produces flutter waves 300 times a minute.",
+      "ecg": "Continuous sawtooth flutter waves."
+    },
+    {
+      "id": "qrs",
+      "label": "Conducted beat",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "A conducted impulse activates the ventricles through the normal system.",
+      "ecg": "A narrow QRS superimposed on the flutter waves."
+    },
+    {
+      "id": "blocked",
+      "label": "Blocked waves",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 1
+      },
+      "caption": "With a longer AV node refractory period, the next three flutter waves reach the node too early and are blocked.",
+      "ecg": "Four flutter waves for each QRS."
+    },
+    {
+      "id": "next",
+      "label": "Next conducted beat",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 4
+      },
+      "caption": "The fourth wave after the last conducted one gets through. Ventricular rate about 75 per minute.",
+      "ecg": "A slow, regular ventricular rhythm: 4:1 conduction."
+    }
+  ],
+  "teaching_points": [
+    "The ventricular response in flutter depends on the AV node: 2:1 is common, 4:1 and variable block also occur (slide 66).",
+    "Flutter should be suspected whenever a regular narrow-complex rhythm runs at a ventricular rate near 150 or 75.",
+    "Slowing AV conduction does not stop the flutter; it only changes the ventricular response."
+  ],
+  "labels": [
+    "sub_flutter_ring",
+    "sub_cti",
+    "sub_crista",
+    "cs_SAN",
+    "cs_AVN"
+  ]
+}

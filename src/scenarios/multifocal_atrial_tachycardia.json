@@ -1,0 +1,149 @@
+{
+  "id": "multifocal_atrial_tachycardia",
+  "mechanism": "impulse_formation",
+  "group": "formation",
+  "title": "Multifocal atrial tachycardia",
+  "summary": "Several atrial foci take turns. The P waves differ in shape and the rhythm is irregular.",
+  "source": "Slides 71-72 (irregular narrow-complex tachycardia: multifocal atrial tachycardia)",
+  "period_ms": 3600,
+  "waves": [
+    {
+      "tag": "a",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "b",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 520
+        }
+      ]
+    },
+    {
+      "tag": "c",
+      "stimuli": [
+        {
+          "site": "RA_low",
+          "time_ms": 1090
+        }
+      ]
+    },
+    {
+      "tag": "a",
+      "stimuli": [
+        {
+          "site": "PAC_RA",
+          "time_ms": 1480
+        }
+      ]
+    },
+    {
+      "tag": "b",
+      "stimuli": [
+        {
+          "site": "LA_lateral",
+          "time_ms": 2060
+        }
+      ]
+    },
+    {
+      "tag": "c",
+      "stimuli": [
+        {
+          "site": "RA_high",
+          "time_ms": 2480
+        }
+      ]
+    },
+    {
+      "tag": "b",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 2930
+        }
+      ]
+    }
+  ],
+  "highlight": [
+    "site_PAC_RA",
+    "site_PAC_LA",
+    "site_RA_low",
+    "site_LA_lateral",
+    "site_RA_high"
+  ],
+  "labels": [
+    "cs_AVN"
+  ],
+  "camera": {
+    "dir": [
+      0,
+      0.35,
+      1
+    ],
+    "distance": 2.7
+  },
+  "epi_opacity": 0.45,
+  "critical_site": "multiple",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "a": "p",
+      "b": "retro",
+      "c": "p"
+    }
+  },
+  "events": [
+    {
+      "id": "f1",
+      "label": "First focus",
+      "at": {
+        "node": "PAC_RA",
+        "wave": 0
+      },
+      "caption": "A focus in the right atrium fires.",
+      "ecg": "A P wave of one shape."
+    },
+    {
+      "id": "f2",
+      "label": "Second focus",
+      "at": {
+        "node": "PAC_LA",
+        "wave": 1
+      },
+      "caption": "A different focus, in the left atrium, takes over. Other foci join in. The tinted regions are the foci used here.",
+      "ecg": "A P wave of a different shape."
+    },
+    {
+      "id": "f3",
+      "label": "Third focus",
+      "at": {
+        "node": "RA_low",
+        "wave": 2
+      },
+      "caption": "A third focus, low in the right atrium, fires.",
+      "ecg": "A third P wave shape."
+    },
+    {
+      "id": "irregular",
+      "label": "Irregular response",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 3
+      },
+      "caption": "Each atrial impulse is conducted if the AV node is ready for it, so the ventricular rhythm is irregular.",
+      "ecg": "At least three different P wave shapes, with irregular P-P and R-R intervals."
+    }
+  ],
+  "teaching_points": [
+    "Multifocal atrial tachycardia: several atrial foci fire, so P waves have at least three shapes and the rhythm is irregular (slides 71-72).",
+    "It is one of the irregular narrow-complex tachycardias to tell apart from atrial fibrillation (slide 71).",
+    "It is often seen in severe lung disease."
+  ]
+}

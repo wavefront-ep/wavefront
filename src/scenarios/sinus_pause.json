@@ -1,0 +1,92 @@
+{
+  "id": "sinus_pause",
+  "mechanism": "impulse_formation",
+  "group": "formation",
+  "title": "Sinus pause or arrest",
+  "summary": "The sinus node fails to fire for a while. No P wave and no QRS appear until it, or a lower pacemaker, restarts.",
+  "source": "Slide 26 (sinus pauses and arrest)",
+  "period_ms": 3600,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2600
+        }
+      ]
+    }
+  ],
+  "select": "cs_SAN",
+  "labels": [
+    "cs_SAN"
+  ],
+  "camera": {
+    "dir": [
+      -1,
+      0.25,
+      0.35
+    ],
+    "distance": 1.9,
+    "focus": "SAN"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "SAN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "regular",
+      "label": "Regular beats",
+      "at": {
+        "node": "SAN",
+        "wave": 1
+      },
+      "caption": "The sinus node fires regularly at first, about 75 times a minute.",
+      "ecg": "Normal P waves and QRS complexes."
+    },
+    {
+      "id": "pause",
+      "label": "Pause",
+      "at": {
+        "at_ms": 1700
+      },
+      "caption": "Then it fails to fire. A short failure is a pause; a longer one is sinus arrest. Nothing is activated.",
+      "ecg": "A long flat line with no P wave and no QRS."
+    },
+    {
+      "id": "restart",
+      "label": "Node restarts",
+      "at": {
+        "node": "SAN",
+        "wave": 2
+      },
+      "caption": "The node starts again. If it did not, a lower pacemaker would eventually take over as an escape rhythm.",
+      "ecg": "Normal P wave and QRS resume."
+    }
+  ],
+  "teaching_points": [
+    "A sinus pause or arrest is a failure of sinus node automaticity: no P wave appears where one is expected (slide 26).",
+    "A pause that is an exact multiple of the usual P-P interval suggests sinoatrial exit block instead (slide 25).",
+    "Symptoms depend on how long it lasts: dizziness, loss of consciousness (slide 16)."
+  ]
+}

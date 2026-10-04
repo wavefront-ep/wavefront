@@ -1,0 +1,127 @@
+{
+  "id": "antidromic_avrt",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Antidromic AV reentrant tachycardia",
+  "summary": "The circuit runs the opposite way to orthodromic AVRT: down the accessory pathway, up the AV node. The QRS is wide.",
+  "source": "Slide 89 (antidromic AVRT)",
+  "period_ms": 2300,
+  "waves": [
+    {
+      "tag": "lap",
+      "stimuli": [
+        {
+          "site": "AVN_atrial_exit",
+          "time_ms": 0
+        }
+      ]
+    }
+  ],
+  "loops": [
+    {
+      "tag": "lap",
+      "first_ms": 291,
+      "every_ms": 291,
+      "laps": 6,
+      "exit_sites": [
+        {
+          "site": "AVN_atrial_exit",
+          "offset_ms": 0
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "enable": "ap_left_free_wall"
+    },
+    {
+      "kind": "accessory",
+      "direction": "antegrade"
+    },
+    {
+      "kind": "avn",
+      "direction": "retrograde",
+      "velocity_scale": 0.5
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "show": [
+    "sub_ap_left_free_wall"
+  ],
+  "labels": [
+    "sub_ap_left_free_wall",
+    "cs_AVN",
+    "cs_His"
+  ],
+  "camera": {
+    "dir": [
+      0.95,
+      0.1,
+      -0.35
+    ],
+    "distance": 2.2,
+    "focus": "ap_left_free_wall"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "ap_left_free_wall",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "lap": "retro"
+    },
+    "ventricular": {
+      "lap": "wide"
+    }
+  },
+  "events": [
+    {
+      "id": "atria",
+      "label": "Atrial activation",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 0
+      },
+      "caption": "The atria are activated, starting at the AV node end of the circuit.",
+      "ecg": "A retrograde P wave."
+    },
+    {
+      "id": "ap",
+      "label": "Down the accessory pathway",
+      "at": {
+        "node": "AP_left_free_wall_ventricular",
+        "wave": 0
+      },
+      "caption": "The impulse reaches the accessory pathway and crosses it to the ventricle without delay. The ventricle is activated from the pathway end, outside the normal conduction system.",
+      "ecg": "A wide, pre-excited QRS."
+    },
+    {
+      "id": "his",
+      "label": "Back up the His bundle",
+      "at": {
+        "node": "His_proximal",
+        "wave": 0
+      },
+      "caption": "The ventricular impulse then enters the His-Purkinje system backwards and climbs the AV node in reverse.",
+      "ecg": "The QRS is wide because the ventricles are not activated by the normal system."
+    },
+    {
+      "id": "tachy",
+      "label": "Tachycardia",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 2
+      },
+      "caption": "The circuit repeats at about 200 per minute: the reverse of orthodromic AVRT.",
+      "ecg": "A regular wide-complex tachycardia, which can look like VT (slide 89)."
+    }
+  ],
+  "teaching_points": [
+    "Antidromic AVRT: antegrade conduction down the accessory pathway and retrograde up the AV node, giving a wide QRS (slide 89).",
+    "It is part of the differential diagnosis of wide-complex tachycardia (slide 77).",
+    "It is much rarer than orthodromic AVRT."
+  ]
+}

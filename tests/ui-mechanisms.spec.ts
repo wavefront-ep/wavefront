@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { openHeart, settle, state, waitForSim } from './helpers';
 
 const scenario = (id: string) => JSON.parse(readFileSync(`src/scenarios/${id}.json`, 'utf8'));
-const IDS = ['complete_heart_block', 'avnrt', 'wpw_preexcitation', 'avrt_orthodromic', 'atrial_flutter_typical', 'vt_scar_monomorphic'];
+const IDS = readdirSync('src/scenarios').filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).filter((id) => id !== 'sinus_rhythm');
 
 test('mechanisms mode: grouped picker, collapsed by default, one selection at a time', async ({ page }) => {
   await openHeart(page, 1600, 900);
@@ -12,10 +12,10 @@ test('mechanisms mode: grouped picker, collapsed by default, one selection at a 
   await page.locator('.rail-btn[aria-label="Mechanisms"]').click();
   await expect(page.locator('#sec-mech')).toBeVisible();
   const heads = page.locator('.mech-head');
-  expect(await heads.count()).toBe(3); // normal, block, reentry
+  expect(await heads.count()).toBe(4); // normal, impulse formation, block, reentry
   for (const h of await heads.all()) await expect(h).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('button', { name: /Reentry/ }).click();
-  expect(await page.locator('.mech-group').nth(2).locator('.vbtn').count()).toBe(5);
+  expect(await page.locator('.mech-group').nth(3).locator('.vbtn').count()).toBe(IDS.filter((id) => scenario(id).group === 'reentry').length);
   await page.getByRole('button', { name: 'AV nodal reentrant tachycardia (AVNRT)' }).click();
   await page.getByRole('button', { name: 'Typical atrial flutter' }).click();
   await expect(page.locator('.mech-group .vbtn[aria-pressed="true"]')).toHaveCount(1);

@@ -325,7 +325,7 @@ export class PlayBar {
     this.ecgBox.appendChild(svg);
     // Name the first wave of each kind; naming every one of a long run would only clutter the strip.
     const named = new Set<string>();
-    const names: Record<string, [string, number]> = { P: ['P', 22], QRS: ['QRS', 0], T: ['T', 28], F: ['Flutter waves', 6] };
+    const names: Record<string, [string, number]> = { P: ['P', 22], QRS: ['QRS', 0], T: ['T', 28], F: ['Flutter waves', 6], AF: ['Fibrillatory waves', 6], VF: ['Ventricular fibrillation', 6] };
     for (const sg of ecg.segments) {
       if (named.has(sg.kind)) continue;
       named.add(sg.kind);

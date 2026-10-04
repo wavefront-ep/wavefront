@@ -1,0 +1,134 @@
+{
+  "id": "ectopic_atrial_tachycardia",
+  "mechanism": "impulse_formation",
+  "group": "formation",
+  "title": "Ectopic (focal) atrial tachycardia",
+  "summary": "A focus in the atrium fires faster than the sinus node and takes over: abnormal automaticity.",
+  "source": "Slides 48 (abnormal automaticity), 58-59 (ectopic atrial tachycardia)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 400
+        }
+      ]
+    },
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 1200
+        }
+      ]
+    },
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 1600
+        }
+      ]
+    },
+    {
+      "tag": "eat",
+      "stimuli": [
+        {
+          "site": "PAC_LA",
+          "time_ms": 2000
+        }
+      ]
+    }
+  ],
+  "highlight": [
+    "site_PAC_LA"
+  ],
+  "labels": [
+    "cs_AVN"
+  ],
+  "camera": {
+    "dir": [
+      0.15,
+      0.55,
+      -1
+    ],
+    "distance": 2.4
+  },
+  "epi_opacity": 0.45,
+  "critical_site": "PAC_LA",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "eat": "retro"
+    }
+  },
+  "events": [
+    {
+      "id": "focus",
+      "label": "Atrial focus",
+      "at": {
+        "node": "PAC_LA",
+        "wave": 0
+      },
+      "caption": "An abnormal focus in the left atrium (tinted) fires on its own, faster than the sinus node, and the sinus node is overridden. This is abnormal automaticity.",
+      "ecg": "A P wave of different shape from the sinus P wave, because the atria are activated from a different place."
+    },
+    {
+      "id": "spread",
+      "label": "Spread through the atria",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 0
+      },
+      "caption": "The impulse spreads from the focus across both atria.",
+      "ecg": "The abnormal P wave."
+    },
+    {
+      "id": "qrs",
+      "label": "Conducted to the ventricles",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Each impulse is conducted through the AV node, so the QRS is narrow.",
+      "ecg": "A regular narrow-complex tachycardia with a P wave before each QRS."
+    },
+    {
+      "id": "rate",
+      "label": "Regular rate",
+      "at": {
+        "node": "PAC_LA",
+        "wave": 1
+      },
+      "caption": "The focus fires regularly, here about 150 per minute.",
+      "ecg": "Regular R-R intervals."
+    }
+  ],
+  "teaching_points": [
+    "Abnormal automaticity: pacemaker cells or other atrial cells generate impulses at a faster rate (slide 48).",
+    "Ectopic atrial tachycardia is regular, with a P wave of abnormal shape before each QRS (slides 58-59).",
+    "It differs from AV nodal reentry because the atrium is activated before the ventricle by a focus, not in a circuit."
+  ]
+}

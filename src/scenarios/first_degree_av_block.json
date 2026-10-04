@@ -1,0 +1,114 @@
+{
+  "id": "first_degree_av_block",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "First-degree AV block",
+  "summary": "Every impulse reaches the ventricles, but the AV node conducts slowly, so the PR interval is long.",
+  "source": "Slides 28-32 (first-degree AV block)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1600
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "avn",
+      "velocity_scale": 0.3
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0.4
+    }
+  ],
+  "select": "cs_AVN",
+  "labels": [
+    "cs_AVN",
+    "cs_His"
+  ],
+  "camera": {
+    "dir": [
+      -0.9,
+      0.2,
+      0.55
+    ],
+    "distance": 1.6,
+    "focus": "AVN"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "AVN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "san",
+      "label": "Sinus beat",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "The sinus beat starts normally.",
+      "ecg": "A normal P wave."
+    },
+    {
+      "id": "avn",
+      "label": "AV node",
+      "at": {
+        "node": "AVN_entry",
+        "wave": 0
+      },
+      "caption": "The impulse enters the AV node, which conducts much more slowly than normal.",
+      "ecg": "The PR segment is flat for longer than normal."
+    },
+    {
+      "id": "his",
+      "label": "His bundle",
+      "at": {
+        "node": "His_proximal",
+        "wave": 0
+      },
+      "caption": "Eventually it emerges into the His bundle and spreads normally.",
+      "ecg": "The PR interval is over 200 ms, here about 320."
+    },
+    {
+      "id": "qrs",
+      "label": "Ventricles",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Every impulse still reaches the ventricles. The QRS is normal.",
+      "ecg": "A narrow QRS follows every P wave: a delay, not a block."
+    }
+  ],
+  "teaching_points": [
+    "First-degree AV block: every P wave is conducted, but the PR interval is longer than 200 ms (slides 28-30).",
+    "It represents prolonged AV conduction rather than a true block (slide 30) and does not by itself explain a bradycardia (slide 30).",
+    "The delay is usually in the AV node itself."
+  ]
+}

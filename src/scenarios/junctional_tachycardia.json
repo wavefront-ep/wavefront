@@ -1,0 +1,115 @@
+{
+  "id": "junctional_tachycardia",
+  "mechanism": "impulse_formation",
+  "group": "formation",
+  "title": "Junctional tachycardia",
+  "summary": "A focus in the AV junction fires fast. It drives the ventricles normally and the atria backwards.",
+  "source": "Slide 60 (junctional tachycardia)",
+  "period_ms": 2600,
+  "waves": [
+    {
+      "tag": "jn",
+      "stimuli": [
+        {
+          "site": "AVN_exit",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "jn",
+      "stimuli": [
+        {
+          "site": "AVN_exit",
+          "time_ms": 500
+        }
+      ]
+    },
+    {
+      "tag": "jn",
+      "stimuli": [
+        {
+          "site": "AVN_exit",
+          "time_ms": 1000
+        }
+      ]
+    },
+    {
+      "tag": "jn",
+      "stimuli": [
+        {
+          "site": "AVN_exit",
+          "time_ms": 1500
+        }
+      ]
+    },
+    {
+      "tag": "jn",
+      "stimuli": [
+        {
+          "site": "AVN_exit",
+          "time_ms": 2000
+        }
+      ]
+    }
+  ],
+  "select": "cs_AVN",
+  "labels": [
+    "cs_AVN",
+    "cs_His"
+  ],
+  "camera": {
+    "dir": [
+      -0.9,
+      0.2,
+      0.55
+    ],
+    "distance": 1.6,
+    "focus": "AVN"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "AVN_exit",
+  "ecg": {
+    "lead": "II",
+    "atrial": {
+      "jn": "retro"
+    }
+  },
+  "events": [
+    {
+      "id": "focus",
+      "label": "Junctional focus",
+      "at": {
+        "node": "AVN_exit",
+        "wave": 0
+      },
+      "caption": "A focus at the lower end of the AV node fires, here 120 times a minute, and overrides the sinus node.",
+      "ecg": "No P wave precedes the QRS."
+    },
+    {
+      "id": "v",
+      "label": "Ventricles",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "The impulse goes down the His bundle, so the ventricles are activated in the normal way and the QRS is narrow.",
+      "ecg": "A narrow QRS."
+    },
+    {
+      "id": "retro",
+      "label": "Atria backwards",
+      "at": {
+        "firstTissue": "atrial",
+        "wave": 0
+      },
+      "caption": "The impulse also travels back up through the AV node to the atria. The atria are activated from the AV junction, so the P wave is inverted and falls near the QRS.",
+      "ecg": "A retrograde (inverted) P wave just after the QRS, or buried in it."
+    }
+  ],
+  "teaching_points": [
+    "Junctional tachycardia arises in or near the AV node and His bundle, usually with a narrow QRS (slide 60).",
+    "The atria are activated retrogradely, so P waves are inverted in the inferior leads and may be hidden in the QRS.",
+    "Unlike AVNRT it does not need a premature beat to start and is not a circuit."
+  ]
+}

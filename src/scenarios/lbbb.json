@@ -1,0 +1,108 @@
+{
+  "id": "lbbb",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Left bundle branch block",
+  "summary": "The left bundle branch does not conduct. The left ventricle is activated late, cell to cell, and the QRS is wide.",
+  "source": "Slide 91 (left bundle branch block)",
+  "period_ms": 1500,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1000
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "edgeset": "lbb",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "select": "cs_LBB",
+  "labels": [
+    "cs_His",
+    "cs_LBB",
+    "cs_RBB"
+  ],
+  "camera": {
+    "dir": [
+      0.2,
+      0,
+      1
+    ],
+    "distance": 2.7
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "LBB",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "sinus": "lbbb"
+    }
+  },
+  "events": [
+    {
+      "id": "avn",
+      "label": "Normal until the His bundle",
+      "at": {
+        "node": "His_proximal",
+        "wave": 0
+      },
+      "caption": "The atria, the AV node and the His bundle work normally.",
+      "ecg": "A normal P wave and PR interval."
+    },
+    {
+      "id": "rbb",
+      "label": "Right bundle conducts",
+      "at": {
+        "node": "RBB_start",
+        "wave": 0
+      },
+      "caption": "The impulse goes down the right bundle branch and activates the right ventricle first. The left bundle branch is blocked.",
+      "ecg": "The QRS begins."
+    },
+    {
+      "id": "lv",
+      "label": "Left ventricle late",
+      "at": {
+        "firstRegion": 1,
+        "wave": 0
+      },
+      "caption": "The impulse has to cross the septum and spread through left ventricular muscle cell to cell, which is slow. The left ventricle is activated late.",
+      "ecg": "The QRS is wide with a broad, notched R wave."
+    },
+    {
+      "id": "end",
+      "label": "Wide QRS",
+      "at": {
+        "lastTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Activation finishes much later than normal. The abnormal sequence also changes repolarisation.",
+      "ecg": "QRS over 120 ms with an opposite (inverted) T wave."
+    }
+  ],
+  "teaching_points": [
+    "Left bundle branch block: the QRS is wide and the left ventricle is activated late (slide 91).",
+    "A new LBBB can signal significant heart disease; the abnormal activation also hampers coordinated contraction.",
+    "A wide-complex tachycardia in a patient with known LBBB may be SVT with aberrancy (slide 93)."
+  ]
+}

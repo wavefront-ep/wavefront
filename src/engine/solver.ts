@@ -181,7 +181,14 @@ export function solveWave(
   return Float32Array.from(T);
 }
 
-/** Several waves in sequence with refractory blocking between them. */
+/**
+ * Several waves in one event-driven simulation. Events (time, node, wave) are processed in global time
+ * order; a node accepts an event only when it has recovered from its last activation, whichever wave
+ * caused it. Waves therefore compete for tissue: where two fronts meet, the later one is blocked, and a
+ * wave that starts while an earlier one is still spreading is held back only where that wave has
+ * already passed. This is what lets overlapping wavelets (fibrillation) emerge from refractoriness.
+ * Each wave still activates a node at most once.
+ */
 export function solveWaves(
   adj: Adjacency,
   etime: Float32Array,
@@ -190,12 +197,45 @@ export function solveWaves(
   refractory: Float32Array,
   opts?: WaveOptions,
 ): Float32Array[] {
-  const recover = new Float32Array(nodes).fill(-Infinity);
-  const out: Float32Array[] = [];
-  for (const stim of waves) {
-    const T = solveWave(adj, etime, nodes, stim, recover, opts);
-    out.push(T);
-    for (let i = 0; i < nodes; i++) if (T[i] < Infinity) recover[i] = Math.max(recover[i], T[i] + refractory[i]);
+  const decr = new Map<number, Decrement>();
+  for (const d of opts?.decrement ?? []) decr.set(d.kind, d);
+  const recover = new Float64Array(nodes).fill(-Infinity);
+  const T: Float32Array[] = waves.map(() => new Float32Array(nodes).fill(Infinity));
+  const tent: Float64Array[] = waves.map(() => new Float64Array(nodes).fill(Infinity));
+  const heap = new MinHeap();
+  const key = (node: number, w: number) => w * nodes + node;
+  waves.forEach((stim, w) => {
+    for (const s of stim) {
+      if (s.time < tent[w][s.node]) {
+        tent[w][s.node] = s.time;
+        heap.push(s.time, key(s.node, w));
+      }
+    }
+  });
+  while (heap.size) {
+    const [t, k] = heap.pop();
+    const w = Math.floor(k / nodes);
+    const u = k - w * nodes;
+    if (T[w][u] < Infinity || t > tent[w][u]) continue; // already activated in this wave, or a stale entry
+    if (t < recover[u]) continue; // refractory: blocked
+    T[w][u] = t;
+    recover[u] = t + refractory[u];
+    for (let q = adj.start[u]; q < adj.start[u + 1]; q++) {
+      const v = adj.nbr[q];
+      if (T[w][v] < Infinity) continue;
+      const e = adj.edge[q];
+      if (opts?.kindDir && !(opts.kindDir[opts.ekind[e]] & adj.bit[q])) continue; // one-way block
+      let nt = t + etime[e];
+      if (nt < recover[v]) continue; // v will still be refractory when the front arrives
+      if (decr.size) {
+        const d = decr.get(opts!.ekind[e]);
+        if (d) nt += d.max * Math.exp(-(nt - recover[v]) / d.tau); // decremental conduction
+      }
+      if (nt < tent[w][v]) {
+        tent[w][v] = nt;
+        heap.push(nt, key(v, w));
+      }
+    }
   }
-  return out;
+  return T;
 }

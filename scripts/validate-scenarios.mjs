@@ -50,7 +50,7 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
   for (const r of s.refractory ?? []) if (!graph.masks.includes(r.region)) fail(file, `unknown region "${r.region}"`);
   for (const d of s.decrement ?? []) if (!graph.kinds.includes(d.kind)) fail(file, `unknown edge kind "${d.kind}"`);
   for (const h of s.highlight ?? []) if (!graph.masks.includes(h)) fail(file, `unknown highlight region "${h}"`);
-  for (const m of s.labels ?? []) if (!substrateMeshes.has(m)) fail(file, `unknown label mesh "${m}"`);
+  for (const m of s.labels ?? []) if (!substrateMeshes.has(m) && !/^(vein_|epi_|endo_|aorta|pulmonary_trunk|valve_)/.test(m)) fail(file, `unknown label mesh "${m}"`);
   for (const m of s.show ?? []) if (!substrateMeshes.has(m)) fail(file, `unknown substrate mesh "${m}"`);
   for (const k of Object.keys(s.constants ?? {})) if (!(k in graph.constants)) fail(file, `unknown constant "${k}"`);
   if (s.camera?.focus && !(s.camera.focus in graph.paths) && !['scar'].includes(s.camera.focus) && !(s.camera.focus in graph.purkinje)) fail(file, `unknown camera focus "${s.camera.focus}"`);
@@ -60,11 +60,13 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
     evIds.add(e.id);
     if (!e.caption || !e.label) fail(file, `event ${e.id} needs a label and caption`);
     const a = e.at ?? {};
-    if ('node' in a) site(a.node, `event ${e.id}`);
+    if ('at_ms' in a) {
+      if (!(a.at_ms >= 0 && a.at_ms <= s.period_ms)) fail(file, `event ${e.id}: at_ms outside the timeline`);
+    } else if ('node' in a) site(a.node, `event ${e.id}`);
     else if ('firstRange' in a && !a.firstRange.every((r) => r in graph.ranges)) fail(file, `event ${e.id}: unknown range`);
     else if ('firstRegion' in a && ![1, 2, 3, 4].includes(a.firstRegion)) fail(file, `event ${e.id}: region must be 1-4`);
     else if (('firstTissue' in a || 'lastTissue' in a) && !['atrial', 'ventricular'].includes(a.firstTissue ?? a.lastTissue)) fail(file, `event ${e.id}: tissue must be atrial or ventricular`);
-    else if (!['node', 'firstRange', 'firstRegion', 'firstTissue', 'lastTissue'].some((k) => k in a)) fail(file, `event ${e.id}: unrecognised "at"`);
+    else if (!['node', 'firstRange', 'firstRegion', 'firstTissue', 'lastTissue', 'at_ms'].some((k) => k in a)) fail(file, `event ${e.id}: unrecognised "at"`);
   }
 }
 if (failed) process.exit(1);

@@ -510,11 +510,14 @@ export function buildApp(root: HTMLElement) {
   };
 
   /** Show a scenario (or, with view 'normal', the sinus beat beside it) in the heart, bar and ECG. */
+  let openToken = 0;
   const openScenario = async (id: string, view: 'this' | 'normal' = 'this', autoplay = false) => {
     if (!loader) return;
     endTour();
+    const token = ++openToken;
     const data: Loaded = await loader.get(id);
     const shown: Loaded = view === 'normal' ? await loader.get('sinus_rhythm') : data;
+    if (token !== openToken) return; // a newer choice was made while this one was solving
     const sc = data.sc;
     const fresh = !current || current.id !== id;
     current = { id, view };

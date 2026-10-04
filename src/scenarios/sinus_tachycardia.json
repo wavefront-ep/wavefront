@@ -1,0 +1,110 @@
+{
+  "id": "sinus_tachycardia",
+  "mechanism": "impulse_formation",
+  "group": "formation",
+  "title": "Sinus tachycardia",
+  "summary": "The sinus node fires faster than 100 per minute. Everything else about the beat is normal.",
+  "source": "Slide 57 (sinus tachycardia)",
+  "period_ms": 2400,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 460
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 920
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1380
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1840
+        }
+      ]
+    }
+  ],
+  "select": "cs_SAN",
+  "labels": [
+    "cs_SAN"
+  ],
+  "camera": {
+    "dir": [
+      -1,
+      0.25,
+      0.35
+    ],
+    "distance": 1.9,
+    "focus": "SAN"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "SAN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "san",
+      "label": "Sinus node",
+      "at": {
+        "node": "SAN",
+        "wave": 0
+      },
+      "caption": "The sinus node fires fast, here every 0.46 seconds, about 130 times a minute.",
+      "ecg": "A normal P wave."
+    },
+    {
+      "id": "qrs",
+      "label": "Normal conduction",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "Each impulse follows the usual route to the ventricles, so the QRS is narrow.",
+      "ecg": "A normal PR interval and a narrow QRS after every P wave."
+    },
+    {
+      "id": "rate",
+      "label": "Fast rate",
+      "at": {
+        "node": "SAN",
+        "wave": 2
+      },
+      "caption": "The rate is the only abnormality. It is usually a response to something, such as exercise, fever or illness.",
+      "ecg": "Complexes close together, T waves running into the next P wave."
+    }
+  ],
+  "teaching_points": [
+    "Sinus tachycardia is sinus rhythm at more than 100 per minute (slide 57).",
+    "It almost always has an underlying cause: treat the cause, not the rate."
+  ]
+}

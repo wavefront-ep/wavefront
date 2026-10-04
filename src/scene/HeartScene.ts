@@ -822,7 +822,7 @@ export class HeartScene {
         if (grp === 'substrate' ? !this.substrates.has(it.meshes[0]) : !this.layers.conduction) continue;
         const depth = it.point.clone().sub(cam).dot(this.camera.getWorldDirection(new Vector3()));
         // With a cutaway the inside is open, so only the clipped-away ones are dropped.
-        if (this.clipped(it.point) || (this.cut.mode === 'off' && depth > centreDepth + 0.1)) continue;
+        if (this.clipped(it.point) || (this.cut.mode === 'off' && !this.focusLabels.has(it.meshes[0]) && depth > centreDepth + 0.1)) continue;
         const pp = it.point.clone().project(this.camera);
         const ax2 = ((pp.x + 1) / 2) * w;
         const ay2 = ((1 - pp.y) / 2) * h;

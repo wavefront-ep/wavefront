@@ -8,7 +8,15 @@ import type { BeatEvent } from './playbar';
 const files = import.meta.glob('../scenarios/*.json', { eager: true, import: 'default' }) as Record<string, unknown>;
 
 // Teaching order: normal first, then block, then the reentry rhythms in the order the deck builds them up.
-const ORDER = ['sinus_rhythm', 'complete_heart_block', 'avnrt', 'wpw_preexcitation', 'avrt_orthodromic', 'atrial_flutter_typical', 'vt_scar_monomorphic'];
+const ORDER = [
+  'sinus_rhythm',
+  // impulse formation: sinus node first, then atrial, junctional, triggered
+  'sinus_bradycardia', 'sinus_tachycardia', 'sinus_pause', 'ectopic_atrial_tachycardia', 'multifocal_atrial_tachycardia', 'junctional_tachycardia', 'torsades_de_pointes',
+  // conduction block: sinus node exit, AV node, bundle branches
+  'sa_exit_block', 'first_degree_av_block', 'mobitz_i', 'mobitz_ii', 'complete_heart_block', 'lbbb', 'rbbb',
+  // reentry and fibrillation
+  'avnrt', 'wpw_preexcitation', 'avrt_orthodromic', 'antidromic_avrt', 'svt_aberrancy', 'atrial_flutter_typical', 'atrial_flutter_4to1', 'atrial_fibrillation', 'af_with_bbb', 'preexcited_af', 'vt_scar_monomorphic', 'ventricular_fibrillation',
+];
 
 export const SCENARIOS: Scenario[] = Object.values(files)
   .map((s) => {

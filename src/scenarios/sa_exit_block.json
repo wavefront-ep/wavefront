@@ -1,0 +1,92 @@
+{
+  "id": "sa_exit_block",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Sinoatrial exit block",
+  "summary": "The sinus node fires on schedule, but one impulse fails to leave it. The pause equals twice the usual interval.",
+  "source": "Slides 24-25 (sinoatrial block)",
+  "period_ms": 3300,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 800
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2400
+        }
+      ]
+    }
+  ],
+  "select": "cs_SAN",
+  "labels": [
+    "cs_SAN"
+  ],
+  "camera": {
+    "dir": [
+      -1,
+      0.25,
+      0.35
+    ],
+    "distance": 1.9,
+    "focus": "SAN"
+  },
+  "epi_opacity": 0.3,
+  "critical_site": "SAN",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "regular",
+      "label": "Regular beats",
+      "at": {
+        "node": "SAN",
+        "wave": 1
+      },
+      "caption": "The sinus node fires every 0.8 seconds and each impulse leaves the node to activate the atria.",
+      "ecg": "Normal P waves and QRS complexes."
+    },
+    {
+      "id": "blocked",
+      "label": "Exit block",
+      "at": {
+        "at_ms": 1600
+      },
+      "caption": "The node fires on schedule, but this impulse cannot leave it and reach the atrial muscle. The sinus node's own firing is too small to see on the ECG.",
+      "ecg": "A beat is missing where one was due."
+    },
+    {
+      "id": "resume",
+      "label": "Beats resume",
+      "at": {
+        "node": "SAN",
+        "wave": 2
+      },
+      "caption": "The next impulse gets out. The pause is exactly twice the usual P-P interval: the node never lost its rhythm, one beat was simply blocked.",
+      "ecg": "The pause is a whole multiple of the P-P interval (type II, slide 25)."
+    }
+  ],
+  "teaching_points": [
+    "Sinoatrial exit block: the sinus node fires but some impulses do not exit to the atria (slide 24).",
+    "Type II: the pause is a multiple of the P-P interval. Type I (classic grouped beating) shows progressively shorter P-P intervals before a pause (slide 25).",
+    "Unlike a sinus pause, the underlying node rhythm keeps its timing."
+  ]
+}

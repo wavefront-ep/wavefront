@@ -300,7 +300,7 @@ class Builder:
             for k in range(len(ids) - 1):
                 self.edgesets.setdefault(f"ap_{site}", []).append(len(self.edges) - (len(ids) - 1) + k)
                 self.opt.add(len(self.edges) - (len(ids) - 1) + k)
-            ea = self.add_node_link_tissue(ids[0], 0, 3.0, "accessory", f"ap_{site}")
+            ea = self.add_node_link_tissue(ids[0], 0, 3.0, "accessory", f"ap_{site}", tissue_first=True)
             ev = self.add_node_link_tissue(ids[-1], 1, 3.5, "accessory", f"ap_{site}")
             self.masks[f"ap_{site}"] = list(ids)
             self.named[f"AP_{site}_atrial"], self.named[f"AP_{site}_ventricular"] = ids[0], ids[-1]
@@ -363,6 +363,59 @@ class Builder:
         lv = np.where((self.cls == 1))[0]
         d = np.linalg.norm(self.pos[lv] - np.asarray(sc["centre"]), axis=1)
         self.masks["scar_core"] = lv[d < sc["core_r"]].tolist()
+
+        # ---- bundle branch edge sets (a bundle branch block scales these to zero)
+        nodes_of = lambda *names: {i for nme in names for i in self.path_nodes[nme]}
+        his_ids = self.path_nodes["His"]
+        lbb_set = nodes_of("LBB") | {his_ids[-1]} | {self.path_nodes[f][0] for f in ("LSF", "LAF", "LPF")}
+        rbb_set = nodes_of("RBB_entry", "RBB") | {his_ids[len(his_ids) // 2]}
+        for name, st in (("lbb", lbb_set), ("rbb", rbb_set)):
+            idx = [i for i, e in enumerate(self.edges) if e[0] in st and e[1] in st]
+            self.edgesets[name] = idx
+
+        # ---- extra stimulus sites: ventricular foci and pulmonary vein ostia
+        P = g.P
+        vent = np.where(self.cls == 1)[0]
+        vpos = self.pos[vent]
+        apex = np.asarray(g.lm["apex"])
+        def vsite(point):
+            return int(vent[np.argmin(np.linalg.norm(vpos - np.asarray(point), axis=1))])
+        self.named["V_apex"] = vsite(apex + (np.asarray(g.lm["base"]) - apex) * 0.12)
+        rvo = [i for i in vent if self.reg[i] == 2]
+        rvp = self.pos[rvo]
+        self.named["V_RVOT"] = int(rvo[np.argmax(rvp[:, 1] + 0.5 * rvp[:, 2])])  # superior, anterior right ventricle
+        lvo = [i for i in vent if self.reg[i] == 1]
+        lvp = self.pos[lvo]
+        self.named["V_LV_lateral"] = int(lvo[np.argmax(lvp[:, 0])])  # most left-lateral left ventricle
+        self.named["V_LV_base"] = int(lvo[np.argmax(lvp[:, 1] - 0.4 * lvp[:, 2])])  # basal, posterior left ventricle
+        self.named["V_RV_free"] = int(rvo[np.argmin(rvp[:, 0])])  # right-lateral right ventricle
+        la_ids = np.where((self.cls == 0) & (self.reg == 3))[0]
+        pv_nodes = []
+        for k, label in (("LSPV", 12), ("LIPV", 13), ("RIPV", 14), ("RSPV", 15)):
+            c = P[np.unique(self.g.T[self.g.L == label])].mean(0)
+            d = np.linalg.norm(self.pos[la_ids] - c, axis=1)
+            self.named[f"PV_{k}"] = int(la_ids[np.argmin(d)])
+            pv_nodes += la_ids[d < 7.0].tolist()
+        self.masks["pv_ostia"] = sorted(set(pv_nodes))
+        # a few more atrial sites for multifocal and fibrillatory activity
+        ra_ids = np.where((self.cls == 0) & (self.reg == 4))[0]
+        rpos = self.pos[ra_ids]
+        self.named["RA_high"] = int(ra_ids[np.argmax(rpos[:, 1])])
+        self.named["RA_low"] = int(ra_ids[np.argmin(rpos[:, 1])])
+        lpos = self.pos[la_ids]
+        self.named["LA_low"] = int(la_ids[np.argmin(lpos[:, 1])])
+        self.named["LA_lateral"] = int(la_ids[np.argmax(lpos[:, 0])])
+
+        # ---- tissue regions around each stimulus site (for highlighting the focus) and the His-Purkinje trunk
+        self.masks["his_node"] = sorted(set(self.path_nodes["His"]) | set(self.path_nodes["RBB_entry"]) | set(self.path_nodes["LBB"]))
+        for nme, node in list(self.named.items()):
+            if node >= self.n_tissue or nme.startswith(("AP_",)):
+                continue
+            c = int(self.cls[node])
+            ids = np.where(self.cls == c)[0]
+            d = np.linalg.norm(self.pos[ids] - self.pos[node], axis=1)
+            self.masks[f"site_{nme}"] = ids[d < 8.0].tolist()
+
         # velocities were updated: refresh the lookup used by the reference solver
         for i, k in enumerate(KINDS):
             key = f"v_{k}"
@@ -382,7 +435,7 @@ class Builder:
             # edge (node, tissue): direction 1 = node to tissue, 2 = tissue to node
             self.add_edge(node, t, kind, delay=delay, direction=2 if into_node else 1)
 
-    def add_node_link_tissue(self, node, cls, radius, kind, setname):
+    def add_node_link_tissue(self, node, cls, radius, kind, setname, tissue_first=False):
         tree, ids = self.tissue_tree[cls], self.tissue_ids[cls]
         near = tree.query_ball_point(self.node_pos[node], radius)
         if not near:
@@ -390,7 +443,10 @@ class Builder:
             near = [int(j)]
         near = sorted(near, key=lambda j: np.linalg.norm(self.pos[ids[j]] - self.node_pos[node]))[:3]
         for j in near:
-            i = self.add_edge(node, int(ids[j]), kind, sets=(setname,), optional=True)
+            if tissue_first:  # edge order is atrial side first, so first-to-second is always antegrade
+                self.add_edge(int(ids[j]), node, kind, sets=(setname,), optional=True)
+            else:
+                self.add_edge(node, int(ids[j]), kind, sets=(setname,), optional=True)
         return near
 
     # --------------------------------------------------------------------- reference solver

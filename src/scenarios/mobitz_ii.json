@@ -1,0 +1,154 @@
+{
+  "id": "mobitz_ii",
+  "mechanism": "conduction_block",
+  "group": "block",
+  "title": "Second-degree AV block, Mobitz type II",
+  "summary": "The PR interval stays the same, then a P wave suddenly fails to conduct. The block is below the AV node.",
+  "source": "Slides 34, 36-38 (Mobitz type II, 2:1 block, high-grade block)",
+  "period_ms": 4100,
+  "waves": [
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 700
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 1400
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2050
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 2650
+        }
+      ]
+    },
+    {
+      "tag": "sinus",
+      "stimuli": [
+        {
+          "site": "SAN",
+          "time_ms": 3350
+        }
+      ]
+    }
+  ],
+  "modifiers": [
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    }
+  ],
+  "refractory": [
+    {
+      "region": "his_node",
+      "erp_ms": 640
+    }
+  ],
+  "select": "cs_His",
+  "labels": [
+    "cs_AVN",
+    "cs_His",
+    "cs_LBB"
+  ],
+  "camera": {
+    "dir": [
+      0.6,
+      0.1,
+      0.8
+    ],
+    "distance": 2.0,
+    "focus": "His"
+  },
+  "epi_opacity": 0.25,
+  "critical_site": "His",
+  "ecg": {
+    "lead": "II"
+  },
+  "events": [
+    {
+      "id": "c1",
+      "label": "Conducted beat",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 0
+      },
+      "caption": "An impulse passes through the AV node and the His-Purkinje system.",
+      "ecg": "A normal PR interval."
+    },
+    {
+      "id": "c2",
+      "label": "Same PR again",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 1
+      },
+      "caption": "The next beat conducts with exactly the same delay.",
+      "ecg": "The PR interval is constant."
+    },
+    {
+      "id": "c3",
+      "label": "Still the same",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 2
+      },
+      "caption": "The block is not in the AV node, so the PR does not lengthen as the beats go on.",
+      "ecg": "Still the same PR interval."
+    },
+    {
+      "id": "drop",
+      "label": "Sudden block",
+      "at": {
+        "node": "SAN",
+        "wave": 4
+      },
+      "caption": "Without warning an impulse is blocked below the AV node, in the His-Purkinje system, which cannot conduct it so soon after the last one.",
+      "ecg": "A P wave with no QRS, and no earlier lengthening of the PR."
+    },
+    {
+      "id": "resume",
+      "label": "Conduction resumes",
+      "at": {
+        "firstTissue": "ventricular",
+        "wave": 5
+      },
+      "caption": "The next impulse conducts normally.",
+      "ecg": "The PR interval is the same as before the dropped beat."
+    }
+  ],
+  "teaching_points": [
+    "Mobitz type II: the PR interval is constant and a QRS is dropped suddenly (slide 34); the block is almost always infranodal.",
+    "It can progress suddenly to complete heart block, so it is treated more seriously than type I.",
+    "With 2:1 block the ECG alone cannot tell type I from type II: look at the QRS width and the response to atropine or exercise (slide 37)."
+  ]
+}

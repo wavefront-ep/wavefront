@@ -1,0 +1,7 @@
+{ "id": "af-base", "mechanism": "x", "group": "reentry", "title": "x", "summary": "x", "source": "x", "period_ms": 3000, "events": [], "teaching_points": [],
+  "tag": "af",
+  "constants": { "apd_atrial": 110 },
+  "modifiers": [{ "kind": "slow_pathway", "velocity_scale": 0 }],
+  "refractory": [{ "region": "avn_node", "erp_ms": 330 }],
+  "candidate_sites": ["PV_LSPV", "PV_LIPV", "PV_RSPV", "PV_RIPV", "PAC_RA", "PAC_LA", "RA_high", "RA_low", "LA_low", "LA_lateral"],
+  "min_gap_ms": 70, "jitter_ms": 110, "min_reach_nodes": 400, "max_ms": 2600 }

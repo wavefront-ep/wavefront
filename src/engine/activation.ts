@@ -18,7 +18,8 @@ export type EventSpec =
   | { firstTissue: 'atrial' | 'ventricular' }
   | { lastTissue: 'atrial' | 'ventricular' }
   | { firstRange: string[] }
-  | { firstRegion: number };
+  | { firstRegion: number }
+  | { at_ms: number };
 
 /** Every spec can name the wave it refers to (default 0). */
 export type EventAt = EventSpec & { wave?: number };
@@ -176,6 +177,7 @@ export class ActivationEngine {
 
   /** Time (ms) of a named event in wave 0, or null when it is never reached. */
   eventTime(spec: EventAt, result: ActivationResult): number | null {
+    if ('at_ms' in spec) return spec.at_ms;
     const T = result.times[spec.wave ?? 0];
     if (!T) return null;
     const g = this.graph;

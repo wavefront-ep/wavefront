@@ -156,64 +156,204 @@
     145
    ]
   },
-  "es_ap_left_free_wall": {
+  "mask_pv_ostia": {
    "offset": 2147568,
+   "dtype": "uint16",
+   "shape": [
+    585
+   ]
+  },
+  "mask_his_node": {
+   "offset": 2148740,
+   "dtype": "uint16",
+   "shape": [
+    51
+   ]
+  },
+  "mask_site_AVN_atrial_exit": {
+   "offset": 2148844,
+   "dtype": "uint16",
+   "shape": [
+    179
+   ]
+  },
+  "mask_site_PAC_RA": {
+   "offset": 2149204,
+   "dtype": "uint16",
+   "shape": [
+    169
+   ]
+  },
+  "mask_site_PAC_LA": {
+   "offset": 2149544,
+   "dtype": "uint16",
+   "shape": [
+    177
+   ]
+  },
+  "mask_site_V_apex": {
+   "offset": 2149900,
+   "dtype": "uint16",
+   "shape": [
+    67
+   ]
+  },
+  "mask_site_V_RVOT": {
+   "offset": 2150036,
+   "dtype": "uint16",
+   "shape": [
+    38
+   ]
+  },
+  "mask_site_V_LV_lateral": {
+   "offset": 2150112,
+   "dtype": "uint16",
+   "shape": [
+    60
+   ]
+  },
+  "mask_site_V_LV_base": {
+   "offset": 2150232,
+   "dtype": "uint16",
+   "shape": [
+    34
+   ]
+  },
+  "mask_site_V_RV_free": {
+   "offset": 2150300,
+   "dtype": "uint16",
+   "shape": [
+    52
+   ]
+  },
+  "mask_site_PV_LSPV": {
+   "offset": 2150404,
+   "dtype": "uint16",
+   "shape": [
+    214
+   ]
+  },
+  "mask_site_PV_LIPV": {
+   "offset": 2150832,
+   "dtype": "uint16",
+   "shape": [
+    203
+   ]
+  },
+  "mask_site_PV_RIPV": {
+   "offset": 2151240,
+   "dtype": "uint16",
+   "shape": [
+    180
+   ]
+  },
+  "mask_site_PV_RSPV": {
+   "offset": 2151600,
+   "dtype": "uint16",
+   "shape": [
+    190
+   ]
+  },
+  "mask_site_RA_high": {
+   "offset": 2151980,
+   "dtype": "uint16",
+   "shape": [
+    122
+   ]
+  },
+  "mask_site_RA_low": {
+   "offset": 2152224,
+   "dtype": "uint16",
+   "shape": [
+    142
+   ]
+  },
+  "mask_site_LA_low": {
+   "offset": 2152508,
+   "dtype": "uint16",
+   "shape": [
+    186
+   ]
+  },
+  "mask_site_LA_lateral": {
+   "offset": 2152880,
+   "dtype": "uint16",
+   "shape": [
+    145
+   ]
+  },
+  "es_ap_left_free_wall": {
+   "offset": 2153172,
    "dtype": "uint32",
    "shape": [
     10
    ]
   },
   "es_ap_right_free_wall": {
-   "offset": 2147608,
+   "offset": 2153212,
    "dtype": "uint32",
    "shape": [
     9
    ]
   },
   "es_ap_posteroseptal": {
-   "offset": 2147644,
+   "offset": 2153248,
    "dtype": "uint32",
    "shape": [
     11
    ]
   },
   "es_ap_anteroseptal": {
-   "offset": 2147688,
+   "offset": 2153292,
    "dtype": "uint32",
    "shape": [
     9
    ]
   },
   "es_flutter_ring": {
-   "offset": 2147724,
+   "offset": 2153328,
    "dtype": "uint32",
    "shape": [
     70
    ]
   },
   "es_cti": {
-   "offset": 2148004,
+   "offset": 2153608,
    "dtype": "uint32",
    "shape": [
     24
    ]
   },
   "es_vt_ring": {
-   "offset": 2148100,
+   "offset": 2153704,
    "dtype": "uint32",
    "shape": [
     91
    ]
   },
   "es_vt_channel": {
-   "offset": 2148464,
+   "offset": 2154068,
    "dtype": "uint32",
    "shape": [
     32
    ]
   },
+  "es_lbb": {
+   "offset": 2154196,
+   "dtype": "uint32",
+   "shape": [
+    18
+   ]
+  },
+  "es_rbb": {
+   "offset": 2154268,
+   "dtype": "uint32",
+   "shape": [
+    105
+   ]
+  },
   "map_epi_RA_idx": {
-   "offset": 2148592,
+   "offset": 2154688,
    "dtype": "uint32",
    "shape": [
     4763,
@@ -221,7 +361,7 @@
    ]
   },
   "map_epi_RA_w": {
-   "offset": 2205748,
+   "offset": 2211844,
    "dtype": "float32",
    "shape": [
     4763,
@@ -229,7 +369,7 @@
    ]
   },
   "map_endo_RA_idx": {
-   "offset": 2262904,
+   "offset": 2269000,
    "dtype": "uint32",
    "shape": [
     5040,
@@ -237,7 +377,7 @@
    ]
   },
   "map_endo_RA_w": {
-   "offset": 2323384,
+   "offset": 2329480,
    "dtype": "float32",
    "shape": [
     5040,
@@ -245,7 +385,7 @@
    ]
   },
   "map_epi_LA_idx": {
-   "offset": 2383864,
+   "offset": 2389960,
    "dtype": "uint32",
    "shape": [
     6225,
@@ -253,7 +393,7 @@
    ]
   },
   "map_epi_LA_w": {
-   "offset": 2458564,
+   "offset": 2464660,
    "dtype": "float32",
    "shape": [
     6225,
@@ -261,7 +401,7 @@
    ]
   },
   "map_endo_LA_idx": {
-   "offset": 2533264,
+   "offset": 2539360,
    "dtype": "uint32",
    "shape": [
     4735,
@@ -269,7 +409,7 @@
    ]
   },
   "map_endo_LA_w": {
-   "offset": 2590084,
+   "offset": 2596180,
    "dtype": "float32",
    "shape": [
     4735,
@@ -277,7 +417,7 @@
    ]
   },
   "map_epi_LV_idx": {
-   "offset": 2646904,
+   "offset": 2653000,
    "dtype": "uint32",
    "shape": [
     5645,
@@ -285,7 +425,7 @@
    ]
   },
   "map_epi_LV_w": {
-   "offset": 2714644,
+   "offset": 2720740,
    "dtype": "float32",
    "shape": [
     5645,
@@ -293,7 +433,7 @@
    ]
   },
   "map_endo_LV_idx": {
-   "offset": 2782384,
+   "offset": 2788480,
    "dtype": "uint32",
    "shape": [
     7141,
@@ -301,7 +441,7 @@
    ]
   },
   "map_endo_LV_w": {
-   "offset": 2868076,
+   "offset": 2874172,
    "dtype": "float32",
    "shape": [
     7141,
@@ -309,7 +449,7 @@
    ]
   },
   "map_epi_RV_idx": {
-   "offset": 2953768,
+   "offset": 2959864,
    "dtype": "uint32",
    "shape": [
     5617,
@@ -317,7 +457,7 @@
    ]
   },
   "map_epi_RV_w": {
-   "offset": 3021172,
+   "offset": 3027268,
    "dtype": "float32",
    "shape": [
     5617,
@@ -325,7 +465,7 @@
    ]
   },
   "map_endo_RV_idx": {
-   "offset": 3088576,
+   "offset": 3094672,
    "dtype": "uint32",
    "shape": [
     8728,
@@ -333,7 +473,7 @@
    ]
   },
   "map_endo_RV_w": {
-   "offset": 3193312,
+   "offset": 3199408,
    "dtype": "float32",
    "shape": [
     8728,
@@ -341,147 +481,147 @@
    ]
   },
   "map_cs_SAN_idx": {
-   "offset": 3298048,
+   "offset": 3304144,
    "dtype": "uint32",
    "shape": [
     150
    ]
   },
   "map_cs_AVN_idx": {
-   "offset": 3298648,
+   "offset": 3304744,
    "dtype": "uint32",
    "shape": [
     110
    ]
   },
   "map_cs_His_idx": {
-   "offset": 3299088,
+   "offset": 3305184,
    "dtype": "uint32",
    "shape": [
     136
    ]
   },
   "map_cs_Bachmann_idx": {
-   "offset": 3299632,
+   "offset": 3305728,
    "dtype": "uint32",
    "shape": [
     544
    ]
   },
   "map_cs_LBB_idx": {
-   "offset": 3301808,
+   "offset": 3307904,
    "dtype": "uint32",
    "shape": [
     120
    ]
   },
   "map_cs_LSF_idx": {
-   "offset": 3302288,
+   "offset": 3308384,
    "dtype": "uint32",
    "shape": [
     432
    ]
   },
   "map_cs_LAF_idx": {
-   "offset": 3304016,
+   "offset": 3310112,
    "dtype": "uint32",
    "shape": [
     520
    ]
   },
   "map_cs_LPF_idx": {
-   "offset": 3306096,
+   "offset": 3312192,
    "dtype": "uint32",
    "shape": [
     448
    ]
   },
   "map_cs_RBB_idx": {
-   "offset": 3307888,
+   "offset": 3313984,
    "dtype": "uint32",
    "shape": [
     688
    ]
   },
   "map_sub_ap_left_free_wall_idx": {
-   "offset": 3310640,
+   "offset": 3316736,
    "dtype": "uint32",
    "shape": [
     40
    ]
   },
   "map_sub_ap_right_free_wall_idx": {
-   "offset": 3310800,
+   "offset": 3316896,
    "dtype": "uint32",
    "shape": [
     32
    ]
   },
   "map_sub_ap_posteroseptal_idx": {
-   "offset": 3310928,
+   "offset": 3317024,
    "dtype": "uint32",
    "shape": [
     48
    ]
   },
   "map_sub_ap_anteroseptal_idx": {
-   "offset": 3311120,
+   "offset": 3317216,
    "dtype": "uint32",
    "shape": [
     32
    ]
   },
   "map_sub_flutter_ring_idx": {
-   "offset": 3311248,
+   "offset": 3317344,
    "dtype": "uint32",
    "shape": [
     568
    ]
   },
   "map_sub_cti_idx": {
-   "offset": 3313520,
+   "offset": 3319616,
    "dtype": "uint32",
    "shape": [
     200
    ]
   },
   "map_sub_slow_pathway_idx": {
-   "offset": 3314320,
+   "offset": 3320416,
    "dtype": "uint32",
    "shape": [
     120
    ]
   },
   "map_sub_vt_circuit_idx": {
-   "offset": 3314800,
+   "offset": 3320896,
    "dtype": "uint32",
    "shape": [
     736
    ]
   },
   "map_sub_vt_channel_idx": {
-   "offset": 3317744,
+   "offset": 3323840,
    "dtype": "uint32",
    "shape": [
     264
    ]
   },
   "map_cs_RBB_entry_idx": {
-   "offset": 3318800,
+   "offset": 3324896,
    "dtype": "uint32",
    "shape": [
     152
    ]
   },
   "map_cs_Purkinje_LV_idx": {
-   "offset": 3319408,
+   "offset": 3325504,
    "dtype": "uint32",
    "shape": [
     10410
    ]
   },
   "map_cs_Purkinje_RV_idx": {
-   "offset": 3361048,
+   "offset": 3367144,
    "dtype": "uint32",
    "shape": [
     10160
@@ -575,7 +715,20 @@
   "Flutter_start": 31923,
   "Flutter_cti_end": 31947,
   "VT_start": 31993,
-  "VT_exit": 32025
+  "VT_exit": 32025,
+  "V_apex": 28399,
+  "V_RVOT": 21999,
+  "V_LV_lateral": 29410,
+  "V_LV_base": 21594,
+  "V_RV_free": 17897,
+  "PV_LSPV": 15952,
+  "PV_LIPV": 16627,
+  "PV_RIPV": 5479,
+  "PV_RSPV": 6122,
+  "RA_high": 5180,
+  "RA_low": 5198,
+  "LA_low": 14101,
+  "LA_lateral": 17885
  },
  "stimulus": {
   "site": "SAN",
@@ -598,7 +751,25 @@
   "crista_terminalis",
   "cti",
   "flutter_ring",
+  "his_node",
+  "pv_ostia",
   "scar_core",
+  "site_AVN_atrial_exit",
+  "site_LA_lateral",
+  "site_LA_low",
+  "site_PAC_LA",
+  "site_PAC_RA",
+  "site_PV_LIPV",
+  "site_PV_LSPV",
+  "site_PV_RIPV",
+  "site_PV_RSPV",
+  "site_RA_high",
+  "site_RA_low",
+  "site_V_LV_base",
+  "site_V_LV_lateral",
+  "site_V_RVOT",
+  "site_V_RV_free",
+  "site_V_apex",
   "slow_pathway",
   "triangle_koch",
   "vt_ring"
@@ -610,6 +781,8 @@
   "ap_right_free_wall",
   "cti",
   "flutter_ring",
+  "lbb",
+  "rbb",
   "vt_channel",
   "vt_ring"
  ],

@@ -1,0 +1,227 @@
+{
+  "id": "ventricular_fibrillation",
+  "mechanism": "reentry",
+  "group": "reentry",
+  "title": "Ventricular fibrillation",
+  "summary": "Chaotic, rapid ventricular activation with no coordinated contraction. Fatal unless defibrillated.",
+  "source": "Slide 83 (ventricular fibrillation)",
+  "period_ms": 2200,
+  "waves": [
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 0
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 126
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 234
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RV_free",
+          "time_ms": 348
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 474
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 606
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 744
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 876
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 1008
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_LV_lateral",
+          "time_ms": 1146
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 1284
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 1434
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 1518
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_apex",
+          "time_ms": 1626
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_RVOT",
+          "time_ms": 1716
+        }
+      ]
+    },
+    {
+      "tag": "vf",
+      "stimuli": [
+        {
+          "site": "V_LV_lateral",
+          "time_ms": 1848
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "apd_ventricular": 150,
+    "v_ventricular": 0.5
+  },
+  "modifiers": [
+    {
+      "kind": "avn",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "slow_pathway",
+      "velocity_scale": 0
+    },
+    {
+      "kind": "pmj",
+      "direction": "antegrade"
+    }
+  ],
+  "labels": [],
+  "camera": {
+    "dir": [
+      0.2,
+      -0.3,
+      1
+    ],
+    "distance": 2.9
+  },
+  "epi_opacity": 0.6,
+  "critical_site": "none",
+  "ecg": {
+    "lead": "II",
+    "ventricular": {
+      "vf": "vf"
+    }
+  },
+  "events": [
+    {
+      "id": "start",
+      "label": "Chaotic start",
+      "at": {
+        "node": "V_RVOT",
+        "wave": 0
+      },
+      "caption": "Rapid ventricular activity, often precipitated by ventricular tachycardia or ischaemia, breaks into many wavelets.",
+      "ecg": "The trace becomes irregular."
+    },
+    {
+      "id": "wavelets",
+      "label": "Colliding wavelets",
+      "at": {
+        "node": "V_apex",
+        "wave": 1
+      },
+      "caption": "Wavefronts arise from many sites, collide and die out in tissue that is still recovering. No single wave activates the whole ventricle.",
+      "ecg": "Irregular deflections of varying size and shape: no QRS complexes."
+    },
+    {
+      "id": "noflow",
+      "label": "No coordinated beat",
+      "at": {
+        "node": "V_RV_free",
+        "wave": 3
+      },
+      "caption": "The ventricle quivers instead of contracting, so there is no effective cardiac output. The patient loses consciousness within seconds.",
+      "ecg": "A chaotic baseline with no identifiable QRS, ST segment or T wave."
+    }
+  ],
+  "teaching_points": [
+    "Ventricular fibrillation: rapid, totally chaotic ventricular rhythm, often precipitated by VT; fatal unless cardiopulmonary resuscitation with immediate defibrillation (slide 83).",
+    "Reversible causes include ischaemia, electrolyte disturbance and the other 'Hs and Ts' (slide 77).",
+    "Defibrillation depolarises all the tissue at once, so no excitable gaps remain for the wavelets."
+  ]
+}
