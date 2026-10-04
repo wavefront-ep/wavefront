@@ -1,0 +1,7 @@
+# Lecture deck is copyrighted (slide 2): never commit or publish
+reference/
+.DS_Store
+node_modules/
+dist/
+# raw source meshes; keep only processed assets
+assets/raw/
