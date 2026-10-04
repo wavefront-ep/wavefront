@@ -33,8 +33,17 @@ for (const id of IDS) {
     await page.evaluate((id) => (window as any).epOpen(id), id);
     await expect(page.locator('.playbar')).toBeVisible();
     await expect(page.locator('.pb-title')).toContainText(sc.title.slice(0, 12));
-    await settle(page, 1200);
+    await settle(page, 1500);
     let s = await state(page);
+    expect(s.playing).toBe(false); // a chosen rhythm waits at the start until Play is pressed
+    expect(s.time).toBe(0);
+    // the structures the scenario is about are labelled without turning the Labels layer on
+    expect(s.layers.labels).toBe(false);
+    for (const m of sc.labels ?? []) expect(s.visible).toContain(m);
+    expect(await page.locator('.overlay text').count()).toBeGreaterThanOrEqual((sc.labels ?? []).length - 1);
+    await page.getByRole('button', { name: 'Play or pause (space)' }).click();
+    await settle(page, 700);
+    s = await state(page);
     expect(s.playing).toBe(true);
     for (const m of sc.show ?? []) expect(s.visible).toContain(m); // the substrate it needs is drawn
     expect(s.visible).toContain('cs_AVN'); // the conduction system is on

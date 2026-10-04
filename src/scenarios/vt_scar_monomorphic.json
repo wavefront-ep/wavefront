@@ -93,14 +93,14 @@
   ],
   "camera": {
     "dir": [
-      -0.7,
-      0.57,
-      -0.48
+      -0.47,
+      -0.67,
+      0.51
     ],
-    "distance": 1.4,
+    "distance": 1.5,
     "focus": "scar"
   },
-  "epi_opacity": 0.7,
+  "epi_opacity": 0.2,
   "critical_site": "vt_channel",
   "ecg": {
     "lead": "II",
@@ -165,8 +165,9 @@
     "A wide-complex tachycardia is VT until proven otherwise; AV dissociation supports the diagnosis (slides 94-97).",
     "The slow channel through the scar is the target of catheter ablation."
   ],
-  "cut": {
-    "mode": "shortAxis",
-    "offset": 0.0
-  }
+  "labels": [
+    "sub_scar",
+    "sub_vt_circuit",
+    "sub_vt_channel"
+  ]
 }

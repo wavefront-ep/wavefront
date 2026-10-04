@@ -487,7 +487,7 @@ export function buildApp(root: HTMLElement) {
   showInfo(null);
 
   /** Show a scenario (or, with view 'normal', the sinus beat beside it) in the heart, bar and ECG. */
-  const openScenario = async (id: string, view: 'this' | 'normal' = 'this') => {
+  const openScenario = async (id: string, view: 'this' | 'normal' = 'this', autoplay = false) => {
     if (!loader) return;
     endTour();
     const data: Loaded = await loader.get(id);
@@ -522,12 +522,14 @@ export function buildApp(root: HTMLElement) {
     lower.hidden = true;
     bar.show('beat');
     bar.setStyleState(scene.style, mapRange, palette);
+    scene.setFocusLabels(mine ? sc.labels ?? [] : []);
     scene.setTime(0);
-    scene.play();
+    if (autoplay) scene.play();
+    else scene.pause();
     app.classList.add('bar-open');
     syncControls();
   };
-  const openBeat = () => void openScenario('sinus_rhythm');
+  const openBeat = () => void openScenario('sinus_rhythm', 'this', true);
   bar.onCompare = (v) => current && void openScenario(current.id, v);
 
   const closeBar = () => {
@@ -535,6 +537,7 @@ export function buildApp(root: HTMLElement) {
     scene.select(null, true);
     scene.setSubstrates([]);
     scene.setHighlight([]);
+    scene.setFocusLabels([]);
     bar.hide();
     lower.hidden = false;
     app.classList.remove('bar-open');

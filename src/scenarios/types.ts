@@ -74,6 +74,8 @@ export interface Scenario {
   select?: string;
   /** Camera for the scenario: direction from the target to the camera, distance, and a path to look at. */
   camera?: { dir: [number, number, number]; distance: number; focus?: string };
+  /** Structures to label while the scenario is open (mesh names). */
+  labels?: string[];
   /** Cutaway applied when the scenario opens (the camera then looks at the cut face). */
   cut?: { mode: 'fourChamber' | 'shortAxis'; offset: number };
   /** Epicardial opacity while the scenario plays (the structures sit inside the wall). */

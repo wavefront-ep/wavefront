@@ -142,5 +142,10 @@
     "Third-degree AV block: no atrial impulse reaches the ventricles; atria and ventricles beat independently (AV dissociation) (slide 39).",
     "The escape rhythm decides the QRS: a junctional focus above the bundle branches gives a narrow QRS, a ventricular focus gives a wide one, and the rate is slow (about 40 or less).",
     "Nodal blocks are usually transient and have a more reliable junctional escape; infranodal blocks are less stable (slides 20-21)."
+  ],
+  "labels": [
+    "cs_SAN",
+    "cs_AVN",
+    "cs_His"
   ]
 }

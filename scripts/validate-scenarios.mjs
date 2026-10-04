@@ -50,6 +50,7 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
   for (const r of s.refractory ?? []) if (!graph.masks.includes(r.region)) fail(file, `unknown region "${r.region}"`);
   for (const d of s.decrement ?? []) if (!graph.kinds.includes(d.kind)) fail(file, `unknown edge kind "${d.kind}"`);
   for (const h of s.highlight ?? []) if (!graph.masks.includes(h)) fail(file, `unknown highlight region "${h}"`);
+  for (const m of s.labels ?? []) if (!substrateMeshes.has(m)) fail(file, `unknown label mesh "${m}"`);
   for (const m of s.show ?? []) if (!substrateMeshes.has(m)) fail(file, `unknown substrate mesh "${m}"`);
   for (const k of Object.keys(s.constants ?? {})) if (!(k in graph.constants)) fail(file, `unknown constant "${k}"`);
   if (s.camera?.focus && !(s.camera.focus in graph.paths) && !['scar'].includes(s.camera.focus) && !(s.camera.focus in graph.purkinje)) fail(file, `unknown camera focus "${s.camera.focus}"`);

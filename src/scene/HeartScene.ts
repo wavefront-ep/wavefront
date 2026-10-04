@@ -111,6 +111,7 @@ export class HeartScene {
   private pathMid = new Map<string, Vector3>();
   private lastFrame = 0;
   private substrates = new Set<string>();
+  private focusLabels = new Set<string>();
   private paletteTex = shared.uMapTex.value;
 
   private meshes = new Map<string, Mesh>();
@@ -361,7 +362,7 @@ export class HeartScene {
         m.customProgramCacheKey = () => 'scar-hatch';
         mesh.material = m;
         mesh.renderOrder = 3;
-        const sg = new Mesh(mesh.geometry, new MeshBasicMaterial({ color: base.clone(), transparent: true, opacity: 0.4, depthTest: false, depthWrite: false, side: DoubleSide }));
+        const sg = new Mesh(mesh.geometry, new MeshBasicMaterial({ color: base.clone(), transparent: true, opacity: 0.6, depthTest: false, depthWrite: false, side: DoubleSide }));
         sg.raycast = () => {};
         sg.renderOrder = 6;
         this.meshes.set(mesh.name, mesh);
@@ -784,7 +785,7 @@ export class HeartScene {
   /** Labels are placed after the camera settles: anchor on the first visible surface along the
    *  ray to each landmark, and only show a label if that surface is the one it names. */
   private updateLabels() {
-    if (!this.layers.labels || !this.labelItems.length) {
+    if ((!this.layers.labels && !this.focusLabels.size) || !this.labelItems.length) {
       this.onLabels([]);
       return;
     }
@@ -808,6 +809,8 @@ export class HeartScene {
     const cam = this.camera.position;
     const centreDepth = this.center.clone().sub(cam).dot(this.camera.getWorldDirection(new Vector3()));
     for (const it of this.labelItems) {
+      // With the Labels layer off, only the structures a scenario singles out are labelled.
+      if (!this.layers.labels && !this.focusLabels.has(it.meshes[0])) continue;
       if (it.mode === 'always') {
         // Conduction structures sit inside the wall, so occlusion by the surface is ignored; hide
         // those on the far side of the heart instead.
@@ -865,6 +868,12 @@ export class HeartScene {
       });
     }
     this.onLabels(placed);
+  }
+
+  /** Meshes that are always labelled (a scenario's key structures), whatever the Labels layer says. */
+  setFocusLabels(names: string[]) {
+    this.focusLabels = new Set(names);
+    this.invalidate(true);
   }
 
   relabel() {

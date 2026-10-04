@@ -150,5 +150,10 @@
     "Sinus beats take the fast pathway; a premature atrial beat blocks in the fast pathway, goes down the slow one and returns by the fast one (slide 53).",
     "Atria and ventricles are activated simultaneously, so the P wave is hidden in or just after the QRS (slide 55).",
     "The slow pathway is the usual ablation target."
+  ],
+  "labels": [
+    "cs_AVN",
+    "sub_slow_pathway",
+    "cs_His"
   ]
 }

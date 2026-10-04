@@ -128,5 +128,12 @@
     "Typical flutter is a macro-reentrant circuit around the tricuspid annulus, rate about 300 per minute, with sawtooth waves most visible in leads II, III and aVF (slide 66).",
     "The AV node limits how many impulses reach the ventricles: 2:1 is common (ventricular rate about 150); 4:1 and variable block also occur (slide 66).",
     "The cavotricuspid isthmus is the critical slow strip and the usual ablation target (slides 67-68)."
+  ],
+  "labels": [
+    "sub_flutter_ring",
+    "sub_cti",
+    "sub_crista",
+    "cs_SAN",
+    "cs_AVN"
   ]
 }

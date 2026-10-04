@@ -98,5 +98,10 @@
     "Pre-excitation: an accessory pathway activates part of the ventricle early (short PR, delta wave, wide QRS) (slide 61).",
     "The accessory pathway conducts without the AV node delay and can carry the impulse in either direction.",
     "Pre-excited atrial fibrillation can conduct very fast over the pathway and is dangerous (slides 85-87)."
+  ],
+  "labels": [
+    "sub_ap_left_free_wall",
+    "cs_AVN",
+    "cs_His"
   ]
 }

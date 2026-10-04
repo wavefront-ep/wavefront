@@ -173,5 +173,10 @@
     "Orthodromic AVRT: antegrade conduction down the AV node, retrograde up an accessory pathway; the QRS is narrow (slide 65).",
     "Initiation: a premature atrial (or ventricular) beat meets unidirectional block and finds the circuit ready (slides 50, 64).",
     "The accessory pathway is the usual ablation target; the AV node can also be slowed with drugs or a vagal manoeuvre."
+  ],
+  "labels": [
+    "sub_ap_left_free_wall",
+    "cs_AVN",
+    "cs_His"
   ]
 }
