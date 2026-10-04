@@ -50,6 +50,6 @@ and two palettes (colour-blind safe, CARTO-style).
 
 `src/ecg/morphology.ts` builds a schematic lead II trace from the same event times: P wave over atrial
 activation, Q/R/S inside the ventricular activation window, T wave from QRS end plus the action potential
-duration. It shares the scrubber's time axis, lights the wave segment the playhead is in, numbers each
-sequence event on the strip, and brackets the PR, QRS and QT intervals. Scenarios choose a template
+duration. It shares the scrubber's time axis, lights the wave segment the playhead is in, and numbers each
+sequence event on the strip. Scenarios choose a template
 (`ecg.template`); only `normal_sinus` exists so far.

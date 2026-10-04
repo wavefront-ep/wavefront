@@ -193,21 +193,13 @@ test('four-chamber cut keeps the conduction system in view and labelled', async 
   for (const l of ['SA node', 'AV node', 'His bundle', 'Left bundle branch', 'Right bundle branch']) expect(labels).toContain(l);
 });
 
-test('ECG strip: waves, intervals, event markers and cursor follow the beat', async ({ page }) => {
+test('ECG strip: waves, event markers and cursor follow the beat', async ({ page }) => {
   await openHeart(page, 1600, 900);
   await waitForSim(page);
   await page.getByRole('button', { name: 'Play sinus beat' }).click();
   await expect(page.locator('.pb-ecg svg path.pb-ecg-trace')).toBeVisible();
   await expect(page.locator('.pb-ecg-mark')).toHaveCount(8);
-  const vals = await page.locator('.pb-ecg-val').allInnerTexts();
-  const num = (s: string) => Number(s.replace(/\D+/g, ''));
-  const [pr, qrs, qt] = vals.map(num);
-  expect(pr).toBeGreaterThan(140);
-  expect(pr).toBeLessThan(180);
-  expect(qrs).toBeGreaterThan(75);
-  expect(qrs).toBeLessThan(115);
-  expect(qt).toBeGreaterThan(300);
-  expect(qt).toBeLessThan(460);
+  await expect(page.locator('.pb-ecg-val')).toHaveCount(0); // no interval readouts
   // the P wave segment lights up during atrial activation and the QRS segment during ventricular activation
   await page.evaluate(() => { const s = (window as any).epHeart; s.pause(); s.setTime(60); });
   expect(await page.locator('.pb-ecg-seg.on').count()).toBe(1);

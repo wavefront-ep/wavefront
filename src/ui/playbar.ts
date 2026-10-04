@@ -296,11 +296,6 @@ export class PlayBar {
       svg.appendChild(l);
     };
     line(0, base, W, base, 'pb-ecg-base');
-    for (const [r, yy] of [[ecg.pr, 90], [ecg.qrs, 90], [ecg.qt, 98]] as [[number, number], number][]) {
-      line(r[0], yy, r[1], yy, 'pb-ecg-int');
-      line(r[0], yy - 3, r[0], yy + 3, 'pb-ecg-int');
-      line(r[1], yy - 3, r[1], yy + 3, 'pb-ecg-int');
-    }
     const path = document.createElementNS(ns, 'path');
     path.setAttribute('d', d);
     path.setAttribute('class', 'pb-ecg-trace');
@@ -317,9 +312,6 @@ export class PlayBar {
     label('P', (ecg.p[0] + ecg.p[1]) / 2, 22);
     label('QRS', (ecg.qrs[0] + ecg.qrs[1]) / 2 + 18, 0);
     label('T', (ecg.t[0] + ecg.t[1]) / 2, 28);
-    label('PR', (ecg.pr[0] + ecg.pr[1]) / 2, 82, 'int');
-    label('QRS', (ecg.qrs[0] + ecg.qrs[1]) / 2, 82, 'int');
-    label('QT', (ecg.qt[0] + ecg.qt[1]) / 2, 90, 'int');
     // numbered event markers along the top edge, matching the ticks on the scrubber
     this.ecgMarks = this.events.map((e, i) => {
       const m = el('button', 'pb-ecg-mark', String(i + 1));
@@ -335,11 +327,7 @@ export class PlayBar {
       return m;
     });
     this.ecgBox.appendChild(this.ecgCursor);
-    const r = (n: number) => Math.round(n);
     this.ecgVals.innerHTML = '';
-    for (const [k, v] of [['PR', ecg.pr[1] - ecg.pr[0]], ['QRS', ecg.qrs[1] - ecg.qrs[0]], ['QT', ecg.qt[1] - ecg.qt[0]]] as [string, number][]) {
-      this.ecgVals.appendChild(el('span', 'pb-ecg-val', `<em>${k}</em> ${r(v)} ms`));
-    }
     const toggle = el('button', 'pb-text pb-ecg-toggle', 'Hide ECG');
     toggle.setAttribute('aria-pressed', 'true');
     toggle.addEventListener('click', () => {
