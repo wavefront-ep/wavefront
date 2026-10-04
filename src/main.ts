@@ -2,6 +2,7 @@ import './style.css';
 import { ActivationEngine } from './engine/activation';
 import sinus from './scenarios/sinus_rhythm.json';
 import { validateScenario } from './scenarios/types';
+import { buildEcg } from './ecg/morphology';
 import { buildApp } from './ui/app';
 
 const root = document.getElementById('app')!;
@@ -24,7 +25,7 @@ async function start() {
 
   const events = scenario.events.flatMap((e) => {
     const t = engine.eventTime(e.at, result);
-    return t === null ? [] : [{ id: e.id, label: e.label, t, caption: e.caption }];
+    return t === null ? [] : [{ id: e.id, label: e.label, t, caption: e.caption, ecg: e.ecg }];
   });
   // Colour-map ranges (ms), rounded outwards to the 10 ms isochrone spacing.
   const span = (a: number | null, b: number | null): [number, number] => [Math.floor((a ?? 0) / 10) * 10, Math.ceil((b ?? 0) / 10) * 10];
@@ -33,7 +34,11 @@ async function start() {
   const vFirst = engine.eventTime({ firstTissue: 'ventricular' }, result);
   const vLast = engine.eventTime({ lastTissue: 'ventricular' }, result);
   const scopes = { all: span(0, vLast), atria: span(aFirst, aLast), ventricles: span(vFirst, vLast) };
-  ui.attachSimulation(engine, scenario, result, events, scopes);
+  const ecg =
+    scenario.ecg && aFirst !== null && aLast !== null && vFirst !== null && vLast !== null
+      ? buildEcg(scenario.ecg.template, { aFirst, aLast, vFirst, vLast, apdVentricular: engine.constants.apd_ventricular }, scenario.period_ms)
+      : null;
+  ui.attachSimulation(engine, scenario, result, events, scopes, ecg);
   (window as any).epEngine = { engine, result, events };
 }
 

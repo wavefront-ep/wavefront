@@ -80,7 +80,7 @@ test('activation maps: palettes and scopes', async ({ page }) => {
 
 test('guided tour', async ({ page }) => {
   await setup(page);
-  await page.locator('.rail-btn[aria-label="Guided tour"]').click();
+  await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
   await page.mouse.move(800, 20);
   for (let i = 1; i <= 8; i++) {
     await settle(page, 1500);

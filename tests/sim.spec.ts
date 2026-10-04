@@ -140,7 +140,7 @@ test('activation map: legend in ms, palettes and scopes', async ({ page }) => {
 test('guided tour walks eight steps and ends cleanly', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
-  await page.locator('.rail-btn[aria-label="Guided tour"]').click();
+  await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
   await expect(page.locator('.pb-tour-count')).toHaveText('1 of 8');
   const titles: string[] = [];
   for (let i = 0; i < 8; i++) {
@@ -191,4 +191,56 @@ test('four-chamber cut keeps the conduction system in view and labelled', async 
   expect((await state(page)).cut.offset).toBeCloseTo(-0.26, 2);
   const labels = await page.locator('.overlay text').allTextContents();
   for (const l of ['SA node', 'AV node', 'His bundle', 'Left bundle branch', 'Right bundle branch']) expect(labels).toContain(l);
+});
+
+test('ECG strip: waves, intervals, event markers and cursor follow the beat', async ({ page }) => {
+  await openHeart(page, 1600, 900);
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await expect(page.locator('.pb-ecg svg path.pb-ecg-trace')).toBeVisible();
+  await expect(page.locator('.pb-ecg-mark')).toHaveCount(8);
+  const vals = await page.locator('.pb-ecg-val').allInnerTexts();
+  const num = (s: string) => Number(s.replace(/\D+/g, ''));
+  const [pr, qrs, qt] = vals.map(num);
+  expect(pr).toBeGreaterThan(140);
+  expect(pr).toBeLessThan(180);
+  expect(qrs).toBeGreaterThan(75);
+  expect(qrs).toBeLessThan(115);
+  expect(qt).toBeGreaterThan(300);
+  expect(qt).toBeLessThan(460);
+  // the P wave segment lights up during atrial activation and the QRS segment during ventricular activation
+  await page.evaluate(() => { const s = (window as any).epHeart; s.pause(); s.setTime(60); });
+  expect(await page.locator('.pb-ecg-seg.on').count()).toBe(1);
+  const left60 = await page.locator('.pb-ecg-cursor').evaluate((e: HTMLElement) => parseFloat(e.style.left));
+  expect(left60).toBeCloseTo(6, 0);
+  await page.evaluate(() => (window as any).epHeart.setTime(200));
+  const on = await page.locator('.pb-ecg-seg').evaluateAll((els) => els.map((e) => e.classList.contains('on')));
+  expect(on).toEqual([false, true, false]);
+  // the "On the ECG" line follows the current event; flat PR segment for the His bundle
+  await page.evaluate(() => (window as any).epHeart.setTime(128));
+  await expect(page.locator('.pb-ecgnote')).toContainText('flat');
+  // markers jump to their event
+  await page.locator('.pb-ecg-mark').nth(6).click();
+  const events: [string, number][] = await page.evaluate(() => (window as any).epEngine.events.map((e: any) => [e.id, e.t]));
+  expect((await state(page)).time).toBeCloseTo(events[6][1], 1);
+  // the strip can be hidden
+  await page.getByRole('button', { name: 'Hide ECG' }).click();
+  await expect(page.locator('.pb-ecgnote')).toBeHidden();
+});
+
+test('top bar offers the guided tour, cutaway and layers up front', async ({ page }) => {
+  await openHeart(page);
+  await waitForSim(page);
+  const bar = page.locator('.topbar');
+  await expect(bar.getByRole('button', { name: 'Guided tour' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Cutaway' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Layers and views' })).toBeVisible();
+  await bar.getByRole('button', { name: 'Layers and views' }).click();
+  await expect(page.locator('.app.drawer-open')).toHaveCount(1);
+  await bar.getByRole('button', { name: 'Guided tour' }).click();
+  expect((await state(page)).layers.labels).toBe(true); // labels are on from the first tour step
+  for (let i = 0; i < 7; i++) {
+    await page.getByRole('button', { name: 'Next' }).click();
+    expect((await state(page)).layers.labels).toBe(true);
+  }
 });

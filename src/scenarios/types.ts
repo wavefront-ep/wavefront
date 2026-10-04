@@ -7,6 +7,8 @@ export interface ScenarioEvent {
   label: string;
   at: EventSpec;
   caption: string;
+  /** What this moment looks like on the surface ECG (shown under the caption). */
+  ecg?: string;
 }
 
 export interface Scenario {
@@ -19,6 +21,7 @@ export interface Scenario {
   stimuli: { site: string; time_ms: number }[];
   substrate?: unknown[];
   modifiers?: unknown[];
+  ecg?: { template: 'normal_sinus'; lead: string };
   events: ScenarioEvent[];
   teaching_points: string[];
 }

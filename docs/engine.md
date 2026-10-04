@@ -45,3 +45,11 @@ and two palettes (colour-blind safe, CARTO-style).
 | First ventricular activation (PR from atrial onset) | about 162 ms (PR about 159) |
 | Ventricular activation (QRS) | about 162 to 254 ms (about 93 ms) |
 | Order | RA before LA; left septum before right; endocardium before epicardium; base last |
+
+## ECG strip
+
+`src/ecg/morphology.ts` builds a schematic lead II trace from the same event times: P wave over atrial
+activation, Q/R/S inside the ventricular activation window, T wave from QRS end plus the action potential
+duration. It shares the scrubber's time axis, lights the wave segment the playhead is in, numbers each
+sequence event on the strip, and brackets the PR, QRS and QT intervals. Scenarios choose a template
+(`ecg.template`); only `normal_sinus` exists so far.

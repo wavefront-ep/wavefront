@@ -4,6 +4,7 @@ import { ActivationEngine, ActivationResult } from '../engine/activation';
 import { PaletteId } from '../engine/material';
 import { CutMode, HeartScene, PlacedLabel } from '../scene/HeartScene';
 import { VIEWS } from '../scene/views';
+import { Ecg } from '../ecg/morphology';
 import { Scenario } from '../scenarios/types';
 import { PlayBar } from './playbar';
 import { Vector3 } from 'three';
@@ -15,12 +16,6 @@ const ICONS = {
   explore: svg('M10 17C5 13.5 3 10.5 3 7.8 3 5.6 4.7 4 6.6 4c1.4 0 2.6.8 3.4 2 .8-1.2 2-2 3.4-2C15.3 4 17 5.6 17 7.8c0 2.7-2 5.7-7 9.2Z'),
   // A flat trace with one excursion: arrhythmia mechanisms.
   mechanisms: svg('M2 11h4l1.5-5 3 9 1.7-4H18'),
-  // Three stacked rules: layers and views.
-  layers: svg('M3 5h14M3 10h14M3 15h14'),
-  // A circle crossed by a straight cut.
-  cut: svg('M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14ZM3 14.5 17 5.5'),
-  // A path with three stops: the guided tour.
-  tour: svg('M4 15c3 0 3-5 6-5s3-5 6-5M4 15h.01M10 10h.01M16 5h.01'),
 };
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: string) {
@@ -48,14 +43,22 @@ export function buildApp(root: HTMLElement) {
   const mech = railBtn(ICONS.mechanisms, 'Mechanisms (not yet available)');
   mech.setAttribute('aria-disabled', 'true');
   rail.append(explore, mech, el('div', 'spacer'));
-  const tourBtn = railBtn(ICONS.tour, 'Guided tour');
-  const cutBtn = railBtn(ICONS.cut, 'Cutaway');
-  const layersBtn = railBtn(ICONS.layers, 'Layers and views');
-  layersBtn.setAttribute('aria-pressed', 'false');
-  rail.append(tourBtn, cutBtn, layersBtn);
+
+  // Top bar: the three things a new visitor should find first, as words rather than icons.
+  const topbar = el('header', 'topbar');
+  const topBtn = (label: string) => {
+    const b = el('button', 'top-btn', label);
+    b.setAttribute('aria-pressed', 'false');
+    return b;
+  };
+  const tourBtn = topBtn('Guided tour');
+  const cutBtn = topBtn('Cutaway');
+  const layersBtn = topBtn('Layers and views');
+  topbar.append(tourBtn, cutBtn, el('span', 'spacer'), layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
+  stage.appendChild(topbar);
   const viewport = el('div', 'viewport');
   const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   overlay.setAttribute('class', 'overlay');
@@ -441,6 +444,7 @@ export function buildApp(root: HTMLElement) {
     bar.hide();
     lower.hidden = false;
     app.classList.remove('bar-open');
+    tourBtn.setAttribute('aria-pressed', 'false');
     tourStep = -1;
   };
   bar.onClose = () => {
@@ -481,6 +485,7 @@ export function buildApp(root: HTMLElement) {
   const startTour = () => {
     if (!result) return;
     lower.hidden = true;
+    tourBtn.setAttribute('aria-pressed', 'true');
     bar.show('tour');
     app.classList.add('bar-open');
     applyTourStep(0);
@@ -489,6 +494,7 @@ export function buildApp(root: HTMLElement) {
     if (tourStep < 0) return;
     tourStep = -1;
     bar.hide();
+    tourBtn.setAttribute('aria-pressed', 'false');
     app.classList.remove('bar-open');
     lower.hidden = false;
   };
@@ -526,8 +532,9 @@ export function buildApp(root: HTMLElement) {
     eng: ActivationEngine,
     sc: Scenario,
     res: ActivationResult,
-    events: { id: string; label: string; t: number; caption: string }[],
+    events: { id: string; label: string; t: number; caption: string; ecg?: string }[],
     scopes: Record<string, [number, number]>,
+    ecg: Ecg | null,
   ) => {
     engine = eng;
     scenario = sc;
@@ -537,6 +544,7 @@ export function buildApp(root: HTMLElement) {
     mapRange = ranges.all;
     scene.setMapRange(mapRange[0], mapRange[1]);
     bar.setEvents(events, sc.period_ms);
+    if (ecg) bar.setEcg(ecg);
     playBeat.disabled = false;
   };
 

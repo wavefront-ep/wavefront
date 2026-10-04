@@ -1,4 +1,5 @@
 import { PALETTES, PaletteId } from '../engine/material';
+import { Ecg } from '../ecg/morphology';
 import { HeartScene } from '../scene/HeartScene';
 
 export interface BeatEvent {
@@ -6,6 +7,7 @@ export interface BeatEvent {
   label: string;
   t: number;
   caption: string;
+  ecg?: string;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: string) {
@@ -31,6 +33,8 @@ const SPEEDS = [0.02, 0.05, 0.1, 0.25, 0.5, 1];
 export class PlayBar {
   readonly root = el('div', 'playbar');
   private caption = el('p', 'pb-caption');
+  private captionLabel = el('strong', 'pb-caption-label');
+  private captionText = el('span');
   private beat = el('div', 'pb-beat');
   private tour = el('div', 'pb-tour');
   private playBtn = el('button', 'pb-btn', ICON.play);
@@ -44,6 +48,14 @@ export class PlayBar {
   private legendCanvas = el('canvas');
   private legendTicks = el('div', 'pb-legend-ticks');
   private events: BeatEvent[] = [];
+  private ecgBox = el('div', 'pb-ecg');
+  private ecgCursor = el('div', 'pb-ecg-cursor');
+  private ecgSegs: { el: SVGRectElement; range: [number, number] }[] = [];
+  private ecgMarks: HTMLButtonElement[] = [];
+  private ecgRow = el('div', 'pb-ecgrow');
+  private ecgVals = el('div', 'pb-ecg-vals');
+  private ecgNote = el('p', 'pb-ecgnote');
+  private duration = 1000;
   private mode: 'beat' | 'tour' | null = null;
   onClose: () => void = () => {};
   onTourStep: (delta: number) => void = () => {};
@@ -56,6 +68,7 @@ export class PlayBar {
   constructor(private scene: HeartScene) {
     this.root.hidden = true;
     this.root.setAttribute('aria-label', 'Playback');
+    this.caption.append(this.captionLabel, this.captionText);
 
     // ---- beat face
     this.playBtn.setAttribute('aria-label', 'Play or pause (space)');
@@ -101,9 +114,19 @@ export class PlayBar {
     this.legend.append(strip, el('em', 'pb-legend-unit', 'ms after the sinus node fires'));
     this.legendCanvas.width = 160;
     this.legendCanvas.height = 6;
+    // Left: transport. Middle: scrubber (same time axis as the ECG above it). Right: readout and options.
     const controls = el('div', 'pb-controls');
-    controls.append(prev, this.playBtn, next, scrub, this.time, speed, this.loopBtn, style, close);
-    this.beat.append(controls, this.legend);
+    const transport = el('div', 'pb-transport');
+    transport.append(prev, this.playBtn, next);
+    const right = el('div', 'pb-right');
+    right.append(this.time, speed, this.loopBtn, style, close);
+    controls.append(transport, scrub, right);
+
+    const ecgLabel = el('div', 'pb-ecg-label', 'Lead II<br><em>schematic</em>');
+    this.ecgRow.append(ecgLabel, this.ecgBox, this.ecgVals);
+    this.ecgRow.hidden = true;
+    this.ecgNote.hidden = true;
+    this.beat.append(this.ecgRow, controls, this.legend);
 
     // ---- tour face
     const tourRow = el('div', 'pb-controls');
@@ -114,7 +137,7 @@ export class PlayBar {
     this.tourBack.addEventListener('click', () => this.onTourStep(-1));
     this.tourNext.addEventListener('click', () => this.onTourStep(1));
 
-    this.root.append(this.caption, this.beat, this.tour);
+    this.root.append(this.caption, this.ecgNote, this.beat, this.tour);
 
     // ---- behaviour
     this.playBtn.addEventListener('click', () => scene.togglePlay());
@@ -138,6 +161,7 @@ export class PlayBar {
 
   setEvents(events: BeatEvent[], duration: number) {
     this.events = [...events].sort((a, b) => a.t - b.t);
+    this.duration = duration;
     this.slider.max = String(duration);
     this.ticks.innerHTML = '';
     for (const e of this.events) {
@@ -199,7 +223,9 @@ export class PlayBar {
   setTour(step: number, total: number, title: string, text: string) {
     this.tourTitle.textContent = title;
     this.tourCount.textContent = `${step + 1} of ${total}`;
-    this.caption.textContent = text;
+    this.captionLabel.textContent = '';
+    this.captionText.textContent = text;
+    this.ecgNote.textContent = '';
     this.tourBack.disabled = step === 0;
     this.tourNext.textContent = step === total - 1 ? 'Finish' : 'Next';
   }
@@ -227,7 +253,105 @@ export class PlayBar {
     this.slider.value = String(Math.round(t));
     this.time.textContent = `${Math.round(t)} ms`;
     const e = this.currentEvent(t);
-    this.caption.textContent = e ? e.caption : 'Press play to see one normal beat.';
+    this.captionLabel.textContent = e ? `${e.label}. ` : '';
+    this.captionText.textContent = e ? e.caption : 'Press play to see one normal beat.';
+    this.ecgNote.textContent = e?.ecg ? `On the ECG: ${e.ecg}` : '';
     this.ticks.querySelectorAll('.pb-tick').forEach((n, i) => n.classList.toggle('on', this.events[i] === e));
+    this.ecgCursor.style.left = `${(t / this.duration) * 100}%`;
+    for (const s of this.ecgSegs) s.el.classList.toggle('on', t >= s.range[0] && t <= s.range[1]);
+    this.ecgMarks.forEach((m, i) => m.classList.toggle('on', this.events[i] === e));
+  }
+
+  /** Draw the strip: trace, wave segments that light up as the playhead passes, one numbered marker per
+   *  sequence event, and the PR, QRS and QT intervals. All on the same time axis as the scrubber. */
+  setEcg(ecg: Ecg) {
+    const W = this.duration;
+    const base = 62;
+    const y = (a: number) => base - a * 50;
+    let d = '';
+    for (let x = 0; x <= W; x += 2) d += `${x === 0 ? 'M' : 'L'}${x},${y(ecg.samples[x]).toFixed(1)}`;
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} 100`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+    this.ecgSegs = [];
+    const seg = (range: [number, number]) => {
+      const r = document.createElementNS(ns, 'rect');
+      r.setAttribute('x', String(range[0]));
+      r.setAttribute('width', String(range[1] - range[0]));
+      r.setAttribute('y', '0');
+      r.setAttribute('height', '100');
+      r.setAttribute('class', 'pb-ecg-seg');
+      svg.appendChild(r);
+      this.ecgSegs.push({ el: r, range });
+    };
+    seg(ecg.p);
+    seg(ecg.qrs);
+    seg(ecg.t);
+    const line = (x1: number, y1: number, x2: number, y2: number, cls: string) => {
+      const l = document.createElementNS(ns, 'line');
+      l.setAttribute('x1', String(x1)); l.setAttribute('y1', String(y1)); l.setAttribute('x2', String(x2)); l.setAttribute('y2', String(y2));
+      l.setAttribute('class', cls);
+      svg.appendChild(l);
+    };
+    line(0, base, W, base, 'pb-ecg-base');
+    for (const [r, yy] of [[ecg.pr, 90], [ecg.qrs, 90], [ecg.qt, 98]] as [[number, number], number][]) {
+      line(r[0], yy, r[1], yy, 'pb-ecg-int');
+      line(r[0], yy - 3, r[0], yy + 3, 'pb-ecg-int');
+      line(r[1], yy - 3, r[1], yy + 3, 'pb-ecg-int');
+    }
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'pb-ecg-trace');
+    svg.appendChild(path);
+
+    this.ecgBox.innerHTML = '';
+    this.ecgBox.appendChild(svg);
+    const label = (text: string, t: number, top: number, cls = '') => {
+      const s = el('span', `pb-ecg-text ${cls}`, text);
+      s.style.left = `${(t / W) * 100}%`;
+      s.style.top = `${top}px`;
+      this.ecgBox.appendChild(s);
+    };
+    label('P', (ecg.p[0] + ecg.p[1]) / 2, 22);
+    label('QRS', (ecg.qrs[0] + ecg.qrs[1]) / 2 + 18, 0);
+    label('T', (ecg.t[0] + ecg.t[1]) / 2, 28);
+    label('PR', (ecg.pr[0] + ecg.pr[1]) / 2, 82, 'int');
+    label('QRS', (ecg.qrs[0] + ecg.qrs[1]) / 2, 82, 'int');
+    label('QT', (ecg.qt[0] + ecg.qt[1]) / 2, 90, 'int');
+    // numbered event markers along the top edge, matching the ticks on the scrubber
+    this.ecgMarks = this.events.map((e, i) => {
+      const m = el('button', 'pb-ecg-mark', String(i + 1));
+      m.style.left = `${(e.t / W) * 100}%`;
+      m.style.top = `${(i % 2) * 15 + 2}px`;
+      m.title = `${i + 1}. ${e.label}, ${Math.round(e.t)} ms`;
+      m.setAttribute('aria-label', `Event ${i + 1}: ${e.label}, ${Math.round(e.t)} milliseconds`);
+      m.addEventListener('click', () => {
+        this.scene.pause();
+        this.scene.setTime(e.t);
+      });
+      this.ecgBox.appendChild(m);
+      return m;
+    });
+    this.ecgBox.appendChild(this.ecgCursor);
+    const r = (n: number) => Math.round(n);
+    this.ecgVals.innerHTML = '';
+    for (const [k, v] of [['PR', ecg.pr[1] - ecg.pr[0]], ['QRS', ecg.qrs[1] - ecg.qrs[0]], ['QT', ecg.qt[1] - ecg.qt[0]]] as [string, number][]) {
+      this.ecgVals.appendChild(el('span', 'pb-ecg-val', `<em>${k}</em> ${r(v)} ms`));
+    }
+    const toggle = el('button', 'pb-text pb-ecg-toggle', 'Hide ECG');
+    toggle.setAttribute('aria-pressed', 'true');
+    toggle.addEventListener('click', () => {
+      const on = toggle.getAttribute('aria-pressed') !== 'true';
+      toggle.setAttribute('aria-pressed', String(on));
+      toggle.textContent = on ? 'Hide ECG' : 'Show ECG';
+      this.ecgBox.hidden = !on;
+      this.ecgNote.hidden = !on;
+    });
+    this.ecgVals.appendChild(toggle);
+    this.ecgRow.hidden = false;
+    this.ecgNote.hidden = false;
+    this.update(this.scene.playback.t);
   }
 }
