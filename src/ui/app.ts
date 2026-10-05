@@ -451,6 +451,7 @@ export function buildApp(root: HTMLElement) {
   const openScenario = async (id: string, view: 'this' | 'normal' = 'this', autoplay = false) => {
     if (!loader) return;
     endTour();
+    if (app.classList.contains('present')) setDrawer(false); // a rhythm picked in present mode closes the list again
     const token = ++openToken;
     const data: Loaded = await loader.get(id);
     const shown: Loaded = view === 'normal' ? await loader.get('sinus_rhythm') : data;

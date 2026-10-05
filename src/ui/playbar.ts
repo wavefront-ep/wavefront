@@ -71,6 +71,7 @@ export class PlayBar {
   onTourStep: (delta: number) => void = () => {};
   private tourTitle = el('span', 'pb-tour-title');
   private tourCount = el('span', 'pb-tour-count');
+  private tourAtEnd = false;
   private tourBack = el('button', 'pb-text', 'Back');
   private tourNext = el('button', 'pb-text', 'Next');
 
@@ -156,7 +157,8 @@ export class PlayBar {
     const exit = el('button', 'pb-text', 'End tour');
     tourRow.append(this.tourBack, this.tourCount, this.tourNext, el('span', 'pb-spacer'), exit);
     this.tour.append(this.tourTitle, tourRow, this.legend);
-    exit.addEventListener('click', () => this.onClose());
+    // On the last step, ending the tour carries on to the sinus beat.
+    exit.addEventListener('click', () => (this.tourAtEnd ? this.onTourStep(1) : this.onClose()));
     this.tourBack.addEventListener('click', () => this.onTourStep(-1));
     this.tourNext.addEventListener('click', () => this.onTourStep(1));
 
@@ -289,6 +291,7 @@ export class PlayBar {
     this.captionLabel.textContent = '';
     this.captionText.textContent = text;
     this.ecgNoteText.textContent = '';
+    this.tourAtEnd = step === total - 1;
     this.tourBack.disabled = step === 0;
     this.tourNext.textContent = step === total - 1 ? 'Next: sinus beat' : 'Next';
   }

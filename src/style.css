@@ -128,7 +128,9 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius
 
 /* ---- present mode: for a projector; the heart, the player and bigger type, nothing else ---- */
 .app.present { grid-template-columns: 1fr 0; }
-.app.present .topbar, .app.present .drawer, .app.present .hint { display: none; }
+.app.present .topbar, .app.present .hint { display: none; }
+.app.present:not(.drawer-open) .drawer { display: none; }
+.app.present.drawer-open { grid-template-columns: 1fr var(--drawer); }
 .app.present .overlay text { font-size: 19px; }
 .app.present .overlay line { stroke-width: 1.6; stroke-opacity: 0.75; }
 .app.present .pb-caption { font-size: 24px; max-width: 70ch; }

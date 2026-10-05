@@ -51,3 +51,27 @@ test('the instructor guide is linked from the side panel and has no deck referen
   expect(g.ok()).toBe(true);
   expect(await g.text()).not.toMatch(/\bdeck\b|slides? \d/i);
 });
+
+test('in present mode the rhythm list opens from "Choose a rhythm" and closes after a pick', async ({ page }) => {
+  await openHeart(page, 1440, 900);
+  await waitForSim(page);
+  await page.goto('/#present=1&rhythms');
+  await page.reload();
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'Choose a rhythm' }).click();
+  await expect(page.locator('#sec-mech')).toBeVisible();
+  await page.evaluate(() => (window as any).epOpen('mobitz_i'));
+  await expect(page.locator('.playbar')).toBeVisible();
+  await expect(page.locator('.drawer')).toBeHidden();
+});
+
+test('"End tour" on the last step goes to the sinus beat', async ({ page }) => {
+  await openHeart(page, 1440, 900);
+  await waitForSim(page);
+  await page.goto('/#tour=9');
+  await page.reload();
+  await waitForSim(page);
+  await page.getByRole('button', { name: 'End tour' }).click();
+  await expect(page.locator('.pb-ecgrow')).toBeVisible();
+  await expect(page.locator('.pb-title')).toContainText(/sinus rhythm/i);
+});
