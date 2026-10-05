@@ -88,3 +88,12 @@ test('every preset lands on its own direction, including superior to inferior', 
     expect(Math.abs(d[axis])).toBeGreaterThan(3);
   }
 });
+
+test('arrow keys pan the view up and down', async ({ page }) => {
+  await openHeart(page);
+  const y0 = await page.evaluate(() => (window as any).epHeart.controls.target.y);
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  const y1 = await page.evaluate(() => (window as any).epHeart.controls.target.y);
+  expect(y1).toBeGreaterThan(y0 + 0.1);
+});

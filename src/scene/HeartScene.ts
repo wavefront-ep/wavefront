@@ -172,6 +172,17 @@ export class HeartScene {
     this.controls.screenSpacePanning = true;
     this.controls.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN };
     this.controls.touches = { ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN };
+    // Shift + wheel pans (a trackpad has no right button, and its two-finger scroll zooms).
+    this.renderer.domElement.addEventListener(
+      'wheel',
+      (e) => {
+        if (!e.shiftKey) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        this.panBy(e.deltaX * 0.0015, -(e.deltaY || e.deltaX) * 0.0015);
+      },
+      { capture: true, passive: false },
+    );
     this.controls.addEventListener('start', () => {
       this.tween = null;
       this.currentView = null;
@@ -545,6 +556,18 @@ export class HeartScene {
   }
 
   /** Free camera placement for the guided tour: direction towards the camera, distance and target. */
+  /** Slide the view across the heart; amounts are fractions of the viewing distance. */
+  panBy(right: number, up: number) {
+    this.tween = null;
+    const d = this.camera.position.distanceTo(this.controls.target);
+    const r = new Vector3().setFromMatrixColumn(this.camera.matrix, 0);
+    const u = new Vector3().setFromMatrixColumn(this.camera.matrix, 1);
+    const off = r.multiplyScalar(right * d).addScaledVector(u, up * d);
+    this.controls.target.add(off);
+    this.camera.position.add(off);
+    this.camera.updateMatrixWorld();
+  }
+
   setCamera(dir: Vector3, distance: number, target: Vector3 | null = null, animate = true) {
     this.flyTo(dir, distance, target ?? this.center.clone(), animate);
     this.currentView = null;

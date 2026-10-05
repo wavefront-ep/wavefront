@@ -64,7 +64,7 @@ export function buildApp(root: HTMLElement) {
   const lower = el('div', 'lower');
   const playBeat = el('button', 'primary', 'Play sinus beat');
   playBeat.disabled = true;
-  const hint = el('div', 'hint', 'Drag to rotate. Scroll to zoom. Select a structure for its name.');
+  const hint = el('div', 'hint', 'Drag to rotate. Scroll to zoom. Shift-drag or arrow keys up and down to move the view. Select a structure for its name.');
   lower.append(playBeat, hint);
   const loading = el('div', 'loading', 'Loading the heart');
   viewport.append(overlay, hoverLabel, lower, loading);
@@ -610,6 +610,9 @@ export function buildApp(root: HTMLElement) {
       e.preventDefault();
       if (!bar.visible && mode === 'explore') openBeat();
       else if (bar.currentMode === 'beat') scene.togglePlay();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      scene.panBy(0, e.key === 'ArrowUp' ? 0.08 : -0.08); // Up looks higher up the heart
     } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       const d = e.key === 'ArrowRight' ? 1 : -1;
       if (bar.currentMode === 'beat') bar.stepEvent(d);
