@@ -78,6 +78,7 @@ export class PlayBar {
     this.root.hidden = true;
     this.root.setAttribute('aria-label', 'Playback');
     this.captionLive.append(this.captionLabel, this.captionText);
+    this.caption.setAttribute('aria-live', 'polite'); // a screen reader hears each step as the caption changes
     this.caption.append(this.captionLive);
     this.ecgNote.append(this.ecgNoteText);
     this.compare.setAttribute('role', 'group');

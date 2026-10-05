@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wavefront: instructor quick-guide</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+<style>
+  :root { --bg: #f6f3ee; --ink: #2a2624; --muted: #6f6761; --faint: rgba(42,38,36,.16); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 28px 56px; }
+  h1 { font: 500 30px/1.2 Newsreader, Georgia, serif; margin: 0 0 4px; }
+  h2 { font: 500 12px/1.3 inherit; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 28px 0 8px; padding-top: 14px; border-top: 1px solid var(--faint); }
+  p, li { margin: 0 0 6px; }
+  .lede { font: italic 17px/1.45 Newsreader, Georgia, serif; color: var(--muted); margin-bottom: 8px; }
+  ol, ul { padding-left: 20px; margin: 0; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 36px; }
+  kbd { font: 12.5px inherit; border: 1px solid var(--faint); padding: 0 5px; border-radius: 3px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td { padding: 3px 12px 3px 0; vertical-align: top; border-bottom: 1px solid var(--faint); }
+  td:first-child { white-space: nowrap; color: var(--muted); width: 1%; }
+  a { color: inherit; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  @media print { body { background: #fff; font-size: 11.5px; } main { padding: 0; max-width: none; } h1 { font-size: 24px; } h2 { margin-top: 16px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Wavefront: instructor quick-guide</h1>
+  <p class="lede">A 3D heart for teaching how the heartbeat spreads and how arrhythmias arise. One page.</p>
+
+  <h2>Before class</h2>
+  <ul>
+    <li>Open the site in a current Chrome, Edge, Safari or Firefox. The first load downloads about 8 MB.</li>
+    <li>No Wi-Fi in the room? Use the offline file <b>wavefront.html</b> (from <code>npm run build:offline</code>). It opens by double-click and needs no internet.</li>
+    <li>Press <kbd>P</kbd> (or the Present button) for the projector view: the top bar and side panel disappear, text gets larger. <kbd>Esc</kbd> leaves it.</li>
+  </ul>
+
+  <h2>A 10 to 15 minute route</h2>
+  <ol>
+    <li><b>Guided tour</b> (top bar, step 1). Nine short steps: the heart from the front, inside the chambers, the sinus node, the atria, the AV node, His bundle and bundle branches, Purkinje fibres, the whole beat as a colour map, then a pointer to the side panel. Use Next or the right arrow.</li>
+    <li><b>Sinus beat</b> (step 2). One normal beat with a Lead II trace underneath. The numbered circles on the trace match the events on the scrubber. Press Space to play or pause.</li>
+    <li><b>Arrhythmias</b> (step 3). Pick a rhythm from the list on the right: normal, impulse formation, conduction block, and re-entry. Each opens paused with its key structures labelled. Press Play, or step with the arrow keys.</li>
+  </ol>
+
+  <h2>Controls that matter</h2>
+  <div class="cols">
+    <table>
+      <tr><td>Rotate</td><td>Drag</td></tr>
+      <tr><td>Zoom</td><td>Scroll</td></tr>
+      <tr><td>Move the view</td><td>Shift-drag, right-drag, two fingers, or <kbd>&uarr;</kbd> <kbd>&darr;</kbd></td></tr>
+      <tr><td>Play / pause</td><td><kbd>Space</kbd></td></tr>
+      <tr><td>Step event</td><td><kbd>&larr;</kbd> <kbd>&rarr;</kbd></td></tr>
+    </table>
+    <table>
+      <tr><td>Labels</td><td><kbd>L</kbd></td></tr>
+      <tr><td>Present mode</td><td><kbd>P</kbd>, leave with <kbd>Esc</kbd></td></tr>
+      <tr><td>Hide all chrome</td><td><kbd>H</kbd></td></tr>
+      <tr><td>Cut the heart open</td><td>Layers and views, then Cutaway</td></tr>
+      <tr><td>Share a state</td><td>Copy link (top right)</td></tr>
+    </table>
+  </div>
+
+  <h2>Things to know</h2>
+  <ul>
+    <li><b>Pause at each step</b> (above the play buttons) holds on every event long enough to read its caption and speeds across quiet stretches. It is on for the arrhythmias and off for the sinus rhythm. Turn it off to let a rhythm run continuously.</li>
+    <li>Speed starts at 0.05&times; so the sequence is easy to follow. 0.02&times; to 1&times; are in the bar. The ECG on the strip is on the same time axis as the scrubber.</li>
+    <li><b>Normal / This rhythm</b> in the player compares an arrhythmia with the normal beat on the same heart.</li>
+    <li>The side panel (Layers and views) has the cutaway, layers (outer wall opacity, conduction system, labels) and standard views. The cut can show the conduction system inside the four-chamber view.</li>
+  </ul>
+
+  <h2>Links for slides or the course site</h2>
+  <p>The address always matches what is on screen. Open a state and use Copy link. Examples (add them after the site address):</p>
+  <table>
+    <tr><td><code>#tour=3</code></td><td>Guided tour, step 3 (1 to 9)</td></tr>
+    <tr><td><code>#rhythm=avnrt</code></td><td>One rhythm, opened paused (add <code>&amp;compare=normal</code> to start with the normal beat for comparison)</td></tr>
+    <tr><td><code>#rhythms</code></td><td>The arrhythmia list</td></tr>
+    <tr><td><code>&amp;present=1</code></td><td>Add to any of the above to open in present mode</td></tr>
+  </table>
+  <p>Rhythm names: sinus_rhythm, sinus_bradycardia, sinus_tachycardia, sinus_pause, ectopic_atrial_tachycardia, multifocal_atrial_tachycardia, junctional_tachycardia, torsades_de_pointes, sa_exit_block, first_degree_av_block, mobitz_i, mobitz_ii, complete_heart_block, lbbb, rbbb, avnrt, wpw_preexcitation, avrt_orthodromic, antidromic_avrt, atrial_flutter_typical, atrial_flutter_4to1, atrial_fibrillation, af_with_bbb, preexcited_af, svt_aberrancy, vt_scar_monomorphic, ventricular_fibrillation.</p>
+
+  <h2>What it is and is not</h2>
+  <ul>
+    <li>A <b>schematic</b> teaching tool. Activation timing is tuned to the teaching points (for example the AV delay, flutter cycle length and re-entry period), but it is not a biophysical simulation or patient data. The conduction pathways other than the main nodes and bundles, the ECG, the re-entry circuits and fibrillation are drawn as schematic and labelled that way in the interface.</li>
+    <li>Heart shape: Rodero et al. 2021, average of a statistical shape model of healthy adult hearts (CC BY 4.0). Valves are drawn as closed planes, not leaflets.</li>
+    <li>Report anything that looks anatomically or physiologically wrong so it can be checked against a reference and corrected.</li>
+  </ul>
+</main>
+</body>
+</html>

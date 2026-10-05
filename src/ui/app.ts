@@ -89,6 +89,7 @@ export function buildApp(root: HTMLElement) {
   secCut.appendChild(el('h2', undefined, 'Cutaway'));
 
   const secCredit = el('section', 'sec');
+  secCredit.appendChild(el('p', 'cap', '<a href="./guide.html" target="_blank" rel="noopener">Instructor quick-guide</a> (one page, printable)'));
   secCredit.appendChild(
     el('p', 'cap', 'Heart geometry: Rodero et al., PLoS Computational Biology 2021, average shape of a healthy-adult statistical model (CC BY 4.0). Surface extracted, smoothed and decimated for this viewer. Conduction system placement and activation are schematic.'),
   );
@@ -112,6 +113,8 @@ export function buildApp(root: HTMLElement) {
   // ---------------------------------------------------------- scene and bar
   const scene = new HeartScene(viewport);
   (window as any).epHeart = scene;
+  scene.renderer.domElement.setAttribute('role', 'img');
+  scene.renderer.domElement.setAttribute('aria-label', 'Three-dimensional model of the heart. Use the guided tour, the sinus beat and the arrhythmia list to explore it; the caption below describes what is shown.');
   viewport.insertBefore(scene.renderer.domElement, overlay);
   const bar = new PlayBar(scene);
   stage.appendChild(bar.root);
