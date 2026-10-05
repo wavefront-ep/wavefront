@@ -35,6 +35,8 @@ export function buildApp(root: HTMLElement) {
   const sinusBtn = stepBtn(2, 'Sinus beat');
   const arrBtn = stepBtn(3, 'Arrhythmias');
   const layersBtn = topBtn('Layers and views');
+  const presentBtn = topBtn('Present');
+  const linkBtn = topBtn('Copy link');
   const brand = el(
     'span',
     'brand',
@@ -42,7 +44,7 @@ export function buildApp(root: HTMLElement) {
   );
   // Space is the play key, so a clicked top-bar button must not keep the focus.
   topbar.addEventListener('click', (e) => (e.target as HTMLElement).closest('button')?.blur());
-  topbar.append(brand, tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), layersBtn);
+  topbar.append(brand, tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), linkBtn, presentBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -57,8 +59,9 @@ export function buildApp(root: HTMLElement) {
   playBeat.disabled = true;
   const hint = el('div', 'hint', 'Drag to rotate. Scroll to zoom. Shift-drag or arrow keys up and down to move the view. Select a structure for its name.');
   lower.append(playBeat, hint);
+  const presentExit = el('div', 'present-exit', 'Press Esc to leave present mode');
   const loading = el('div', 'loading', 'Loading the heart');
-  viewport.append(overlay, hoverLabel, lower, loading);
+  viewport.append(overlay, hoverLabel, lower, presentExit, loading);
   stage.appendChild(viewport);
 
   // ---------------------------------------------------------- drawer
@@ -515,6 +518,7 @@ export function buildApp(root: HTMLElement) {
     tourBtn.setAttribute('aria-pressed', String(tourStep >= 0));
     sinusBtn.setAttribute('aria-pressed', String(mode === 'explore' && beatOpen && current?.id === 'sinus_rhythm'));
     arrBtn.setAttribute('aria-pressed', String(mode === 'mechanisms'));
+    syncHash();
   };
   const setMode = (m: 'explore' | 'mechanisms') => {
     mode = m;
@@ -575,6 +579,7 @@ export function buildApp(root: HTMLElement) {
     bar.setTour(i, TOUR.length, s.title, s.text);
     scene.applyLayers();
     scene.relabel();
+    syncHash();
   };
   const startTour = async () => {
     if (!loader) return;
@@ -608,6 +613,62 @@ export function buildApp(root: HTMLElement) {
   };
   tourBtn.addEventListener('click', () => (tourStep >= 0 ? bar.onClose() : startTour()));
 
+  // present mode: hides the top bar and the drawer, enlarges text, goes full screen where allowed
+  let presentTimer = 0;
+  const setPresent = (on: boolean) => {
+    app.classList.toggle('present', on);
+    presentBtn.setAttribute('aria-pressed', String(on));
+    if (on) {
+      setDrawer(false);
+      presentExit.classList.add('show');
+      clearTimeout(presentTimer);
+      presentTimer = window.setTimeout(() => presentExit.classList.remove('show'), 3500);
+      void document.documentElement.requestFullscreen?.().catch(() => {});
+    } else if (document.fullscreenElement) {
+      void document.exitFullscreen().catch(() => {});
+    }
+    scene.relabel();
+    syncHash();
+  };
+  presentBtn.addEventListener('click', () => setPresent(!app.classList.contains('present')));
+  // leaving full screen by the browser's own key also leaves present mode
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && app.classList.contains('present')) setPresent(false);
+  });
+
+  // deep links: the address always describes what is on screen, so it can be pasted into a slide or message
+  function syncHash() {
+    const parts: string[] = [];
+    if (tourStep >= 0) parts.push(`tour=${tourStep + 1}`);
+    else if (current) parts.push(`rhythm=${current.id}`, ...(current.view === 'normal' ? ['compare=normal'] : []));
+    else if (mode === 'mechanisms') parts.push('rhythms');
+    if (app.classList.contains('present')) parts.push('present=1');
+    history.replaceState(null, '', parts.length ? `#${parts.join('&')}` : location.pathname + location.search);
+  }
+  const applyHash = async () => {
+    const q = new URLSearchParams(location.hash.slice(1));
+    if (q.get('present') === '1') setPresent(true);
+    const n = Number(q.get('tour'));
+    const id = q.get('rhythm');
+    if (n >= 1) {
+      await startTour();
+      applyTourStep(Math.min(TOUR.length, Math.floor(n)) - 1);
+    } else if (id && SCENARIOS.some((x) => x.id === id)) {
+      setMode(id === 'sinus_rhythm' ? 'explore' : 'mechanisms');
+      await openScenario(id, q.get('compare') === 'normal' ? 'normal' : 'this', false);
+    } else if (q.has('rhythms')) setMode('mechanisms');
+  };
+  linkBtn.addEventListener('click', async () => {
+    syncHash();
+    try {
+      await navigator.clipboard.writeText(location.href);
+      linkBtn.textContent = 'Link copied';
+    } catch {
+      linkBtn.textContent = 'Copy it from the address bar';
+    }
+    setTimeout(() => (linkBtn.textContent = 'Copy link'), 2200);
+  });
+
   // keyboard
   window.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -618,7 +679,10 @@ export function buildApp(root: HTMLElement) {
     const k = e.key.toLowerCase();
     if (k === 'l') setLabels(!L.labels);
     else if (k === 'h') app.classList.toggle('chrome-hidden');
-    else if (k === 'escape') scene.select(null);
+    else if (k === 'escape') {
+      if (app.classList.contains('present')) setPresent(false);
+      else scene.select(null);
+    } else if (k === 'p') setPresent(!app.classList.contains('present'));
     else if (e.key === ' ' && loader && t?.tagName !== 'BUTTON') {
       e.preventDefault();
       if (!bar.visible && mode === 'explore') openBeat();
@@ -638,6 +702,7 @@ export function buildApp(root: HTMLElement) {
     loader = l;
     playBeat.disabled = false;
     itemBtns.forEach((b) => (b.disabled = false));
+    void applyHash();
   };
 
   return { scene, app, loading, chamberInputs, attachScenarios, openScenario, get current() { return current; } };

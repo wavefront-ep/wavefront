@@ -35,7 +35,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .app { display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: 1fr 0; height: 100%; transition: grid-template-columns var(--t); }
 .app.drawer-open { grid-template-columns: 1fr var(--drawer); }
 .app.chrome-hidden { grid-template-columns: 1fr 0; }
-.app.chrome-hidden .app.chrome-hidden .drawer, .app.chrome-hidden .topbar { visibility: hidden; }
+.app.chrome-hidden .drawer, .app.chrome-hidden .topbar { visibility: hidden; }
 
 .brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; color: var(--ink); }
 .brand-name { font-family: var(--serif); font-size: 18px; letter-spacing: 0.01em; }
@@ -126,9 +126,20 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius
   .app:not(.drawer-open) .drawer { visibility: hidden !important; }
 }
 
-.present { --drawer: 380px; font-size: 17px; }
-.present .overlay text { font-size: 17px; }
-.present .overlay line { stroke-width: 1.5; stroke-opacity: 0.7; }
+/* ---- present mode: for a projector; the heart, the player and bigger type, nothing else ---- */
+.app.present { grid-template-columns: 1fr 0; }
+.app.present .topbar, .app.present .drawer, .app.present .hint { display: none; }
+.app.present .overlay text { font-size: 19px; }
+.app.present .overlay line { stroke-width: 1.6; stroke-opacity: 0.75; }
+.app.present .pb-caption { font-size: 24px; max-width: 70ch; }
+.app.present .pb-ecgnote { font-size: 19px; }
+.app.present .pb-caption-label { font-weight: 600; }
+.app.present .pb-text, .app.present .pb-ecg-text, .app.present .pb-ecg-label { font-size: 15px; }
+.app.present .pb-tour-title { font-size: 22px; }
+.app.present .pb-tour-count { font-size: 16px; }
+.app.present .primary { font-size: 18px; }
+.present-exit { position: absolute; top: 12px; right: 18px; z-index: 5; font-size: 13px; color: var(--muted); opacity: 0; transition: opacity 600ms ease; pointer-events: none; }
+.app.present .present-exit.show { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
