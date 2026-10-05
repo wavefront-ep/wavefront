@@ -63,10 +63,10 @@ test('guided tour', async ({ page }) => {
   await setup(page);
   await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
   await page.mouse.move(800, 20);
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= 9; i++) {
     await settle(page, 1500);
     await page.screenshot({ path: `${OUT}/tour_${i}.png` });
-    if (i < 8) await page.getByRole('button', { name: 'Next' }).click();
+    if (i < 9) await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
 });
 

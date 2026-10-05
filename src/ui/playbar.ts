@@ -61,6 +61,8 @@ export class PlayBar {
   private ecgRow = el('div', 'pb-ecgrow');
   private ecgVals = el('div', 'pb-ecg-vals');
   private ecgNote = el('p', 'pb-ecgnote');
+  private ecgNoteText = el('span', 'pb-live');
+  private captionLive = el('span', 'pb-live');
   private duration = 1000;
   private mode: 'beat' | 'tour' | null = null;
   onClose: () => void = () => {};
@@ -75,7 +77,9 @@ export class PlayBar {
   constructor(private scene: HeartScene) {
     this.root.hidden = true;
     this.root.setAttribute('aria-label', 'Playback');
-    this.caption.append(this.captionLabel, this.captionText);
+    this.captionLive.append(this.captionLabel, this.captionText);
+    this.caption.append(this.captionLive);
+    this.ecgNote.append(this.ecgNoteText);
     this.compare.setAttribute('role', 'group');
     this.compare.setAttribute('aria-label', 'Normal rhythm or this rhythm');
     for (const [id, name] of [['normal', 'Normal'], ['this', 'This rhythm']] as const) {
@@ -184,8 +188,30 @@ export class PlayBar {
     this.compareBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === view)));
   }
 
+  /** Invisible copies of every text the box can show, stacked in one grid cell, so the box keeps the height of the longest and the view of the heart does not move as the text changes. */
+  private reserve(captions: string[], notes: string[]) {
+    for (const [box, texts] of [[this.caption, captions], [this.ecgNote, notes]] as const) {
+      box.querySelectorAll('.pb-ghost').forEach((n) => n.remove());
+      for (const t of texts) {
+        const g = el('span', 'pb-ghost');
+        g.setAttribute('aria-hidden', 'true');
+        g.textContent = t;
+        box.appendChild(g);
+      }
+    }
+  }
+
+  /** Reserve room for the tour's texts. */
+  reserveTour(texts: string[]) {
+    this.reserve(texts, []);
+  }
+
   setEvents(events: BeatEvent[], duration: number) {
     this.events = [...events].sort((a, b) => a.t - b.t);
+    this.reserve(
+      [...this.events.map((e) => `${e.label}. ${e.caption}`), 'Press play to start. The animation pauses at each step so you can read it.'],
+      this.events.filter((e) => e.ecg).map((e) => `On the ECG: ${e.ecg}`),
+    );
     this.duration = duration;
     this.slider.max = String(duration);
     this.ticks.innerHTML = '';
@@ -256,7 +282,7 @@ export class PlayBar {
     this.tourCount.textContent = `${step + 1} of ${total}`;
     this.captionLabel.textContent = '';
     this.captionText.textContent = text;
-    this.ecgNote.textContent = '';
+    this.ecgNoteText.textContent = '';
     this.tourBack.disabled = step === 0;
     this.tourNext.textContent = step === total - 1 ? 'Next: sinus beat' : 'Next';
   }
@@ -286,7 +312,7 @@ export class PlayBar {
     const e = this.currentEvent(t);
     this.captionLabel.textContent = e ? `${e.label}. ` : '';
     this.captionText.textContent = e ? e.caption : 'Press play to start. The animation pauses at each step so you can read it.';
-    this.ecgNote.textContent = e?.ecg ? `On the ECG: ${e.ecg}` : '';
+    this.ecgNoteText.textContent = e?.ecg ? `On the ECG: ${e.ecg}` : '';
     this.ticks.querySelectorAll('.pb-tick').forEach((n, i) => n.classList.toggle('on', this.events[i] === e));
     this.ecgCursor.style.left = `${(t / this.duration) * 100}%`;
     for (const s of this.ecgSegs) s.el.classList.toggle('on', t >= s.range[0] && t <= s.range[1]);

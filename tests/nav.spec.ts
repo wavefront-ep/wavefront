@@ -3,7 +3,8 @@ import { openHeart, settle } from './helpers';
 
 test('cutaway is reachable from the top bar and the drawer nav', async ({ page }) => {
   await openHeart(page, 1366, 768);
-  await page.locator('.topbar').getByRole('button', { name: 'Cutaway' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Layers and views' }).click();
+  await page.locator('.drawer-nav button', { hasText: 'Cutaway' }).click();
   await settle(page, 700);
   await expect(page.locator('.app.drawer-open')).toHaveCount(1);
   await expect(page.locator('#sec-cutaway')).toBeInViewport();

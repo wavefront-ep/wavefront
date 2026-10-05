@@ -37,7 +37,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .app.chrome-hidden { grid-template-columns: 1fr 0; }
 .app.chrome-hidden .app.chrome-hidden .drawer, .app.chrome-hidden .topbar { visibility: hidden; }
 
-.mark { font-family: var(--serif); font-size: 17px; letter-spacing: 0.02em; margin-right: 6px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; color: var(--ink); }
+.brand-name { font-family: var(--serif); font-size: 18px; letter-spacing: 0.01em; }
+.brand-mark { width: 20px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
 .top-n { font-family: var(--serif); font-style: italic; color: var(--muted); margin-right: 6px; }
 .pb-next { color: var(--ink); }
 
@@ -204,6 +206,9 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius
 .pb-ecgnote { margin: 0 0 8px; font-family: var(--serif); font-style: italic; font-size: 14.5px; line-height: 1.4; color: var(--muted); max-width: 78ch; }
 .pb-ecgnote[hidden] { display: none; }
 .pb-caption-label { font-weight: 500; }
+.pb-caption, .pb-ecgnote { display: grid; }
+.pb-live, .pb-ghost { grid-area: 1 / 1; }
+.pb-ghost { visibility: hidden; pointer-events: none; }
 .pb-transport { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .pb-transport-btns { display: flex; gap: 2px; }
 .pb-guided { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink); cursor: pointer; line-height: 1.2; }

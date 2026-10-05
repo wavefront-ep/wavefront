@@ -13,7 +13,10 @@ export interface TourStep {
   cut?: CutMode;
   conduction?: boolean;
   epiOpacity?: number;
-  labels?: boolean;
+  /** Only these structures (mesh names) are labelled on this step. */
+  labelOnly?: string[];
+  /** Open the Layers and views panel at the cutaway section. */
+  drawer?: boolean;
   /** Structure to highlight (mesh name). */
   select?: string;
   /** Playhead in ms; the beat stays paused here. */
@@ -30,7 +33,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: false,
     epiOpacity: 1,
-    labels: true,
+    labelOnly: ['epi_RA', 'epi_RV', 'epi_LV', 'aorta', 'pulmonary_trunk'],
     time: 0,
     style: 'live',
   },
@@ -42,7 +45,7 @@ export const TOUR: TourStep[] = [
     cut: 'fourChamber',
     conduction: false,
     epiOpacity: 1,
-    labels: true,
+    labelOnly: ['epi_RA', 'epi_LA', 'epi_RV', 'epi_LV', 'valve_tricuspid', 'valve_mitral'],
     time: 0,
   },
   {
@@ -54,7 +57,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: true,
     epiOpacity: 0.3,
-    labels: true,
+    labelOnly: ['cs_SAN', 'vein_SVC'],
     select: 'cs_SAN',
     time: 0,
   },
@@ -66,7 +69,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: true,
     epiOpacity: 0.3,
-    labels: true,
+    labelOnly: ['cs_SAN', 'cs_Bachmann'],
     time: 38,
   },
   {
@@ -78,7 +81,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: true,
     epiOpacity: 0.25,
-    labels: true,
+    labelOnly: ['cs_AVN'],
     select: 'cs_AVN',
     time: 95,
   },
@@ -91,7 +94,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: true,
     epiOpacity: 0.25,
-    labels: true,
+    labelOnly: ['cs_His', 'cs_RBB', 'cs_LBB'],
     select: 'cs_His',
     time: 140,
   },
@@ -103,7 +106,7 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: true,
     epiOpacity: 0.4,
-    labels: true,
+    labelOnly: ['cs_Purkinje_LV'],
     select: 'cs_Purkinje_LV',
     time: 185,
   },
@@ -115,8 +118,21 @@ export const TOUR: TourStep[] = [
     cut: 'off',
     conduction: false,
     epiOpacity: 1,
-    labels: true,
+    labelOnly: [],
     time: 0,
     style: 'map',
+  },
+  {
+    title: 'Now explore it yourself',
+    text: 'The Layers and views panel on the right (button at the top right) is open now. Use it to cut the heart open and see inside, hide the outer wall or the conduction system, turn labels on and off, and choose a standard view. Next, watch one normal beat, then move on to the arrhythmias.',
+    dir: [0, 0, 1],
+    distance: 3.1,
+    cut: 'off',
+    conduction: true,
+    epiOpacity: 0.4,
+    labelOnly: [],
+    drawer: true,
+    time: 0,
+    style: 'live',
   },
 ];

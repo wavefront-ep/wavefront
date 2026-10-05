@@ -134,23 +134,25 @@ test('activation map is only offered on the last tour step', async ({ page }) =>
   expect((await state(page)).style).toBe('map');
   await expect(page.locator('.pb-legend')).toBeVisible();
   await expect(page.locator('.pb-legend')).toContainText('ms');
-  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   expect((await state(page)).style).toBe('live');
+  await expect(page.locator('.app.drawer-open')).toHaveCount(1); // the last step opens the Layers and views panel
+  await page.getByRole('button', { name: 'Next: sinus beat' }).click();
+  expect((await state(page)).style).toBe('live'); // the beat opens as a live wave, not the map
 });
 
-test('guided tour walks eight steps and ends cleanly', async ({ page }) => {
+test('guided tour walks nine steps and ends cleanly', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
   await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
-  await expect(page.locator('.pb-tour-count')).toHaveText('1 of 8');
+  await expect(page.locator('.pb-tour-count')).toHaveText('1 of 9');
   const titles: string[] = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 9; i++) {
     titles.push(await page.locator('.pb-tour-title').innerText());
-    await expect(page.locator('.pb-tour-count')).toHaveText(`${i + 1} of 8`);
-    if (i < 7) await page.getByRole('button', { name: 'Next' }).click();
+    await expect(page.locator('.pb-tour-count')).toHaveText(`${i + 1} of 9`);
+    if (i < 8) await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
-  expect(new Set(titles).size).toBe(8);
-  expect((await state(page)).style).toBe('map'); // last step shows the map
+  expect(new Set(titles).size).toBe(9);
   await page.getByRole('button', { name: 'Next: sinus beat' }).click(); // the tour leads into the sinus beat
   await expect(page.locator('.pb-ecgrow')).toBeVisible();
   await expect(page.locator('.topbar').getByRole('button', { name: 'Sinus beat' })).toHaveAttribute('aria-pressed', 'true');
@@ -224,19 +226,23 @@ test('ECG strip: waves, event markers and cursor follow the beat', async ({ page
   await expect(page.locator('.pb-ecgnote')).toBeHidden();
 });
 
-test('top bar offers the guided tour, cutaway and layers up front', async ({ page }) => {
+test('top bar offers the route (tour, sinus beat, arrhythmias) and layers up front', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
   const bar = page.locator('.topbar');
   await expect(bar.getByRole('button', { name: 'Guided tour' })).toBeVisible();
-  await expect(bar.getByRole('button', { name: 'Cutaway' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Sinus beat' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Arrhythmias' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Cutaway' })).toHaveCount(0);
   await expect(bar.getByRole('button', { name: 'Layers and views' })).toBeVisible();
   await bar.getByRole('button', { name: 'Layers and views' }).click();
   await expect(page.locator('.app.drawer-open')).toHaveCount(1);
   await bar.getByRole('button', { name: 'Guided tour' }).click();
-  expect((await state(page)).layers.labels).toBe(true); // labels are on from the first tour step
-  for (let i = 0; i < 7; i++) {
-    await page.getByRole('button', { name: 'Next' }).click();
-    expect((await state(page)).layers.labels).toBe(true);
-  }
+  await expect(page.locator('.overlay text')).toHaveCount(6); // step 1 names only the chambers, great arteries and apex it shows
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await settle(page, 1800);
+  const names = await page.locator('.overlay text').allTextContents();
+  expect(names.length).toBeLessThanOrEqual(3);
+  expect(names).toContain('SA node');
 });

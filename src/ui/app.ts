@@ -34,11 +34,15 @@ export function buildApp(root: HTMLElement) {
   const tourBtn = stepBtn(1, 'Guided tour');
   const sinusBtn = stepBtn(2, 'Sinus beat');
   const arrBtn = stepBtn(3, 'Arrhythmias');
-  const cutBtn = topBtn('Cutaway');
   const layersBtn = topBtn('Layers and views');
+  const brand = el(
+    'span',
+    'brand',
+    `<span class="brand-name">Wavefront</span><svg class="brand-mark" viewBox="0 0 24 18" aria-hidden="true"><path d="M5 2.5Q1.5 9 5 15.5"/><path d="M11 1Q6 9 11 17"/><path d="M17.5 0Q11.5 9 17.5 18"/></svg>`,
+  );
   // Space is the play key, so a clicked top-bar button must not keep the focus.
   topbar.addEventListener('click', (e) => (e.target as HTMLElement).closest('button')?.blur());
-  topbar.append(el('span', 'mark', 'EP'), tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), cutBtn, layersBtn);
+  topbar.append(brand, tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -116,10 +120,6 @@ export function buildApp(root: HTMLElement) {
     layersBtn.setAttribute('aria-pressed', String(open));
   };
   layersBtn.addEventListener('click', () => setDrawer(!app.classList.contains('drawer-open')));
-  cutBtn.addEventListener('click', () => {
-    setDrawer(true);
-    requestAnimationFrame(() => goTo('sec-cutaway'));
-  });
 
   const showStructure = (mesh: string | null) => {
     structBody.innerHTML = '';
@@ -550,7 +550,12 @@ export function buildApp(root: HTMLElement) {
       setOpacity(s.epiOpacity);
     }
     if (s.conduction !== undefined) setConduction(s.conduction, false);
-    if (s.labels !== undefined) setLabels(s.labels);
+    setLabels(false); // the tour names only what each step is about
+    scene.setFocusLabels(s.labelOnly ?? []);
+    if (s.drawer) {
+      setDrawer(true);
+      requestAnimationFrame(() => goTo('sec-cutaway'));
+    }
     if (s.cut !== undefined) {
       const off = s.cut === 'fourChamber' && (s.conduction ?? L.conduction) ? CONDUCTION_CUT_OFFSET : 0;
       scene.setCut(s.cut, off, false);
@@ -577,6 +582,7 @@ export function buildApp(root: HTMLElement) {
     lower.hidden = true;
     tourBtn.setAttribute('aria-pressed', 'true');
     bar.show('tour');
+    bar.reserveTour(TOUR.map((t) => t.text));
     app.classList.add('bar-open');
     applyTourStep(0);
     syncNav();
@@ -584,6 +590,7 @@ export function buildApp(root: HTMLElement) {
   const endTour = () => {
     if (tourStep < 0) return;
     tourStep = -1;
+    scene.setFocusLabels([]);
     bar.hide();
     tourBtn.setAttribute('aria-pressed', 'false');
     app.classList.remove('bar-open');
