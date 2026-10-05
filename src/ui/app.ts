@@ -7,15 +7,6 @@ import { GROUPS, Loaded, SCENARIOS, ScenarioLoader } from './loader';
 import { PlayBar } from './playbar';
 import { Vector3 } from 'three';
 
-const svg = (d: string) => `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="${d}"/></svg>`;
-
-const ICONS = {
-  // Outline of a heart-like form: explore the anatomy.
-  explore: svg('M10 17C5 13.5 3 10.5 3 7.8 3 5.6 4.7 4 6.6 4c1.4 0 2.6.8 3.4 2 .8-1.2 2-2 3.4-2C15.3 4 17 5.6 17 7.8c0 2.7-2 5.7-7 9.2Z'),
-  // A flat trace with one excursion: arrhythmia mechanisms.
-  mechanisms: svg('M2 11h4l1.5-5 3 9 1.7-4H18'),
-};
-
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: string) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -27,20 +18,6 @@ export function buildApp(root: HTMLElement) {
   const app = el('div', 'app');
   root.appendChild(app);
 
-  // ---------------------------------------------------------- rail
-  const rail = el('nav', 'rail');
-  rail.setAttribute('aria-label', 'Modes');
-  rail.appendChild(el('div', 'mark', 'EP'));
-  const railBtn = (icon: string, label: string) => {
-    const b = el('button', 'rail-btn', `${icon}<span class="tip">${label}</span>`);
-    b.setAttribute('aria-label', label);
-    return b;
-  };
-  const explore = railBtn(ICONS.explore, 'Explore');
-  explore.setAttribute('aria-current', 'true');
-  const mech = railBtn(ICONS.mechanisms, 'Mechanisms');
-  rail.append(explore, mech, el('div', 'spacer'));
-
   // Top bar: the three things a new visitor should find first, as words rather than icons.
   const topbar = el('header', 'topbar');
   const topBtn = (label: string) => {
@@ -48,10 +25,20 @@ export function buildApp(root: HTMLElement) {
     b.setAttribute('aria-pressed', 'false');
     return b;
   };
-  const tourBtn = topBtn('Guided tour');
+  const stepBtn = (n: number, label: string) => {
+    const b = el('button', 'top-btn', `<span class="top-n">${n}</span>${label}`);
+    b.setAttribute('aria-pressed', 'false');
+    return b;
+  };
+  // The intended route through the tool: the tour, then one normal beat, then the arrhythmias.
+  const tourBtn = stepBtn(1, 'Guided tour');
+  const sinusBtn = stepBtn(2, 'Sinus beat');
+  const arrBtn = stepBtn(3, 'Arrhythmias');
   const cutBtn = topBtn('Cutaway');
   const layersBtn = topBtn('Layers and views');
-  topbar.append(tourBtn, cutBtn, el('span', 'spacer'), layersBtn);
+  // Space is the play key, so a clicked top-bar button must not keep the focus.
+  topbar.addEventListener('click', (e) => (e.target as HTMLElement).closest('button')?.blur());
+  topbar.append(el('span', 'mark', 'EP'), tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), cutBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -62,7 +49,7 @@ export function buildApp(root: HTMLElement) {
   overlay.setAttribute('aria-hidden', 'true');
   const hoverLabel = el('div', 'hoverlabel');
   const lower = el('div', 'lower');
-  const playBeat = el('button', 'primary', 'Play sinus beat');
+  const playBeat = el('button', 'primary', 'Start the guided tour');
   playBeat.disabled = true;
   const hint = el('div', 'hint', 'Drag to rotate. Scroll to zoom. Shift-drag or arrow keys up and down to move the view. Select a structure for its name.');
   lower.append(playBeat, hint);
@@ -76,7 +63,7 @@ export function buildApp(root: HTMLElement) {
 
   const secMech = el('section', 'sec');
   secMech.id = 'sec-mech';
-  secMech.appendChild(el('h2', undefined, 'Mechanisms'));
+  secMech.appendChild(el('h2', undefined, 'Arrhythmias'));
 
   const secStructure = el('section', 'sec');
   secStructure.appendChild(el('h2', undefined, 'Structure'));
@@ -108,7 +95,7 @@ export function buildApp(root: HTMLElement) {
     const t = drawer.querySelector<HTMLElement>(`#${id}`)!;
     drawer.scrollTo({ top: t.offsetTop - 64, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
-  for (const [id, name] of [['sec-mech', 'Mechanisms'], ['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
+  for (const [id, name] of [['sec-mech', 'Arrhythmias'], ['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
     const b = el('button', id === 'sec-mech' ? 'nav-mech' : undefined, name);
     b.addEventListener('click', () => goTo(id));
     nav.appendChild(b);
@@ -121,7 +108,7 @@ export function buildApp(root: HTMLElement) {
   viewport.insertBefore(scene.renderer.domElement, overlay);
   const bar = new PlayBar(scene);
   stage.appendChild(bar.root);
-  app.append(rail, stage, drawer);
+  app.append(stage, drawer);
 
   // ---------------------------------------------------------- behaviour
   const setDrawer = (open: boolean) => {
@@ -494,6 +481,8 @@ export function buildApp(root: HTMLElement) {
     else scene.pause();
     app.classList.add('bar-open');
     syncControls();
+    bar.setNext(mode === 'explore' && id === 'sinus_rhythm' ? 'Next: arrhythmias' : null);
+    syncNav();
   };
   const openBeat = () => void openScenario('sinus_rhythm', 'this', true);
   bar.onCompare = (v) => current && void openScenario(current.id, v);
@@ -510,29 +499,39 @@ export function buildApp(root: HTMLElement) {
     tourBtn.setAttribute('aria-pressed', 'false');
     tourStep = -1;
     current = null;
+    syncNav();
   };
   bar.onClose = () => {
     closeBar();
     if (scene.style === 'map') setStyle('live');
   };
 
+  const syncNav = () => {
+    const beatOpen = bar.visible && bar.currentMode === 'beat';
+    tourBtn.setAttribute('aria-pressed', String(tourStep >= 0));
+    sinusBtn.setAttribute('aria-pressed', String(mode === 'explore' && beatOpen && current?.id === 'sinus_rhythm'));
+    arrBtn.setAttribute('aria-pressed', String(mode === 'mechanisms'));
+  };
   const setMode = (m: 'explore' | 'mechanisms') => {
     mode = m;
     app.dataset.mode = m;
-    explore.setAttribute('aria-current', String(m === 'explore'));
-    mech.setAttribute('aria-current', String(m === 'mechanisms'));
     if (bar.visible) bar.onClose();
-    playBeat.textContent = m === 'explore' ? 'Play sinus beat' : 'Choose a rhythm';
+    playBeat.textContent = m === 'explore' ? 'Start the guided tour' : 'Choose a rhythm';
     if (m === 'mechanisms') {
       setDrawer(true);
       requestAnimationFrame(() => goTo('sec-mech'));
     }
+    syncNav();
   };
-  explore.addEventListener('click', () => setMode('explore'));
-  mech.addEventListener('click', () => setMode('mechanisms'));
+  sinusBtn.addEventListener('click', () => {
+    if (mode !== 'explore') setMode('explore');
+    openBeat();
+  });
+  arrBtn.addEventListener('click', () => setMode('mechanisms'));
+  bar.onNext = () => setMode('mechanisms');
   app.dataset.mode = 'explore';
   playBeat.addEventListener('click', () => {
-    if (mode === 'explore') openBeat();
+    if (mode === 'explore') void startTour();
     else {
       setDrawer(true);
       goTo('sec-mech');
@@ -570,6 +569,7 @@ export function buildApp(root: HTMLElement) {
   };
   const startTour = async () => {
     if (!loader) return;
+    if (mode !== 'explore') setMode('explore');
     const sinus = await loader.get('sinus_rhythm'); // the map step always shows the normal beat
     if (scene.style === 'map') setStyle('live');
     scene.setActivation(sinus.result, sinus.constants);
@@ -579,6 +579,7 @@ export function buildApp(root: HTMLElement) {
     bar.show('tour');
     app.classList.add('bar-open');
     applyTourStep(0);
+    syncNav();
   };
   const endTour = () => {
     if (tourStep < 0) return;
@@ -587,10 +588,11 @@ export function buildApp(root: HTMLElement) {
     tourBtn.setAttribute('aria-pressed', 'false');
     app.classList.remove('bar-open');
     lower.hidden = false;
+    syncNav();
   };
   bar.onTourStep = (d) => {
     const n = tourStep + d;
-    if (n >= TOUR.length) return bar.onClose();
+    if (n >= TOUR.length) return openBeat(); // the tour leads straight into the sinus beat
     if (n >= 0) applyTourStep(n);
   };
   tourBtn.addEventListener('click', () => (tourStep >= 0 ? bar.onClose() : startTour()));

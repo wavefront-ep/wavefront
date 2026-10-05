@@ -9,7 +9,7 @@ test('mechanisms mode: grouped picker, collapsed by default, one selection at a 
   await openHeart(page, 1600, 900);
   await waitForSim(page);
   await expect(page.locator('#sec-mech')).toBeHidden(); // Explore mode keeps the quiet screen
-  await page.locator('.rail-btn[aria-label="Mechanisms"]').click();
+  await page.locator('.topbar >> text=Arrhythmias').click();
   await expect(page.locator('#sec-mech')).toBeVisible();
   const heads = page.locator('.mech-head');
   expect(await heads.count()).toBe(4); // normal, impulse formation, block, reentry
@@ -73,10 +73,10 @@ test('leaving mechanisms mode closes the player and clears the substrate', async
   await waitForSim(page);
   await page.evaluate(() => (window as any).epOpen('avnrt'));
   await expect(page.locator('.playbar')).toBeVisible();
-  await page.locator('.rail-btn[aria-label="Explore"]').click();
+  await page.getByRole('button', { name: 'Close the beat player' }).click();
   await expect(page.locator('.playbar')).toBeHidden();
   expect((await state(page)).visible.some((n: string) => n.startsWith('sub_'))).toBe(false);
-  await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start the guided tour' })).toBeVisible();
 });
 
 test('substrate structures can be selected and are labelled schematic', async ({ page }) => {

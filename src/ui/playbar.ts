@@ -64,6 +64,8 @@ export class PlayBar {
   private duration = 1000;
   private mode: 'beat' | 'tour' | null = null;
   onClose: () => void = () => {};
+  onNext: () => void = () => {};
+  private nextBtn = el('button', 'pb-text pb-next', 'Next');
   onTourStep: (delta: number) => void = () => {};
   private tourTitle = el('span', 'pb-tour-title');
   private tourCount = el('span', 'pb-tour-count');
@@ -91,7 +93,9 @@ export class PlayBar {
     this.guidedLabel.title = 'On: stops on each step long enough to read it and skips quickly across quiet stretches. Off: plays straight through.';
     this.guidedLabel.append(this.guidedBox, el('span', undefined, 'Pause at each step'));
     const opts = this.compare;
-    this.head.append(this.title, opts);
+    this.nextBtn.hidden = true;
+    this.nextBtn.addEventListener('click', () => this.onNext());
+    this.head.append(this.title, opts, el('span', 'pb-spacer'), this.nextBtn);
 
     // ---- beat face
     this.playBtn.setAttribute('aria-label', 'Play or pause (space)');
@@ -221,6 +225,12 @@ export class PlayBar {
     return this.mode;
   }
 
+  /** The next stage of the route through the tool, offered from the sinus beat; null hides it. */
+  setNext(label: string | null) {
+    this.nextBtn.hidden = !label;
+    if (label) this.nextBtn.textContent = label;
+  }
+
   setSpeed(s: number) {
     this.scene.playback.speed = s;
     this.speedBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(SPEEDS[i] === s)));
@@ -248,7 +258,7 @@ export class PlayBar {
     this.captionText.textContent = text;
     this.ecgNote.textContent = '';
     this.tourBack.disabled = step === 0;
-    this.tourNext.textContent = step === total - 1 ? 'Finish' : 'Next';
+    this.tourNext.textContent = step === total - 1 ? 'Next: sinus beat' : 'Next';
   }
 
   private currentEvent(t: number): BeatEvent | null {

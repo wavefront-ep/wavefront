@@ -17,7 +17,7 @@ const at = async (page: any, t: number) => {
 test('sinus beat on the opaque surface: atria, then ventricles (anterior and posterior)', async ({ page }) => {
   await setup(page);
   await page.evaluate(() => { const s = (window as any).epHeart; s.layers.conduction = false; s.layers.epiOpacity = 1; s.applyLayers(); });
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   await page.evaluate(() => { const s = (window as any).epHeart; s.layers.conduction = false; s.layers.epiOpacity = 1; s.applyLayers(); });
   for (const t of [10, 30, 50, 70, 90, 165, 180, 195, 210, 225, 240, 255, 300]) {
     await at(page, t);
@@ -32,7 +32,7 @@ test('sinus beat on the opaque surface: atria, then ventricles (anterior and pos
 
 test('sinus beat with the conduction system (events, anterior)', async ({ page }) => {
   await setup(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   const events: [string, number][] = await page.evaluate(() => (window as any).epEngine.events.map((e: any) => [e.id, e.t]));
   for (const [id, t] of events) {
     await at(page, t + 3);
@@ -74,7 +74,7 @@ test('layouts with the player', async ({ page }) => {
   for (const [name, w, h] of [['laptop_1366x768', 1366, 768], ['fullhd_1920x1080', 1920, 1080], ['ipad_portrait', 768, 1024], ['ipad_landscape', 1024, 768], ['phone', 390, 844]] as const) {
     await setup(page, w, h);
     await page.screenshot({ path: `${OUT}/layout_${name}_default.png` });
-    await page.getByRole('button', { name: 'Play sinus beat' }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
     await at(page, 190);
     await page.screenshot({ path: `${OUT}/layout_${name}_player.png` });
     await page.getByRole('button', { name: 'Layers and views' }).click();

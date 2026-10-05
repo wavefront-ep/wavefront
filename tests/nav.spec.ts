@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { openHeart, settle } from './helpers';
 
-test('cutaway is reachable from the rail and the drawer nav', async ({ page }) => {
+test('cutaway is reachable from the top bar and the drawer nav', async ({ page }) => {
   await openHeart(page, 1366, 768);
   await page.locator('.topbar').getByRole('button', { name: 'Cutaway' }).click();
   await settle(page, 700);

@@ -57,8 +57,8 @@ test('browser solver reproduces the reference activation and normal intervals', 
 test('the sinus beat plays, pauses on space, and steps between events', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
-  await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await expect(page.locator('.topbar').getByRole('button', { name: 'Sinus beat' })).toBeEnabled();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   await expect(page.locator('.playbar')).toBeVisible();
   await page.evaluate(() => (window as any).epHeart.setGuided(false)); // continuous playback for this check
   await settle(page, 700);
@@ -86,7 +86,7 @@ test('the sinus beat plays, pauses on space, and steps between events', async ({
 test('speed defaults to 0.05x and the control changes it', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.05);
   await page.getByRole('button', { name: '0.1×' }).click();
   expect((await page.evaluate(() => (window as any).epHeart.playback.speed))).toBe(0.1);
@@ -124,13 +124,13 @@ test('the conduction list selects a structure and shows a schematic note where i
 test('activation map is only offered on the last tour step', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   await expect(page.getByRole('button', { name: 'Map', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Layers and views' }).click();
   await expect(page.getByText('Activation display')).toHaveCount(0);
   await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
   await expect(page.locator('.pb-legend')).toBeHidden();
-  for (let i = 0; i < 7; i++) await page.getByRole('button', { name: 'Next' }).click();
+  for (let i = 0; i < 7; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
   expect((await state(page)).style).toBe('map');
   await expect(page.locator('.pb-legend')).toBeVisible();
   await expect(page.locator('.pb-legend')).toContainText('ms');
@@ -151,9 +151,12 @@ test('guided tour walks eight steps and ends cleanly', async ({ page }) => {
   }
   expect(new Set(titles).size).toBe(8);
   expect((await state(page)).style).toBe('map'); // last step shows the map
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await expect(page.locator('.playbar')).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Play sinus beat' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next: sinus beat' }).click(); // the tour leads into the sinus beat
+  await expect(page.locator('.pb-ecgrow')).toBeVisible();
+  await expect(page.locator('.topbar').getByRole('button', { name: 'Sinus beat' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Next: arrhythmias' }).click(); // and the sinus beat into the arrhythmias
+  await expect(page.locator('.topbar').getByRole('button', { name: 'Arrhythmias' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#sec-mech')).toBeVisible();
 });
 
 test('scenario data is validated', async ({ page }) => {
@@ -174,7 +177,7 @@ test('scenario data is validated', async ({ page }) => {
 test('very slow speeds are available', async ({ page }) => {
   await openHeart(page);
   await waitForSim(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   for (const s of [0.02, 0.05]) {
     await page.getByRole('button', { name: `${s}×` }).click();
     expect(await page.evaluate(() => (window as any).epHeart.playback.speed)).toBe(s);
@@ -197,7 +200,7 @@ test('four-chamber cut keeps the conduction system in view and labelled', async 
 test('ECG strip: waves, event markers and cursor follow the beat', async ({ page }) => {
   await openHeart(page, 1600, 900);
   await waitForSim(page);
-  await page.getByRole('button', { name: 'Play sinus beat' }).click();
+  await page.locator('.topbar').getByRole('button', { name: 'Sinus beat' }).click();
   await expect(page.locator('.pb-ecg svg path.pb-ecg-trace')).toBeVisible();
   await expect(page.locator('.pb-ecg-mark')).toHaveCount(8);
   await expect(page.locator('.pb-ecg-val')).toHaveCount(0); // no interval readouts
