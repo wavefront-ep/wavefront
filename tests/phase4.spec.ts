@@ -75,3 +75,24 @@ test('"End tour" on the last step goes to the sinus beat', async ({ page }) => {
   await expect(page.locator('.pb-ecgrow')).toBeVisible();
   await expect(page.locator('.pb-title')).toContainText(/sinus rhythm/i);
 });
+
+test('the Wavefront name returns to the heart on its own with the Layers and views panel open', async ({ page }) => {
+  await openHeart(page, 1440, 900);
+  await waitForSim(page);
+  await page.evaluate(() => (window as any).epOpen('avnrt'));
+  await expect(page.locator('.playbar')).toBeVisible();
+  await page.getByRole('button', { name: 'Wavefront: back to the heart' }).click();
+  await expect(page.locator('.playbar')).toBeHidden();
+  await expect(page.locator('.app.drawer-open')).toHaveCount(1);
+  await expect(page.locator('.topbar').getByRole('button', { name: 'Arrhythmias' })).toHaveAttribute('aria-pressed', 'false');
+  expect(page.url()).not.toContain('#');
+  const s = await page.evaluate(() => (window as any).epHeart.getState());
+  expect(s.layers.conduction).toBe(false);
+  expect(s.cut.mode).toBe('off');
+  await expect(page.getByRole('button', { name: 'Copy link' })).toHaveCount(0);
+  // and from the tour
+  await page.locator('.topbar').getByRole('button', { name: 'Guided tour' }).click();
+  await expect(page.locator('.pb-tour-count')).toBeVisible();
+  await page.getByRole('button', { name: 'Wavefront: back to the heart' }).click();
+  await expect(page.locator('.playbar')).toBeHidden();
+});

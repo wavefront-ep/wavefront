@@ -37,15 +37,16 @@ export function buildApp(root: HTMLElement) {
   const cellBtn = stepBtn(4, 'Cellular view');
   const layersBtn = topBtn('Layers and views');
   const presentBtn = topBtn('Present');
-  const linkBtn = topBtn('Copy link');
   const brand = el(
-    'span',
+    'button',
     'brand',
     `<span class="brand-name">Wavefront</span><svg class="brand-mark" viewBox="0 0 24 18" aria-hidden="true"><path d="M5 2.5Q1.5 9 5 15.5"/><path d="M11 1Q6 9 11 17"/><path d="M17.5 0Q11.5 9 17.5 18"/></svg>`,
   );
+  brand.setAttribute('aria-label', 'Wavefront: back to the heart');
+  brand.title = 'Back to the heart';
   // Space is the play key, so a clicked top-bar button must not keep the focus.
   topbar.addEventListener('click', (e) => (e.target as HTMLElement).closest('button')?.blur());
-  topbar.append(brand, tourBtn, sinusBtn, arrBtn, cellBtn, el('span', 'spacer'), linkBtn, presentBtn, layersBtn);
+  topbar.append(brand, tourBtn, sinusBtn, arrBtn, cellBtn, el('span', 'spacer'), presentBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -702,15 +703,27 @@ export function buildApp(root: HTMLElement) {
     } else if (q.has('rhythms')) setMode('mechanisms');
     else if (q.has('cells')) setMode('cellular');
   };
-  linkBtn.addEventListener('click', async () => {
-    syncHash();
-    try {
-      await navigator.clipboard.writeText(location.href);
-      linkBtn.textContent = 'Link copied';
-    } catch {
-      linkBtn.textContent = 'Copy it from the address bar';
-    }
-    setTimeout(() => (linkBtn.textContent = 'Copy link'), 2200);
+  // The brand returns to the start: the heart on its own, with the Layers and views panel open.
+  brand.addEventListener('click', () => {
+    if (app.classList.contains('present')) setPresent(false);
+    if (tourStep >= 0) endTour();
+    if (mode !== 'explore') setMode('explore');
+    if (bar.visible) bar.onClose();
+    closeBar();
+    if (scene.style === 'map') setStyle('live');
+    L.epicardium = true;
+    setConduction(false, false);
+    setOpacity(1);
+    setCut('off', false);
+    setLabels(false);
+    showStructure(null);
+    scene.select(null, true);
+    scene.setView('anterior');
+    syncControls();
+    scene.applyLayers();
+    setDrawer(true);
+    drawer.scrollTo({ top: 0 });
+    history.replaceState(null, '', location.pathname + location.search);
   });
 
   // keyboard

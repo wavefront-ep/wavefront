@@ -37,7 +37,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .app.chrome-hidden { grid-template-columns: 1fr 0; }
 .app.chrome-hidden .drawer, .app.chrome-hidden .topbar { visibility: hidden; }
 
-.brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; color: var(--ink); }
+.brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; color: var(--ink); cursor: pointer; transition: opacity var(--t); }
+.brand:hover { opacity: 0.7; }
 .brand-name { font-family: var(--serif); font-size: 18px; letter-spacing: 0.01em; }
 .brand-mark { width: 20px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; transform: scaleX(-1); }
 .top-n { font-family: var(--serif); font-style: normal; color: var(--muted); margin-right: 6px; }
