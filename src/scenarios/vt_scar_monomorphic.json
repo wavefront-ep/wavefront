@@ -5,6 +5,14 @@
   "title": "Scar-related monomorphic ventricular tachycardia",
   "summary": "A circuit round old infarct scar sends an impulse into the ventricle with every lap.",
   "period_ms": 2700,
+  "cellular": {
+    "default": "ventricular",
+    "types": [
+      "ventricular"
+    ],
+    "gap": true,
+    "note": "Each lap of the circuit finds this cell recovered. The stretch between the end of one action potential and the next upstroke is the excitable gap."
+  },
   "waves": [
     {
       "tag": "sinus",

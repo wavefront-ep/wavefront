@@ -2,6 +2,7 @@
 // colour-map ranges. Results are cached so switching between "Normal" and "This rhythm" is instant.
 import { ActivationEngine, ActivationResult } from '../engine/activation';
 import { Ecg, buildEcg } from '../ecg/morphology';
+import { CELLS, CELL_BY_ID, CellTrace, CellType, buildCellTrace } from '../cell/actionPotential';
 import { Scenario, validateScenario } from '../scenarios/types';
 import type { BeatEvent } from './playbar';
 
@@ -32,11 +33,22 @@ export const GROUPS: { id: string; name: string }[] = [
   { id: 'reentry', name: 'Reentry' },
 ];
 
+export interface CellView {
+  types: CellType[];
+  default: CellType;
+  traces: Partial<Record<CellType, CellTrace>>;
+  /** Authored comparison traces on their own axis (not tied to the beat), when the scenario has them. */
+  illustrative: { label: string; trace: CellTrace }[] | null;
+  gap: boolean;
+  note: string;
+}
+
 export interface Loaded {
   sc: Scenario;
   result: ActivationResult;
   events: BeatEvent[];
   ecg: Ecg | null;
+  cell: CellView | null;
   scopes: Record<'all' | 'atria' | 'ventricles', [number, number]>;
   constants: Record<string, number>;
 }
@@ -71,6 +83,25 @@ export class ScenarioLoader {
     const a = span(first.atrial);
     const v = span(first.ventricular);
     const scopes = { all: [0, Math.max(a[1], v[1])] as [number, number], atria: a, ventricles: v };
-    return { sc, result, events, ecg, scopes, constants };
+    return { sc, result, events, ecg, cell: this.cellView(sc, result, constants), scopes, constants };
+  }
+
+  /** Action potentials at the cellular sites: the times come straight from the solver, so they agree with the wavefront. */
+  private cellView(sc: Scenario, result: ActivationResult, constants: Record<string, number>): CellView | null {
+    const c = sc.cellular;
+    if (!c) return null;
+    const named = this.engine.graph.meta.named;
+    const types = c.types ?? CELLS.map((x) => x.id);
+    const traces: Partial<Record<CellType, CellTrace>> = {};
+    for (const type of types) {
+      const node = named[c.sites?.[type] ?? CELL_BY_ID[type].site];
+      const acts = result.times.flatMap((T) => (node !== undefined && T[node] < 1e8 && Number.isFinite(T[node]) ? [T[node]] : []));
+      const apd = type === 'atrial' ? constants.apd_atrial : type === 'ventricular' ? constants.apd_ventricular : undefined;
+      traces[type] = buildCellTrace(type, acts, { period: sc.period_ms, apd, automatic: type === 'pacemaker' || !!c.automatic?.includes(type), ead: c.ead?.[type], dad: c.dad?.[type] });
+    }
+    const illustrative = c.illustrative
+      ? c.illustrative.map((i) => ({ label: i.label, trace: buildCellTrace(i.type, [60], { period: 800, apd: i.apd_ms, automatic: false, ead: i.ead ? [0] : [], dad: i.dad ? [0] : [] }) }))
+      : null;
+    return { types, default: c.default, traces, illustrative, gap: !!c.gap, note: c.note };
   }
 }

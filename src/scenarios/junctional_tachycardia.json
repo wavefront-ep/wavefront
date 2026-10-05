@@ -5,6 +5,17 @@
   "title": "Junctional tachycardia",
   "summary": "A focus in the AV junction fires fast. It drives the ventricles normally and the atria backwards.",
   "period_ms": 2600,
+  "cellular": {
+    "default": "av_node",
+    "types": [
+      "av_node",
+      "ventricular"
+    ],
+    "automatic": [
+      "av_node"
+    ],
+    "note": "A junctional focus depolarises on its own faster than the sinus node, so it takes over the rhythm."
+  },
   "waves": [
     {
       "tag": "jn",

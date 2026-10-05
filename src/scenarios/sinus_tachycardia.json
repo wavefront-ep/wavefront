@@ -5,6 +5,14 @@
   "title": "Sinus tachycardia",
   "summary": "The sinus node fires faster than 100 per minute. Everything else about the beat is normal.",
   "period_ms": 2400,
+  "cellular": {
+    "default": "pacemaker",
+    "types": [
+      "pacemaker",
+      "ventricular"
+    ],
+    "note": "A steeper phase 4 slope reaches threshold sooner, so the node fires faster, for example with sympathetic stimulation."
+  },
   "waves": [
     {
       "tag": "sinus",

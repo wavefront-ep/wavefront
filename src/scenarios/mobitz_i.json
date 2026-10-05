@@ -5,6 +5,15 @@
   "title": "Second-degree AV block, Mobitz type I (Wenckebach)",
   "summary": "The PR interval lengthens beat by beat until one P wave fails to conduct, then the cycle repeats.",
   "period_ms": 4000,
+  "cellular": {
+    "default": "av_node",
+    "types": [
+      "av_node",
+      "atrial",
+      "ventricular"
+    ],
+    "note": "AV node cells conduct slowly and decrementally: an impulse that arrives before the cell has fully recovered is delayed more, until one is blocked and no action potential follows."
+  },
   "waves": [
     {
       "tag": "sinus",

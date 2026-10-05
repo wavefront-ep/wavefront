@@ -1,3 +1,5 @@
+import { CellStrip } from './cellstrip';
+import type { CellView } from './loader';
 import { PALETTES, PaletteId } from '../engine/material';
 import type { Ecg } from '../ecg/morphology';
 import { HeartScene } from '../scene/HeartScene';
@@ -59,6 +61,8 @@ export class PlayBar {
   private ecgSegs: { el: SVGRectElement; range: [number, number] }[] = [];
   private ecgMarks: HTMLButtonElement[] = [];
   private ecgRow = el('div', 'pb-ecgrow');
+  private cell = new CellStrip();
+  private cellToggle = el('button', 'pb-text pb-cell-toggle', 'Cell view');
   private ecgVals = el('div', 'pb-ecg-vals');
   private ecgNote = el('p', 'pb-ecgnote');
   private ecgNoteText = el('span', 'pb-live');
@@ -150,7 +154,8 @@ export class PlayBar {
     this.ecgRow.append(ecgLabel, this.ecgBox, this.ecgVals);
     this.ecgRow.hidden = true;
     this.ecgNote.hidden = true;
-    this.beat.append(this.ecgRow, controls);
+    this.beat.append(this.ecgRow, this.cell.root, controls);
+    this.cellToggle.addEventListener('click', () => this.showCell(!this.cell.visible));
 
     // ---- tour face
     const tourRow = el('div', 'pb-controls');
@@ -265,6 +270,20 @@ export class PlayBar {
     this.guidedBox.checked = this.scene.playback.guided;
   }
 
+  /** Load the scenario's cell view (null when it has none); `on` opens the strip straight away. */
+  setCell(view: CellView | null, on: boolean) {
+    this.cell.setView(view, this.duration);
+    this.cellToggle.hidden = !view;
+    this.showCell(on && !!view);
+  }
+
+  private showCell(on: boolean) {
+    this.cell.show(on);
+    this.cellToggle.setAttribute('aria-pressed', String(this.cell.visible));
+    this.cellToggle.textContent = this.cell.visible ? 'Hide cell view' : 'Cell view';
+    this.cell.update(this.scene.playback.t);
+  }
+
   setSpeed(s: number) {
     this.scene.playback.speed = s;
     this.speedBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(SPEEDS[i] === s)));
@@ -324,6 +343,7 @@ export class PlayBar {
     this.ecgNoteText.textContent = e?.ecg ? `On the ECG: ${e.ecg}` : '';
     this.ticks.querySelectorAll('.pb-tick').forEach((n, i) => n.classList.toggle('on', this.events[i] === e));
     this.ecgCursor.style.left = `${(t / this.duration) * 100}%`;
+    this.cell.update(t);
     for (const s of this.ecgSegs) s.el.classList.toggle('on', t >= s.range[0] && t <= s.range[1]);
     this.ecgMarks.forEach((m, i) => m.classList.toggle('on', this.events[i] === e));
   }
@@ -419,7 +439,7 @@ export class PlayBar {
       this.ecgBox.hidden = !on;
       this.ecgNote.hidden = !on;
     });
-    this.ecgVals.appendChild(toggle);
+    this.ecgVals.append(toggle, this.cellToggle);
     this.ecgRow.hidden = false;
     this.ecgNote.hidden = false;
     this.update(this.scene.playback.t);

@@ -42,6 +42,7 @@
     <li><b>Guided tour</b> (top bar, step 1). Nine short steps: the heart from the front, inside the chambers, the sinus node, the atria, the AV node, His bundle and bundle branches, Purkinje fibres, the whole beat as a colour map, then a pointer to the side panel. Use Next or the right arrow.</li>
     <li><b>Sinus beat</b> (step 2). One normal beat with a Lead II trace underneath. The numbered circles on the trace match the events on the scrubber. Press Space to play or pause.</li>
     <li><b>Arrhythmias</b> (step 3). Pick a rhythm from the list on the right: normal, impulse formation, conduction block, and re-entry. Each opens paused with its key structures labelled. Press Play, or step with the arrow keys.</li>
+    <li><b>Cellular view</b> (step 4). A short list of cases where the cell-level mechanism is the point: the cell types in a normal beat, sinus slowing and speeding, AV node conduction, ectopic and junctional automaticity, long QT with an early afterdepolarisation, and the excitable gap in scar-related VT. A strip under the ECG shows the action potential of the cells at one site, lined up with the wavefront, with the phase under the playhead named. Choose the cell type at the left of the strip; "All" overlays them. The strip can also be turned on from the Arrhythmias list with "Cell view" where a case has one.</li>
   </ol>
 
   <h2>Controls that matter</h2>
@@ -76,13 +77,14 @@
     <tr><td><code>#tour=3</code></td><td>Guided tour, step 3 (1 to 9)</td></tr>
     <tr><td><code>#rhythm=avnrt</code></td><td>One rhythm, opened paused (add <code>&amp;compare=normal</code> to start with the normal beat for comparison)</td></tr>
     <tr><td><code>#rhythms</code></td><td>The arrhythmia list</td></tr>
+    <tr><td><code>#cell=mobitz_i</code></td><td>One case in Cellular view (<code>#cells</code> for the list)</td></tr>
     <tr><td><code>&amp;present=1</code></td><td>Add to any of the above to open in present mode</td></tr>
   </table>
   <p>Rhythm names: sinus_rhythm, sinus_bradycardia, sinus_tachycardia, sinus_pause, ectopic_atrial_tachycardia, multifocal_atrial_tachycardia, junctional_tachycardia, torsades_de_pointes, sa_exit_block, first_degree_av_block, mobitz_i, mobitz_ii, complete_heart_block, lbbb, rbbb, avnrt, wpw_preexcitation, avrt_orthodromic, antidromic_avrt, atrial_flutter_typical, atrial_flutter_4to1, atrial_fibrillation, af_with_bbb, preexcited_af, svt_aberrancy, vt_scar_monomorphic, ventricular_fibrillation.</p>
 
   <h2>What it is and is not</h2>
   <ul>
-    <li>A <b>schematic</b> teaching tool. Activation timing is tuned to the teaching points (for example the AV delay, flutter cycle length and re-entry period), but it is not a biophysical simulation or patient data. The conduction pathways other than the main nodes and bundles, the ECG, the re-entry circuits and fibrillation are drawn as schematic and labelled that way in the interface.</li>
+    <li>A <b>schematic</b> teaching tool. The action potentials are drawn shapes with textbook-level voltages and durations, timed by the same activation the wavefront uses; they are not a simulation of ion channels. Activation timing is tuned to the teaching points (for example the AV delay, flutter cycle length and re-entry period), but it is not a biophysical simulation or patient data. The conduction pathways other than the main nodes and bundles, the ECG, the re-entry circuits and fibrillation are drawn as schematic and labelled that way in the interface.</li>
     <li>Heart shape: Rodero et al. 2021, average of a statistical shape model of healthy adult hearts (CC BY 4.0). Valves are drawn as closed planes, not leaflets.</li>
     <li>Report anything that looks anatomically or physiologically wrong so it can be checked against a reference and corrected.</li>
   </ul>

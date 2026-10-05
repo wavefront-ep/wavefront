@@ -34,6 +34,7 @@ export function buildApp(root: HTMLElement) {
   const tourBtn = stepBtn(1, 'Guided tour');
   const sinusBtn = stepBtn(2, 'Sinus beat');
   const arrBtn = stepBtn(3, 'Arrhythmias');
+  const cellBtn = stepBtn(4, 'Cellular view');
   const layersBtn = topBtn('Layers and views');
   const presentBtn = topBtn('Present');
   const linkBtn = topBtn('Copy link');
@@ -44,7 +45,7 @@ export function buildApp(root: HTMLElement) {
   );
   // Space is the play key, so a clicked top-bar button must not keep the focus.
   topbar.addEventListener('click', (e) => (e.target as HTMLElement).closest('button')?.blur());
-  topbar.append(brand, tourBtn, sinusBtn, arrBtn, el('span', 'spacer'), linkBtn, presentBtn, layersBtn);
+  topbar.append(brand, tourBtn, sinusBtn, arrBtn, cellBtn, el('span', 'spacer'), linkBtn, presentBtn, layersBtn);
 
   // ---------------------------------------------------------- stage
   const stage = el('main', 'stage');
@@ -71,6 +72,11 @@ export function buildApp(root: HTMLElement) {
   const secMech = el('section', 'sec');
   secMech.id = 'sec-mech';
   secMech.appendChild(el('h2', undefined, 'Arrhythmias'));
+
+  const secCell = el('section', 'sec');
+  secCell.id = 'sec-cell';
+  secCell.appendChild(el('h2', undefined, 'Cellular view'));
+  secCell.appendChild(el('p', 'cap', 'Action potentials of the cells at one site, lined up with the wavefront and the ECG. Schematic: the shapes are drawn, not simulated.'));
 
   const secStructure = el('section', 'sec');
   secStructure.appendChild(el('h2', undefined, 'Structure'));
@@ -103,12 +109,12 @@ export function buildApp(root: HTMLElement) {
     const t = drawer.querySelector<HTMLElement>(`#${id}`)!;
     drawer.scrollTo({ top: t.offsetTop - 64, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
-  for (const [id, name] of [['sec-mech', 'Arrhythmias'], ['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
-    const b = el('button', id === 'sec-mech' ? 'nav-mech' : undefined, name);
+  for (const [id, name] of [['sec-mech', 'Arrhythmias'], ['sec-cell', 'Cellular view'], ['sec-structure', 'Structure'], ['sec-cutaway', 'Cutaway'], ['sec-layers', 'Layers'], ['sec-view', 'View']]) {
+    const b = el('button', id === 'sec-mech' ? 'nav-mech' : id === 'sec-cell' ? 'nav-cell' : undefined, name);
     b.addEventListener('click', () => goTo(id));
     nav.appendChild(b);
   }
-  drawer.append(nav, secMech, secStructure, secCut, secLayers, secView, secCredit);
+  drawer.append(nav, secMech, secCell, secStructure, secCut, secLayers, secView, secCredit);
 
   // ---------------------------------------------------------- scene and bar
   const scene = new HeartScene(viewport);
@@ -353,7 +359,7 @@ export function buildApp(root: HTMLElement) {
   // ---------------------------------------------------------- scenarios
   let loader: ScenarioLoader | null = null;
   let current: { id: string; view: 'this' | 'normal' } | null = null;
-  let mode: 'explore' | 'mechanisms' = 'explore';
+  let mode: 'explore' | 'mechanisms' | 'cellular' = 'explore';
 
   const syncControls = () => {
     epi.input.checked = L.epicardium;
@@ -423,6 +429,30 @@ export function buildApp(root: HTMLElement) {
   };
   showInfo(null);
 
+  // cellular view picker: the scenarios that carry a cellular block
+  const cellItems = new Map<string, HTMLButtonElement>();
+  const cellList = el('ul', 'list');
+  for (const it of SCENARIOS.filter((x) => x.cellular)) {
+    const li = el('li');
+    const b = el('button', 'vbtn', `<span>${it.title}</span>`);
+    b.setAttribute('aria-pressed', 'false');
+    b.disabled = true;
+    b.addEventListener('click', () => openScenario(it.id));
+    li.appendChild(b);
+    cellList.appendChild(li);
+    cellItems.set(it.id, b);
+  }
+  const cellInfo = el('div', 'mech-info');
+  secCell.append(cellList, cellInfo);
+  const showCellInfo = (id: string | null) => {
+    cellInfo.innerHTML = '';
+    cellItems.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
+    const sc = SCENARIOS.find((x) => x.id === id);
+    if (sc?.cellular) cellInfo.append(el('h3', 'struct-name', sc.title), el('p', 'mech-summary', sc.cellular.note));
+    else cellInfo.appendChild(el('p', 'struct-empty', 'Choose a case to see the cells involved. The strip under the ECG shows their action potential.'));
+  };
+  showCellInfo(null);
+
   // The intended starting state of a scenario: its cutaway and camera. The first Play press after a
   // scenario opens returns here, so a rotated or scrubbed view always starts the animation properly.
   let startArmed = false;
@@ -460,6 +490,7 @@ export function buildApp(root: HTMLElement) {
     const fresh = !current || current.id !== id;
     current = { id, view };
     showInfo(id);
+    showCellInfo(id);
     scene.setActivation(shown.result, shown.constants);
     scene.playback.duration = shown.sc.period_ms;
     bar.setEvents(shown.events, shown.sc.period_ms);
@@ -470,6 +501,7 @@ export function buildApp(root: HTMLElement) {
         return { t: e.t, dwell: Math.min(6500, Math.max(3000, 1500 + words * 90)) };
       }),
     );
+    bar.setCell(shown.cell, mode === 'cellular');
     if (shown.ecg) bar.setEcg(shown.ecg);
     bar.setScenario(sc.title, id !== 'sinus_rhythm', view);
     const mine = view === 'this';
@@ -522,16 +554,17 @@ export function buildApp(root: HTMLElement) {
     tourBtn.setAttribute('aria-pressed', String(tourStep >= 0));
     sinusBtn.setAttribute('aria-pressed', String(mode === 'explore' && beatOpen && current?.id === 'sinus_rhythm'));
     arrBtn.setAttribute('aria-pressed', String(mode === 'mechanisms'));
+    cellBtn.setAttribute('aria-pressed', String(mode === 'cellular'));
     syncHash();
   };
-  const setMode = (m: 'explore' | 'mechanisms') => {
+  const setMode = (m: 'explore' | 'mechanisms' | 'cellular') => {
     mode = m;
     app.dataset.mode = m;
     if (bar.visible) bar.onClose();
-    playBeat.textContent = m === 'explore' ? 'Start the guided tour' : 'Choose a rhythm';
-    if (m === 'mechanisms') {
+    playBeat.textContent = m === 'explore' ? 'Start the guided tour' : m === 'cellular' ? 'Choose a cell view' : 'Choose a rhythm';
+    if (m !== 'explore') {
       setDrawer(true);
-      requestAnimationFrame(() => goTo('sec-mech'));
+      requestAnimationFrame(() => goTo(m === 'cellular' ? 'sec-cell' : 'sec-mech'));
     }
     syncNav();
   };
@@ -540,13 +573,14 @@ export function buildApp(root: HTMLElement) {
     openBeat();
   });
   arrBtn.addEventListener('click', () => setMode('mechanisms'));
+  cellBtn.addEventListener('click', () => setMode('cellular'));
   bar.onNext = () => setMode('mechanisms');
   app.dataset.mode = 'explore';
   playBeat.addEventListener('click', () => {
     if (mode === 'explore') void startTour();
     else {
       setDrawer(true);
-      goTo('sec-mech');
+      goTo(mode === 'cellular' ? 'sec-cell' : 'sec-mech');
     }
   });
 
@@ -644,8 +678,9 @@ export function buildApp(root: HTMLElement) {
   function syncHash() {
     const parts: string[] = [];
     if (tourStep >= 0) parts.push(`tour=${tourStep + 1}`);
-    else if (current) parts.push(`rhythm=${current.id}`, ...(current.view === 'normal' ? ['compare=normal'] : []));
+    else if (current) parts.push(`${mode === 'cellular' ? 'cell' : 'rhythm'}=${current.id}`, ...(current.view === 'normal' ? ['compare=normal'] : []));
     else if (mode === 'mechanisms') parts.push('rhythms');
+    else if (mode === 'cellular') parts.push('cells');
     if (app.classList.contains('present')) parts.push('present=1');
     history.replaceState(null, '', parts.length ? `#${parts.join('&')}` : location.pathname + location.search);
   }
@@ -654,13 +689,18 @@ export function buildApp(root: HTMLElement) {
     if (q.get('present') === '1') setPresent(true);
     const n = Number(q.get('tour'));
     const id = q.get('rhythm');
+    const cellId = q.get('cell');
     if (n >= 1) {
       await startTour();
       applyTourStep(Math.min(TOUR.length, Math.floor(n)) - 1);
     } else if (id && SCENARIOS.some((x) => x.id === id)) {
       setMode(id === 'sinus_rhythm' ? 'explore' : 'mechanisms');
       await openScenario(id, q.get('compare') === 'normal' ? 'normal' : 'this', false);
+    } else if (cellId && SCENARIOS.some((x) => x.id === cellId && x.cellular)) {
+      setMode('cellular');
+      await openScenario(cellId, 'this', false);
     } else if (q.has('rhythms')) setMode('mechanisms');
+    else if (q.has('cells')) setMode('cellular');
   };
   linkBtn.addEventListener('click', async () => {
     syncHash();
@@ -706,6 +746,7 @@ export function buildApp(root: HTMLElement) {
     loader = l;
     playBeat.disabled = false;
     itemBtns.forEach((b) => (b.disabled = false));
+    cellItems.forEach((b) => (b.disabled = false));
     void applyHash();
   };
 

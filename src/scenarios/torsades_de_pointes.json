@@ -5,6 +5,23 @@
   "title": "Torsades de pointes (long QT)",
   "summary": "In long QT, early afterdepolarisations trigger a polymorphic VT whose complexes twist about the baseline.",
   "period_ms": 3100,
+  "cellular": {
+    "default": "ventricular",
+    "illustrative": [
+      {
+        "label": "Normal ventricular cell",
+        "type": "ventricular",
+        "apd_ms": 280
+      },
+      {
+        "label": "Long QT, with an early afterdepolarisation",
+        "type": "ventricular",
+        "apd_ms": 470,
+        "ead": true
+      }
+    ],
+    "note": "In long QT, repolarisation is delayed (phases 2 and 3 are prolonged). An early afterdepolarisation on the late plateau can reach threshold and trigger an extra beat; repeated triggers can start torsades de pointes. This panel is illustrative and is not on the beat's time axis."
+  },
   "waves": [
     {
       "tag": "sinus",

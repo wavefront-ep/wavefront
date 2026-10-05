@@ -53,6 +53,18 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
   for (const m of s.show ?? []) if (!substrateMeshes.has(m)) fail(file, `unknown substrate mesh "${m}"`);
   for (const k of Object.keys(s.constants ?? {})) if (!(k in graph.constants)) fail(file, `unknown constant "${k}"`);
   if (s.camera?.focus && !(s.camera.focus in graph.paths) && !['scar'].includes(s.camera.focus) && !(s.camera.focus in graph.purkinje)) fail(file, `unknown camera focus "${s.camera.focus}"`);
+  if (s.cellular) {
+    const cellTypes = ['pacemaker', 'atrial', 'av_node', 'purkinje', 'ventricular'];
+    const c = s.cellular;
+    const chk = (t, where) => { if (!cellTypes.includes(t)) fail(file, `cellular ${where}: unknown cell type "${t}"`); };
+    chk(c.default, 'default');
+    for (const t of c.types ?? []) chk(t, 'types');
+    if (c.types && !c.types.includes(c.default)) fail(file, 'cellular default must be one of its types');
+    for (const [t, n] of Object.entries(c.sites ?? {})) { chk(t, 'sites'); site(n, 'cellular site'); }
+    for (const t of c.automatic ?? []) chk(t, 'automatic');
+    for (const i of c.illustrative ?? []) { chk(i.type, 'illustrative'); if (!i.label || !(i.apd_ms > 0)) fail(file, 'cellular illustrative entries need a label and apd_ms'); }
+    if (!c.note) fail(file, 'cellular needs a note');
+  }
   const evIds = new Set();
   for (const e of s.events ?? []) {
     if (evIds.has(e.id)) fail(file, `duplicate event id ${e.id}`);

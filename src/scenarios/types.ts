@@ -1,8 +1,30 @@
 import type { EventAt } from '../engine/activation';
+import type { CellType } from '../cell/actionPotential';
 
 /** Scenario data (SPEC section 6). Scenarios are data, not code, so Challenge mode and Ablation can
  *  reuse them later: a scenario declares its stimuli, the substrate it switches on, how conduction is
  *  modified, and its critical site. */
+/** Optional cellular view of the scenario: action potentials of the cells at fixed sites, driven by the solver. */
+export interface CellularSpec {
+  /** Cell type shown first. */
+  default: CellType;
+  /** Cell types offered (default: all five). */
+  types?: CellType[];
+  /** Named graph node to use instead of the cell type's usual site. */
+  sites?: Partial<Record<CellType, string>>;
+  /** Cell types that fire on their own here, so a phase 4 ramp leads into each upstroke. */
+  automatic?: CellType[];
+  /** Indices of beats (among the activations at the site) that carry an afterdepolarisation. */
+  ead?: Partial<Record<CellType, number[]>>;
+  dad?: Partial<Record<CellType, number[]>>;
+  /** Shade the stretch between the end of an action potential and the next upstroke. */
+  gap?: boolean;
+  /** One line shown under the strip. */
+  note: string;
+  /** Authored comparison traces on their own short time axis, not tied to the beat. */
+  illustrative?: { label: string; type: CellType; apd_ms: number; ead?: boolean; dad?: boolean }[];
+}
+
 export interface ScenarioEvent {
   id: string;
   label: string;
@@ -79,6 +101,7 @@ export interface Scenario {
   /** Epicardial opacity while the scenario plays (the structures sit inside the wall). */
   epi_opacity?: number;
   ecg?: EcgRules;
+  cellular?: CellularSpec;
   events: ScenarioEvent[];
   teaching_points: string[];
 }

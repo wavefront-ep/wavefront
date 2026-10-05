@@ -9,7 +9,7 @@ test('cutaway is reachable from the top bar and the drawer nav', async ({ page }
   await expect(page.locator('.app.drawer-open')).toHaveCount(1);
   await expect(page.locator('#sec-cutaway')).toBeInViewport();
   await page.screenshot({ path: 'review/phase1/drawer_cutaway_first.png' });
-  await page.locator('.drawer-nav button', { hasText: 'View' }).click();
+  await page.locator('.drawer-nav').getByRole('button', { name: 'View', exact: true }).click();
   await settle(page, 700);
   await expect(page.locator('#sec-view')).toBeInViewport();
   await page.locator('.drawer-nav button', { hasText: 'Structure' }).click();

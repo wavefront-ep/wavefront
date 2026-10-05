@@ -5,6 +5,20 @@
   "title": "Ectopic (focal) atrial tachycardia",
   "summary": "A focus in the atrium fires faster than the sinus node and takes over: abnormal automaticity.",
   "period_ms": 2400,
+  "cellular": {
+    "default": "atrial",
+    "types": [
+      "atrial",
+      "ventricular"
+    ],
+    "sites": {
+      "atrial": "PAC_LA"
+    },
+    "automatic": [
+      "atrial"
+    ],
+    "note": "An atrial cell with abnormal automaticity: it shows a phase 4 ramp (normally flat) and fires by itself, faster than the sinus node."
+  },
   "waves": [
     {
       "tag": "eat",

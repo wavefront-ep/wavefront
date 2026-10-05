@@ -5,6 +5,14 @@
   "title": "Sinus bradycardia",
   "summary": "The sinus node fires too slowly. Conduction is normal; only the rate is abnormal.",
   "period_ms": 4200,
+  "cellular": {
+    "default": "pacemaker",
+    "types": [
+      "pacemaker",
+      "ventricular"
+    ],
+    "note": "One way a sinus node slows is a flatter phase 4 slope, for example with vagal tone: the cell takes longer to reach threshold."
+  },
   "waves": [
     {
       "tag": "sinus",

@@ -33,3 +33,12 @@ test('a rhythm with the player', async ({ page }) => {
   await page.getByRole('button', { name: 'Arrhythmias' }).click();
   await check(page, 'rhythm');
 });
+
+test('cellular view', async ({ page }) => {
+  await openHeart(page, 1440, 900);
+  await waitForSim(page);
+  await page.goto('/#cell=sinus_rhythm');
+  await page.reload();
+  await waitForSim(page);
+  await check(page, 'cellular');
+});

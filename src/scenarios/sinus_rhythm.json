@@ -5,6 +5,10 @@
   "title": "Sinus rhythm",
   "summary": "The sinus node starts the beat and the impulse follows the conduction system to the ventricles.",
   "period_ms": 1000,
+  "cellular": {
+    "default": "pacemaker",
+    "note": "Each cell type fires in turn as the impulse reaches it. The sinus node cell depolarises on its own; the others wait for the arriving wave."
+  },
   "waves": [{ "tag": "sinus", "stimuli": [{ "site": "SAN", "time_ms": 0 }] }],
   "modifiers": [],
   "ecg": { "lead": "II" },

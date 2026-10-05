@@ -5,6 +5,15 @@
   "title": "First-degree AV block",
   "summary": "Every impulse reaches the ventricles, but the AV node conducts slowly, so the PR interval is long.",
   "period_ms": 2400,
+  "cellular": {
+    "default": "av_node",
+    "types": [
+      "av_node",
+      "atrial",
+      "ventricular"
+    ],
+    "note": "Every impulse still passes through the AV node cells, but slowly, so the action potentials here start later after the atrial beat."
+  },
   "waves": [
     {
       "tag": "sinus",
