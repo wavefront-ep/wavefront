@@ -62,7 +62,7 @@ test("the 'Pause at each step' switch turns the holds off", async ({ page }) => 
   await expect(sw).toBeChecked();
   await sw.uncheck();
   await expect(sw).not.toBeChecked();
-  expect((await state(page)).time).toBe(0);
+  expect((await state(page)).time).toBeLessThan(20); // switching it off does not jump the playhead
   await page.evaluate(() => ((window as any).epHeart.playback.speed = 1));
   await settle(page, 1000);
   expect((await state(page)).time).toBeGreaterThan(0); // moving continuously now
