@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Orthodromic AV reentrant tachycardia (AVRT)",
   "summary": "The impulse goes down the AV node, up an accessory pathway to the atrium and round again.",
-  "source": "Slides 62, 64, 65 (AVRT, initiation, orthodromic AVRT)",
   "period_ms": 2700,
   "waves": [
     {
@@ -170,8 +169,8 @@
     }
   ],
   "teaching_points": [
-    "Orthodromic AVRT: antegrade conduction down the AV node, retrograde up an accessory pathway; the QRS is narrow (slide 65).",
-    "Initiation: a premature atrial (or ventricular) beat meets unidirectional block and finds the circuit ready (slides 50, 64).",
+    "Orthodromic AVRT: antegrade conduction down the AV node, retrograde up an accessory pathway; the QRS is narrow.",
+    "Initiation: a premature atrial (or ventricular) beat meets unidirectional block and finds the circuit ready.",
     "The accessory pathway is the usual ablation target; the AV node can also be slowed with drugs or a vagal manoeuvre."
   ],
   "labels": [

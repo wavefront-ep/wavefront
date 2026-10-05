@@ -4,7 +4,6 @@
   "group": "block",
   "title": "First-degree AV block",
   "summary": "Every impulse reaches the ventricles, but the AV node conducts slowly, so the PR interval is long.",
-  "source": "Slides 28-32 (first-degree AV block)",
   "period_ms": 2400,
   "waves": [
     {
@@ -107,8 +106,8 @@
     }
   ],
   "teaching_points": [
-    "First-degree AV block: every P wave is conducted, but the PR interval is longer than 200 ms (slides 28-30).",
-    "It represents prolonged AV conduction rather than a true block (slide 30) and does not by itself explain a bradycardia (slide 30).",
+    "First-degree AV block: every P wave is conducted, but the PR interval is longer than 200 ms.",
+    "It represents prolonged AV conduction rather than a true block and does not by itself explain a bradycardia.",
     "The delay is usually in the AV node itself."
   ]
 }

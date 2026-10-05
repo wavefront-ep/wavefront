@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Typical atrial flutter",
   "summary": "A wavefront circles the tricuspid annulus about 300 times a minute; the AV node passes every second wave.",
-  "source": "Slides 66-68 (atrial flutter, macro-reentry)",
   "period_ms": 2000,
   "waves": [
     {
@@ -125,9 +124,9 @@
     }
   ],
   "teaching_points": [
-    "Typical flutter is a macro-reentrant circuit around the tricuspid annulus, rate about 300 per minute, with sawtooth waves most visible in leads II, III and aVF (slide 66).",
-    "The AV node limits how many impulses reach the ventricles: 2:1 is common (ventricular rate about 150); 4:1 and variable block also occur (slide 66).",
-    "The cavotricuspid isthmus is the critical slow strip and the usual ablation target (slides 67-68)."
+    "Typical flutter is a macro-reentrant circuit around the tricuspid annulus, rate about 300 per minute, with sawtooth waves most visible in leads II, III and aVF.",
+    "The AV node limits how many impulses reach the ventricles: 2:1 is common (ventricular rate about 150); 4:1 and variable block also occur.",
+    "The cavotricuspid isthmus is the critical slow strip and the usual ablation target."
   ],
   "labels": [
     "sub_flutter_ring",

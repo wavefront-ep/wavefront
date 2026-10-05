@@ -4,7 +4,6 @@
   "group": "block",
   "title": "Second-degree AV block, Mobitz type I (Wenckebach)",
   "summary": "The PR interval lengthens beat by beat until one P wave fails to conduct, then the cycle repeats.",
-  "source": "Slides 33-35 (Mobitz type I, Wenckebach)",
   "period_ms": 4000,
   "waves": [
     {
@@ -143,8 +142,8 @@
     }
   ],
   "teaching_points": [
-    "Mobitz type I (Wenckebach): the PR interval lengthens until a P wave is blocked (slides 34-35).",
-    "The block is in the AV node. Without organic heart disease it is not strongly associated with increased morbidity or mortality (slide 34).",
+    "Mobitz type I (Wenckebach): the PR interval lengthens until a P wave is blocked.",
+    "The block is in the AV node. Without organic heart disease it is not strongly associated with increased morbidity or mortality.",
     "The mechanism is decremental conduction: the sooner an impulse arrives after the node recovers, the slower it conducts."
   ]
 }

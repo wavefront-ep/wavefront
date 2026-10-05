@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Wolff-Parkinson-White pre-excitation",
   "summary": "An accessory pathway lets the impulse reach the ventricle early, bypassing the AV node delay.",
-  "source": "Slides 61, 63 (pre-excitation, WPW)",
   "period_ms": 1000,
   "waves": [
     {
@@ -95,9 +94,9 @@
     }
   ],
   "teaching_points": [
-    "Pre-excitation: an accessory pathway activates part of the ventricle early (short PR, delta wave, wide QRS) (slide 61).",
+    "Pre-excitation: an accessory pathway activates part of the ventricle early (short PR, delta wave, wide QRS).",
     "The accessory pathway conducts without the AV node delay and can carry the impulse in either direction.",
-    "Pre-excited atrial fibrillation can conduct very fast over the pathway and is dangerous (slides 85-87)."
+    "Pre-excited atrial fibrillation can conduct very fast over the pathway and is dangerous."
   ],
   "labels": [
     "sub_ap_left_free_wall",

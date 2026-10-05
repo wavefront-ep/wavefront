@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Antidromic AV reentrant tachycardia",
   "summary": "The circuit runs the opposite way to orthodromic AVRT: down the accessory pathway, up the AV node. The QRS is wide.",
-  "source": "Slide 89 (antidromic AVRT)",
   "period_ms": 2300,
   "waves": [
     {
@@ -116,12 +115,12 @@
         "wave": 2
       },
       "caption": "The circuit repeats at about 200 per minute: the reverse of orthodromic AVRT.",
-      "ecg": "A regular wide-complex tachycardia, which can look like VT (slide 89)."
+      "ecg": "A regular wide-complex tachycardia, which can look like VT."
     }
   ],
   "teaching_points": [
-    "Antidromic AVRT: antegrade conduction down the accessory pathway and retrograde up the AV node, giving a wide QRS (slide 89).",
-    "It is part of the differential diagnosis of wide-complex tachycardia (slide 77).",
+    "Antidromic AVRT: antegrade conduction down the accessory pathway and retrograde up the AV node, giving a wide QRS.",
+    "It is part of the differential diagnosis of wide-complex tachycardia.",
     "It is much rarer than orthodromic AVRT."
   ]
 }

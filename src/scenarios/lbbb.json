@@ -4,7 +4,6 @@
   "group": "block",
   "title": "Left bundle branch block",
   "summary": "The left bundle branch does not conduct. The left ventricle is activated late, cell to cell, and the QRS is wide.",
-  "source": "Slide 91 (left bundle branch block)",
   "period_ms": 1500,
   "waves": [
     {
@@ -101,8 +100,8 @@
     }
   ],
   "teaching_points": [
-    "Left bundle branch block: the QRS is wide and the left ventricle is activated late (slide 91).",
+    "Left bundle branch block: the QRS is wide and the left ventricle is activated late.",
     "A new LBBB can signal significant heart disease; the abnormal activation also hampers coordinated contraction.",
-    "A wide-complex tachycardia in a patient with known LBBB may be SVT with aberrancy (slide 93)."
+    "A wide-complex tachycardia in a patient with known LBBB may be SVT with aberrancy."
   ]
 }

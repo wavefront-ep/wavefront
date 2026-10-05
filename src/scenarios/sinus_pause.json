@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Sinus pause or arrest",
   "summary": "The sinus node fails to fire for a while. No P wave and no QRS appear until it, or a lower pacemaker, restarts.",
-  "source": "Slide 26 (sinus pauses and arrest)",
   "period_ms": 3600,
   "waves": [
     {
@@ -85,8 +84,8 @@
     }
   ],
   "teaching_points": [
-    "A sinus pause or arrest is a failure of sinus node automaticity: no P wave appears where one is expected (slide 26).",
-    "A pause that is an exact multiple of the usual P-P interval suggests sinoatrial exit block instead (slide 25).",
-    "Symptoms depend on how long it lasts: dizziness, loss of consciousness (slide 16)."
+    "A sinus pause or arrest is a failure of sinus node automaticity: no P wave appears where one is expected.",
+    "A pause that is an exact multiple of the usual P-P interval suggests sinoatrial exit block instead.",
+    "Symptoms depend on how long it lasts: dizziness, loss of consciousness."
   ]
 }

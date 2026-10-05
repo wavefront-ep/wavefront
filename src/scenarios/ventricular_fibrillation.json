@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Ventricular fibrillation",
   "summary": "Chaotic, rapid ventricular activation with no coordinated contraction. Fatal unless defibrillated.",
-  "source": "Slide 83 (ventricular fibrillation)",
   "period_ms": 2200,
   "waves": [
     {
@@ -220,8 +219,8 @@
     }
   ],
   "teaching_points": [
-    "Ventricular fibrillation: rapid, totally chaotic ventricular rhythm, often precipitated by VT; fatal unless cardiopulmonary resuscitation with immediate defibrillation (slide 83).",
-    "Reversible causes include ischaemia, electrolyte disturbance and the other 'Hs and Ts' (slide 77).",
+    "Ventricular fibrillation: rapid, totally chaotic ventricular rhythm, often precipitated by VT; fatal unless cardiopulmonary resuscitation with immediate defibrillation.",
+    "Reversible causes include ischaemia, electrolyte disturbance and the other 'Hs and Ts'.",
     "Defibrillation depolarises all the tissue at once, so no excitable gaps remain for the wavelets."
   ]
 }

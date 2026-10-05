@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 const dir = new URL('../src/scenarios/', import.meta.url);
 const graph = JSON.parse(readFileSync(new URL('../public/heart/conduction.json', import.meta.url), 'utf8'));
-const required = ['id', 'mechanism', 'group', 'title', 'summary', 'source', 'period_ms', 'waves', 'events', 'teaching_points'];
+const required = ['id', 'mechanism', 'group', 'title', 'summary', 'period_ms', 'waves', 'events', 'teaching_points'];
 const substrateMeshes = new Set(graph.meshes);
 let failed = 0;
 const fail = (file, msg) => {
@@ -17,7 +17,6 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
   for (const k of required) if (!(k in s)) fail(file, `missing "${k}"`);
   if (ids.has(s.id)) fail(file, `duplicate id ${s.id}`);
   ids.add(s.id);
-  if (typeof s.source !== 'string' || !s.source.trim()) fail(file, 'source must name the slides it implements');
   if (!(s.period_ms > 0)) fail(file, 'period_ms must be positive');
   const site = (n, where) => {
     if (!(n in graph.named)) fail(file, `${where}: unknown site "${n}"`);

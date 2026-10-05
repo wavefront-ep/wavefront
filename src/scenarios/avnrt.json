@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "AV nodal reentrant tachycardia (AVNRT)",
   "summary": "Two pathways in the AV node form a circuit: down the slow pathway, back up the fast one.",
-  "source": "Slides 50-56 (reentry, AVNRT circuit, initiation, ECG)",
   "period_ms": 2800,
   "waves": [
     {
@@ -146,9 +145,9 @@
     }
   ],
   "teaching_points": [
-    "AVNRT uses two pathways in the AV node: a fast one with a long refractory period and a slow one with a short refractory period (slides 50-52).",
-    "Sinus beats take the fast pathway; a premature atrial beat blocks in the fast pathway, goes down the slow one and returns by the fast one (slide 53).",
-    "Atria and ventricles are activated simultaneously, so the P wave is hidden in or just after the QRS (slide 55).",
+    "AVNRT uses two pathways in the AV node: a fast one with a long refractory period and a slow one with a short refractory period.",
+    "Sinus beats take the fast pathway; a premature atrial beat blocks in the fast pathway, goes down the slow one and returns by the fast one.",
+    "Atria and ventricles are activated simultaneously, so the P wave is hidden in or just after the QRS.",
     "The slow pathway is the usual ablation target."
   ],
   "labels": [

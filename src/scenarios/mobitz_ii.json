@@ -4,7 +4,6 @@
   "group": "block",
   "title": "Second-degree AV block, Mobitz type II",
   "summary": "The PR interval stays the same, then a P wave suddenly fails to conduct. The block is below the AV node.",
-  "source": "Slides 34, 36-38 (Mobitz type II, 2:1 block, high-grade block)",
   "period_ms": 4100,
   "waves": [
     {
@@ -147,8 +146,8 @@
     }
   ],
   "teaching_points": [
-    "Mobitz type II: the PR interval is constant and a QRS is dropped suddenly (slide 34); the block is almost always infranodal.",
+    "Mobitz type II: the PR interval is constant and a QRS is dropped suddenly; the block is almost always infranodal.",
     "It can progress suddenly to complete heart block, so it is treated more seriously than type I.",
-    "With 2:1 block the ECG alone cannot tell type I from type II: look at the QRS width and the response to atropine or exercise (slide 37)."
+    "With 2:1 block the ECG alone cannot tell type I from type II: look at the QRS width and the response to atropine or exercise."
   ]
 }

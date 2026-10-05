@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Torsades de pointes (long QT)",
   "summary": "In long QT, early afterdepolarisations trigger a polymorphic VT whose complexes twist about the baseline.",
-  "source": "Slides 49 (triggered activity, EAD), 80-82 (polymorphic VT, torsades, long QT)",
   "period_ms": 3100,
   "waves": [
     {
@@ -197,9 +196,9 @@
     }
   ],
   "teaching_points": [
-    "Triggered activity: early afterdepolarisations (phase 2-3) in long QT, delayed afterdepolarisations (phase 4) in digoxin toxicity and CPVT (slide 49).",
-    "Torsades de pointes is a polymorphic VT in the setting of a long QT interval (slides 80-82).",
-    "Causes: congenital long QT syndromes, hypokalaemia, hypomagnesaemia, drugs and bradycardia (slide 82).",
+    "Triggered activity: early afterdepolarisations (phase 2-3) in long QT, delayed afterdepolarisations (phase 4) in digoxin toxicity and CPVT.",
+    "Torsades de pointes is a polymorphic VT in the setting of a long QT interval.",
+    "Causes: congenital long QT syndromes, hypokalaemia, hypomagnesaemia, drugs and bradycardia.",
     "This illustration shows the ventricular activation sequence only; the cellular mechanism is not simulated."
   ]
 }

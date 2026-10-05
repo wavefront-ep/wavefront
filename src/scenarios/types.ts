@@ -53,8 +53,6 @@ export interface Scenario {
   title: string;
   /** Two-line summary shown in the picker. */
   summary: string;
-  /** Slides in Dr. Hansom's deck that this scenario implements. */
-  source: string;
   /** Length of the timeline in ms. */
   period_ms: number;
   waves: WaveSpec[];
@@ -86,7 +84,7 @@ export interface Scenario {
 }
 
 export function validateScenario(s: any): asserts s is Scenario {
-  const need = ['id', 'mechanism', 'group', 'title', 'summary', 'source', 'period_ms', 'waves', 'events', 'teaching_points'];
+  const need = ['id', 'mechanism', 'group', 'title', 'summary', 'period_ms', 'waves', 'events', 'teaching_points'];
   for (const k of need) if (!(k in s)) throw new Error(`scenario ${s?.id ?? '?'} is missing "${k}"`);
   if (!Array.isArray(s.waves) || !s.waves.length) throw new Error(`scenario ${s.id}: no waves`);
   for (const e of s.events) if (!e.id || !e.caption || !e.at) throw new Error(`scenario ${s.id}: bad event ${e?.id}`);

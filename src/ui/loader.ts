@@ -7,7 +7,7 @@ import type { BeatEvent } from './playbar';
 
 const files = import.meta.glob('../scenarios/*.json', { eager: true, import: 'default' }) as Record<string, unknown>;
 
-// Teaching order: normal first, then block, then the reentry rhythms in the order the deck builds them up.
+// Teaching order: normal first, then block, then the reentry rhythms in the order they build up.
 const ORDER = [
   'sinus_rhythm',
   // impulse formation: sinus node first, then atrial, junctional, triggered

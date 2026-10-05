@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Ectopic (focal) atrial tachycardia",
   "summary": "A focus in the atrium fires faster than the sinus node and takes over: abnormal automaticity.",
-  "source": "Slides 48 (abnormal automaticity), 58-59 (ectopic atrial tachycardia)",
   "period_ms": 2400,
   "waves": [
     {
@@ -127,8 +126,8 @@
     }
   ],
   "teaching_points": [
-    "Abnormal automaticity: pacemaker cells or other atrial cells generate impulses at a faster rate (slide 48).",
-    "Ectopic atrial tachycardia is regular, with a P wave of abnormal shape before each QRS (slides 58-59).",
+    "Abnormal automaticity: pacemaker cells or other atrial cells generate impulses at a faster rate.",
+    "Ectopic atrial tachycardia is regular, with a P wave of abnormal shape before each QRS.",
     "It differs from AV nodal reentry because the atrium is activated before the ventricle by a focus, not in a circuit."
   ]
 }

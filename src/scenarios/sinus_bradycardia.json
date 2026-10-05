@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Sinus bradycardia",
   "summary": "The sinus node fires too slowly. Conduction is normal; only the rate is abnormal.",
-  "source": "Slides 22-23 (sinus bradycardia and its causes)",
   "period_ms": 4200,
   "waves": [
     {
@@ -86,8 +85,8 @@
     }
   ],
   "teaching_points": [
-    "Sinus bradycardia is sinus rhythm with a rate below 60 per minute; check that the P wave axis is normal (slide 22).",
-    "Causes include vagal tone, athletes, drugs (beta-blockers, calcium channel blockers, digoxin, amiodarone), sinus node disease and ischaemia (slide 23).",
-    "Bradycardia comes from reduced automaticity or from conduction block (slide 17)."
+    "Sinus bradycardia is sinus rhythm with a rate below 60 per minute; check that the P wave axis is normal.",
+    "Causes include vagal tone, athletes, drugs (beta-blockers, calcium channel blockers, digoxin, amiodarone), sinus node disease and ischaemia.",
+    "Bradycardia comes from reduced automaticity or from conduction block."
   ]
 }

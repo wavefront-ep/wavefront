@@ -4,7 +4,6 @@
   "group": "normal",
   "title": "Sinus rhythm",
   "summary": "The sinus node starts the beat and the impulse follows the conduction system to the ventricles.",
-  "source": "Slides 5-6 (conduction system), 9 (normal sinus rhythm)",
   "period_ms": 1000,
   "waves": [{ "tag": "sinus", "stimuli": [{ "site": "SAN", "time_ms": 0 }] }],
   "modifiers": [],
@@ -36,7 +35,7 @@
       "ecg": "The QRS ends. A flat ST segment and then the T wave (ventricular repolarisation) follow." }
   ],
   "teaching_points": [
-    "Normal sinus rhythm: the sinus node controls the whole heart, every P wave is followed by a QRS, rate 60 to 100 per minute (slide 9).",
+    "Normal sinus rhythm: the sinus node controls the whole heart, every P wave is followed by a QRS, rate 60 to 100 per minute.",
     "The AV node delay produces the PR interval; the Purkinje system makes the QRS narrow."
   ]
 }

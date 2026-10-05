@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Atrial flutter with 4:1 conduction",
   "summary": "Same circuit as typical flutter, but the AV node passes only every fourth wave.",
-  "source": "Slide 66 (atrial flutter, 2:1 and 4:1 conduction)",
   "period_ms": 2000,
   "waves": [
     {
@@ -115,7 +114,7 @@
     }
   ],
   "teaching_points": [
-    "The ventricular response in flutter depends on the AV node: 2:1 is common, 4:1 and variable block also occur (slide 66).",
+    "The ventricular response in flutter depends on the AV node: 2:1 is common, 4:1 and variable block also occur.",
     "Flutter should be suspected whenever a regular narrow-complex rhythm runs at a ventricular rate near 150 or 75.",
     "Slowing AV conduction does not stop the flutter; it only changes the ventricular response."
   ],

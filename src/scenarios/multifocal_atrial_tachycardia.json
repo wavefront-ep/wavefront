@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Multifocal atrial tachycardia",
   "summary": "Several atrial foci take turns. The P waves differ in shape and the rhythm is irregular.",
-  "source": "Slides 71-72 (irregular narrow-complex tachycardia: multifocal atrial tachycardia)",
   "period_ms": 3600,
   "waves": [
     {
@@ -142,8 +141,8 @@
     }
   ],
   "teaching_points": [
-    "Multifocal atrial tachycardia: several atrial foci fire, so P waves have at least three shapes and the rhythm is irregular (slides 71-72).",
-    "It is one of the irregular narrow-complex tachycardias to tell apart from atrial fibrillation (slide 71).",
+    "Multifocal atrial tachycardia: several atrial foci fire, so P waves have at least three shapes and the rhythm is irregular.",
+    "It is one of the irregular narrow-complex tachycardias to tell apart from atrial fibrillation.",
     "It is often seen in severe lung disease."
   ]
 }

@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Sinus tachycardia",
   "summary": "The sinus node fires faster than 100 per minute. Everything else about the beat is normal.",
-  "source": "Slide 57 (sinus tachycardia)",
   "period_ms": 2400,
   "waves": [
     {
@@ -104,7 +103,7 @@
     }
   ],
   "teaching_points": [
-    "Sinus tachycardia is sinus rhythm at more than 100 per minute (slide 57).",
+    "Sinus tachycardia is sinus rhythm at more than 100 per minute.",
     "It almost always has an underlying cause: treat the cause, not the rate."
   ]
 }

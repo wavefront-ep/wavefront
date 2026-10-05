@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Atrial fibrillation",
   "summary": "Rapid, disorganised wavelets, often triggered at the pulmonary veins, activate the atria. The ventricular response is irregularly irregular.",
-  "source": "Slides 69-70, 73 (atrial fibrillation)",
   "period_ms": 2400,
   "waves": [
     {
@@ -242,8 +241,8 @@
     }
   ],
   "teaching_points": [
-    "Atrial fibrillation: rapid, disorganised atrial activity at 400-600 per minute from multiple foci or wavefronts, with an irregularly irregular ventricular response (slide 69).",
+    "Atrial fibrillation: rapid, disorganised atrial activity at 400-600 per minute from multiple foci or wavefronts, with an irregularly irregular ventricular response.",
     "Pulmonary vein triggers are the target of catheter ablation (pulmonary vein isolation).",
-    "It is not the only irregular narrow-complex tachycardia: ectopics, multifocal atrial tachycardia and flutter with variable block can mimic it (slides 71-74)."
+    "It is not the only irregular narrow-complex tachycardia: ectopics, multifocal atrial tachycardia and flutter with variable block can mimic it."
   ]
 }

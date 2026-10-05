@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Atrial fibrillation with bundle branch block",
   "summary": "A bundle branch block makes every conducted beat wide, so atrial fibrillation can look like VT. The rhythm is still irregularly irregular.",
-  "source": "Slide 88 (AF with existing bundle branch block)",
   "period_ms": 2400,
   "waves": [
     {
@@ -242,7 +241,7 @@
     }
   ],
   "teaching_points": [
-    "With an existing bundle branch block, conducted AF has a wide QRS (slide 88).",
+    "With an existing bundle branch block, conducted AF has a wide QRS.",
     "The irregularity of the R-R intervals and the repeated QRS shape help to separate it from VT, which is usually regular.",
     "Compare with pre-excited AF, where the QRS shape varies from beat to beat."
   ],

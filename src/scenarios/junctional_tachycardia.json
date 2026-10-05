@@ -4,7 +4,6 @@
   "group": "formation",
   "title": "Junctional tachycardia",
   "summary": "A focus in the AV junction fires fast. It drives the ventricles normally and the atria backwards.",
-  "source": "Slide 60 (junctional tachycardia)",
   "period_ms": 2600,
   "waves": [
     {
@@ -108,7 +107,7 @@
     }
   ],
   "teaching_points": [
-    "Junctional tachycardia arises in or near the AV node and His bundle, usually with a narrow QRS (slide 60).",
+    "Junctional tachycardia arises in or near the AV node and His bundle, usually with a narrow QRS.",
     "The atria are activated retrogradely, so P waves are inverted in the inferior leads and may be hidden in the QRS.",
     "Unlike AVNRT it does not need a premature beat to start and is not a circuit."
   ]

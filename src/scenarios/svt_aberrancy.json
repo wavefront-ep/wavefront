@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "SVT with aberrancy (AVNRT with right bundle branch block)",
   "summary": "A supraventricular tachycardia conducted with a bundle branch block looks like a wide-complex tachycardia.",
-  "source": "Slide 93 (SVT with aberrancy)",
   "period_ms": 2800,
   "waves": [
     {
@@ -139,8 +138,8 @@
     }
   ],
   "teaching_points": [
-    "Aberrancy: a supraventricular tachycardia conducted with a bundle branch block (existing or rate-related) gives a wide QRS (slide 93).",
-    "Most wide-complex tachycardias are ventricular tachycardia, so treat it as VT unless proven otherwise (slide 94).",
+    "Aberrancy: a supraventricular tachycardia conducted with a bundle branch block (existing or rate-related) gives a wide QRS.",
+    "Most wide-complex tachycardias are ventricular tachycardia, so treat it as VT unless proven otherwise.",
     "A QRS identical to the patient's QRS in sinus rhythm supports SVT with aberrancy."
   ],
   "labels": [

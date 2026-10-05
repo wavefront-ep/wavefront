@@ -22,7 +22,6 @@ test('mechanisms mode: grouped picker, collapsed by default, one selection at a 
   await expect(page.locator('.mech-info .struct-name')).toHaveText('Typical atrial flutter');
   await page.getByRole('button', { name: 'Show details' }).click();
   await expect(page.locator('.mech-points li').first()).toBeVisible();
-  await expect(page.locator('.mech-details')).toContainText('Deck:');
 });
 
 for (const id of IDS) {

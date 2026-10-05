@@ -406,7 +406,7 @@ export function buildApp(root: HTMLElement) {
     more.setAttribute('aria-expanded', 'false');
     const details = el('div', 'mech-details');
     details.hidden = true;
-    details.append(el('ul', 'mech-points', sc.teaching_points.map((t) => `<li>${t}</li>`).join('')), el('p', 'struct-tag', `Deck: ${sc.source}.`));
+    details.append(el('ul', 'mech-points', sc.teaching_points.map((t) => `<li>${t}</li>`).join('')));
     more.addEventListener('click', () => {
       const open = details.hidden;
       details.hidden = !open;

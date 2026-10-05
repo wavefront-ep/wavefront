@@ -4,7 +4,6 @@
   "group": "reentry",
   "title": "Pre-excited atrial fibrillation",
   "summary": "Atrial fibrillation in a patient with an accessory pathway. Impulses cross the pathway fast, giving a rapid, irregular, wide-complex rhythm.",
-  "source": "Slides 85-87 (atrial fibrillation with pre-excitation)",
   "period_ms": 2400,
   "waves": [
     {
@@ -251,8 +250,8 @@
     }
   ],
   "teaching_points": [
-    "In AF with pre-excitation the accessory pathway can conduct very fast, so the ventricular rate is rapid and irregular (slides 85-86).",
-    "It can degenerate into ventricular fibrillation (slide 87).",
+    "In AF with pre-excitation the accessory pathway can conduct very fast, so the ventricular rate is rapid and irregular.",
+    "It can degenerate into ventricular fibrillation.",
     "AV nodal blocking drugs are avoided because they do not slow the pathway."
   ]
 }

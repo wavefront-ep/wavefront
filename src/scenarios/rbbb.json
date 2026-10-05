@@ -4,7 +4,6 @@
   "group": "block",
   "title": "Right bundle branch block",
   "summary": "The right bundle branch does not conduct. The right ventricle is activated late, cell to cell.",
-  "source": "Slide 92 (right bundle branch block)",
   "period_ms": 1500,
   "waves": [
     {
@@ -101,7 +100,7 @@
     }
   ],
   "teaching_points": [
-    "Right bundle branch block: the right ventricle is activated late and the QRS is wide (slide 92).",
+    "Right bundle branch block: the right ventricle is activated late and the QRS is wide.",
     "Left ventricular activation is normal, so the first part of the QRS is normal.",
     "It can be a normal variant or a sign of right heart strain or disease."
   ]
