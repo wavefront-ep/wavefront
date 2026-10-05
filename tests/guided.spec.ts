@@ -7,7 +7,8 @@ const events = (page: any, id: string): Promise<{ t: number }[]> =>
 test('guided playback holds on each step so the caption can be read', async ({ page }) => {
   await openHeart(page, 1400, 800);
   await waitForSim(page);
-  await page.evaluate(() => (window as any).epOpen('sinus_rhythm', 'this', true));
+  await page.evaluate(() => (window as any).epOpen('sinus_rhythm', 'this', false));
+  await page.evaluate(() => { const h = (window as any).epHeart; h.setGuided(true); h.play(); }); // the normal beat opens unguided
   await settle(page, 1800);
   // started at the first event and is holding there: still "playing", time has not moved
   let s = await state(page);
@@ -28,6 +29,7 @@ test('close-together steps each get their own hold', async ({ page }) => {
   await openHeart(page, 1400, 800);
   await waitForSim(page);
   await page.evaluate(() => (window as any).epOpen('sinus_rhythm'));
+  await page.evaluate(() => (window as any).epHeart.setGuided(true));
   const ev = await events(page, 'sinus_rhythm');
   // His bundle (125 ms) and bundle branches (131 ms) are 6 ms apart
   const i = ev.findIndex((e: any) => e.id === 'his');
@@ -57,7 +59,7 @@ test('a long quiet stretch is crossed quickly, not at the slow base speed', asyn
 test("the 'Pause at each step' switch turns the holds off", async ({ page }) => {
   await openHeart(page, 1400, 800);
   await waitForSim(page);
-  await page.evaluate(() => (window as any).epOpen('sinus_rhythm', 'this', true));
+  await page.evaluate(() => (window as any).epOpen('avnrt', 'this', true));
   const sw = page.getByLabel('Pause at each step');
   await expect(sw).toBeChecked();
   await sw.uncheck();

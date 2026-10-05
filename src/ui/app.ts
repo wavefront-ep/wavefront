@@ -471,7 +471,11 @@ export function buildApp(root: HTMLElement) {
     scene.select(mine && sc.select ? sc.select : null, true);
     setConduction(true);
     if (mine && sc.epi_opacity !== undefined) setOpacity(sc.epi_opacity);
-    if (fresh) applyStartView(sc, mine);
+    if (fresh) {
+      applyStartView(sc, mine);
+      scene.setGuided(id !== 'sinus_rhythm'); // the normal beat plays straight through; the rhythms pause at each step
+      bar.syncGuided();
+    }
     lower.hidden = true;
     bar.show('beat');
     scene.setFocusLabels(mine ? sc.labels ?? [] : []);

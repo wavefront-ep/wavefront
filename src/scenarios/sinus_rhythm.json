@@ -2,7 +2,7 @@
   "id": "sinus_rhythm",
   "mechanism": "normal",
   "group": "normal",
-  "title": "Normal sinus beat",
+  "title": "Sinus rhythm",
   "summary": "The sinus node starts the beat and the impulse follows the conduction system to the ventricles.",
   "source": "Slides 5-6 (conduction system), 9 (normal sinus rhythm)",
   "period_ms": 1000,

@@ -257,6 +257,11 @@ export class PlayBar {
     if (label) this.nextBtn.textContent = label;
   }
 
+  /** Show the state of the 'Pause at each step' switch after the scene's setting changed. */
+  syncGuided() {
+    this.guidedBox.checked = this.scene.playback.guided;
+  }
+
   setSpeed(s: number) {
     this.scene.playback.speed = s;
     this.speedBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(SPEEDS[i] === s)));
