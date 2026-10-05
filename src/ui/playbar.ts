@@ -359,16 +359,32 @@ export class PlayBar {
     this.ecgBox.appendChild(svg);
     // Name the first wave of each kind; naming every one of a long run would only clutter the strip.
     const named = new Set<string>();
-    const names: Record<string, [string, number]> = { P: ['P', 22], QRS: ['QRS', 0], T: ['T', 28], F: ['Flutter waves', 6], AF: ['Fibrillatory waves', 6], VF: ['Ventricular fibrillation', 6] };
+    const names: Record<string, string> = { P: 'P', QRS: 'QRS', T: 'T', F: 'Flutter waves', AF: 'Fibrillatory waves', VF: 'Ventricular fibrillation' };
+    const texts: HTMLElement[] = [];
     for (const sg of ecg.segments) {
       if (named.has(sg.kind)) continue;
       named.add(sg.kind);
-      const [text, top] = names[sg.kind];
-      const s2 = el('span', 'pb-ecg-text', text);
+      const s2 = el('span', 'pb-ecg-text', names[sg.kind]);
       s2.style.left = `${(((sg.range[0] + sg.range[1]) / 2 + (sg.kind === 'QRS' ? 18 : 0)) / W) * 100}%`;
-      s2.style.top = `${top}px`;
       this.ecgBox.appendChild(s2);
+      texts.push(s2);
     }
+    // Wave names sit in a band under the trace, clear of the numbered markers along the top; a name
+    // that would run into its neighbour drops to a second row, and none runs off the ends of the strip.
+    requestAnimationFrame(() => {
+      const boxW = this.ecgBox.clientWidth;
+      if (!boxW) return;
+      const rowEnd = [-Infinity, -Infinity];
+      for (const t of texts.sort((a, b) => a.offsetLeft - b.offsetLeft)) {
+        const w = t.offsetWidth;
+        const left = Math.min(Math.max(t.offsetLeft - w / 2, 0), boxW - w);
+        const row = rowEnd[0] + 6 <= left ? 0 : 1;
+        rowEnd[row] = left + w;
+        t.style.left = `${left}px`;
+        t.style.transform = 'none';
+        t.style.top = `${84 + row * 13}px`;
+      }
+    });
     // numbered event markers along the top edge, matching the ticks on the scrubber
     this.ecgMarks = this.events.map((e, i) => {
       const m = el('button', 'pb-ecg-mark', String(i + 1));

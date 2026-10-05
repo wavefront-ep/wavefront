@@ -182,7 +182,7 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius
 /* ---- ECG strip ---- */
 .pb-ecgrow { margin-bottom: 4px; align-items: stretch !important; }
 .pb-ecgrow[hidden] { display: none; }
-.pb-ecg { position: relative; height: 96px; }
+.pb-ecg { position: relative; height: 112px; }
 .pb-ecg[hidden] { visibility: hidden; }
 .pb-ecg svg { position: absolute; left: 0; top: 0; width: 100%; height: 84px; overflow: visible; }
 .pb-ecg-trace { fill: none; stroke: var(--ink); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
