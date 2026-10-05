@@ -842,6 +842,8 @@ export class HeartScene {
   private resize() {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
+    // Cap the pixel count so a 4K projector does not make the heart heavy to draw.
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2, Math.sqrt(3.6e6 / (w * h))));
     this.renderer.setSize(w, h);
     this.camera.aspect = w / h;
     // Keep the heart fully visible in narrow (portrait) stages.

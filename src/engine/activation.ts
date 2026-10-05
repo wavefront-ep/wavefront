@@ -1,4 +1,5 @@
 import { Graph, loadGraph } from './graph';
+import SolverWorker from './solver.worker?worker&inline'; // a blob worker, so the offline single file can run it
 import { SolveRequest, deferredLoopStart, prepareScenario } from './scenario';
 import type { Scenario } from '../scenarios/types';
 import type { SolveMessage } from './solver.worker';
@@ -41,7 +42,7 @@ export class ActivationEngine {
 
   static async create(base: string): Promise<ActivationEngine> {
     const graph = await loadGraph(`${base}heart/conduction.json`, `${base}heart/graph.bin`);
-    const worker = new Worker(new URL('./solver.worker.ts', import.meta.url), { type: 'module' });
+    const worker = new SolverWorker();
     const ready = new Promise<void>((res) => {
       worker.addEventListener('message', function once(e: MessageEvent) {
         if (e.data.type === 'ready') {
