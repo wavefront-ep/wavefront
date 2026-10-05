@@ -8,3 +8,4 @@ assets/raw/
 .venv/
 test-results/
 playwright-report/
+review/
