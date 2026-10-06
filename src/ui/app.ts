@@ -77,7 +77,7 @@ export function buildApp(root: HTMLElement) {
   const secCell = el('section', 'sec');
   secCell.id = 'sec-cell';
   secCell.appendChild(el('h2', undefined, 'Cellular view'));
-  secCell.appendChild(el('p', 'cap', 'Action potentials of the cells at one site, lined up with the wavefront and the ECG. Schematic: the shapes are drawn, not simulated.'));
+  secCell.appendChild(el('p', 'cap', 'Action potentials of the cells at one site, lined up with the wavefront and the ECG. The action potential shapes are schematic, not exact or simulated.'));
 
   const secStructure = el('section', 'sec');
   secStructure.appendChild(el('h2', undefined, 'Structure'));
@@ -96,7 +96,6 @@ export function buildApp(root: HTMLElement) {
   secCut.appendChild(el('h2', undefined, 'Cutaway'));
 
   const secCredit = el('section', 'sec');
-  secCredit.appendChild(el('p', 'cap', '<a href="./guide.html" target="_blank" rel="noopener">Instructor quick-guide</a> (one page, printable)'));
   secCredit.appendChild(
     el('p', 'cap', 'Heart geometry: Rodero et al., PLoS Computational Biology 2021, average shape of a healthy-adult statistical model (CC BY 4.0). Surface extracted, smoothed and decimated for this viewer. Conduction system placement and activation are schematic.'),
   );
@@ -260,9 +259,6 @@ export function buildApp(root: HTMLElement) {
   const labels = check('Labels', L.labels, (v) => setLabels(v), 'row', 'L');
   secLayers.appendChild(labels.label);
 
-  secLayers.appendChild(
-    el('p', 'cap', 'Blue-grey marks vessels carrying blood towards the lungs and the venae cavae; coral marks the aorta and pulmonary veins. This is a convention, not a measurement.'),
-  );
 
   // The activation map is shown only on the last step of the guided tour.
   const mapRange: [number, number] = [0, 260];

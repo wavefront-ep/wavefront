@@ -42,11 +42,7 @@ test('the address describes the state and opens it again', async ({ page }) => {
   await expect(page.locator('.app.present')).toHaveCount(1);
 });
 
-test('the instructor guide is linked from the side panel and has no deck references', async ({ page }) => {
-  await openHeart(page, 1440, 900);
-  await page.getByRole('button', { name: 'Layers and views' }).click();
-  const href = await page.getByRole('link', { name: 'Instructor quick-guide' }).getAttribute('href');
-  expect(href).toBe('./guide.html');
+test('the instructor guide page is served and has no deck references', async ({ page }) => {
   const g = await page.request.get('/guide.html');
   expect(g.ok()).toBe(true);
   expect(await g.text()).not.toMatch(/\bdeck\b|slides? \d/i);
